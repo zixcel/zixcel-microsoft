@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "zixcel://microsoft/sharepoint-daily-report-plan/v1",
+  "title": "Zixcel Microsoft SharePoint Department Daily Report Plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "plan_id",
+    "request_id",
+    "correlation_id",
+    "artifact_id",
+    "provider",
+    "connector",
+    "capability",
+    "mode",
+    "source",
+    "artifact_contract",
+    "steps",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "zixcel://microsoft/sharepoint-daily-report-plan/v1"
+    },
+    "plan_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "request_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "correlation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "artifact_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "provider": {
+      "const": "microsoft"
+    },
+    "connector": {
+      "const": "zixcel-microsoft"
+    },
+    "capability": {
+      "const": "sharepoint-department-daily-report-read"
+    },
+    "mode": {
+      "const": "observe"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "artifact_contract": {
+      "$ref": "#/$defs/artifactContract"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    },
+    "safety": {
+      "$ref": "#/$defs/planSafety"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "site_ref",
+        "drive_ref",
+        "drive_root_relative_path"
+      ],
+      "properties": {
+        "site_ref": {
+          "type": "string",
+          "pattern": "^site:[a-z0-9][a-z0-9._-]{0,127}$"
+        },
+        "drive_ref": {
+          "type": "string",
+          "pattern": "^drive:[a-z0-9][a-z0-9._-]{0,127}$"
+        },
+        "drive_root_relative_path": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 512
+        }
+      }
+    },
+    "artifactContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "expected_schema",
+        "expected_artifact",
+        "media_type",
+        "max_bytes"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "expected_schema": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 256,
+          "pattern": "^[a-z][a-z0-9+.-]{1,31}://[^?#\\\\\\s]+$"
+        },
+        "expected_artifact": {
+          "$ref": "#/$defs/expectedArtifact"
+        },
+        "media_type": {
+          "const": "application/json"
+        },
+        "max_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        }
+      }
+    },
+    "expectedArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "headquarters_id",
+        "department_id",
+        "reporting_team_id",
+        "classification",
+        "customer_data"
+      ],
+      "properties": {
+        "headquarters_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "department_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "reporting_team_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "classification": {
+          "enum": [
+            "internal",
+            "internal-confidential",
+            "personal-confidential",
+            "restricted-sensitive",
+            "customer-confidential"
+          ]
+        },
+        "customer_data": {
+          "type": "boolean"
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "action",
+        "execution_boundary",
+        "target",
+        "effect",
+        "network_required",
+        "performed"
+      ],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "action": {
+          "enum": [
+            "validate-versioned-request",
+            "host-fetch-sharepoint-drive-item",
+            "host-stage-local-json-artifact",
+            "offline-validate-and-receipt"
+          ]
+        },
+        "execution_boundary": {
+          "enum": [
+            "zixcel-microsoft",
+            "host-executor"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/identifier"
+        },
+        "effect": {
+          "enum": [
+            "none",
+            "observe"
+          ]
+        },
+        "network_required": {
+          "type": "boolean"
+        },
+        "performed": {
+          "const": false
+        }
+      }
+    },
+    "planSafety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "network_calls_performed",
+        "redirects_followed",
+        "credentials_resolved",
+        "host_execution_required",
+        "host_redirect_policy",
+        "offline_accept_required"
+      ],
+      "properties": {
+        "scope": {
+          "const": "zixcel-microsoft-process"
+        },
+        "network_calls_performed": {
+          "const": false
+        },
+        "redirects_followed": {
+          "const": false
+        },
+        "credentials_resolved": {
+          "const": false
+        },
+        "host_execution_required": {
+          "const": true
+        },
+        "host_redirect_policy": {
+          "const": "reject"
+        },
+        "offline_accept_required": {
+          "const": true
+        }
+      }
+    }
+  }
+}

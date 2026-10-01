@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "zixcel://microsoft/authorized-connector-plan/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "request_id",
+    "request_digest_sha256",
+    "provider_plan_id",
+    "provider",
+    "mode",
+    "workflow_receipt_id",
+    "workflow_receipt_digest_sha256",
+    "decision_id",
+    "decision_digest_sha256",
+    "network_calls_performed",
+    "credentials_resolved",
+    "secret_resolution",
+    "external_actions"
+  ],
+  "properties": {
+    "schema": { "const": "zixcel://microsoft/authorized-connector-plan/v1" },
+    "request_id": { "$ref": "#/$defs/text" },
+    "request_digest_sha256": { "$ref": "#/$defs/digest" },
+    "provider_plan_id": { "$ref": "#/$defs/text" },
+    "provider": { "const": "microsoft" },
+    "mode": { "const": "propose" },
+    "workflow_receipt_id": { "$ref": "#/$defs/text" },
+    "workflow_receipt_digest_sha256": { "$ref": "#/$defs/digest" },
+    "decision_id": { "$ref": "#/$defs/text" },
+    "decision_digest_sha256": { "$ref": "#/$defs/digest" },
+    "network_calls_performed": { "const": false },
+    "credentials_resolved": { "const": false },
+    "secret_resolution": { "const": false },
+    "external_actions": { "const": false }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

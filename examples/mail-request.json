@@ -1,0 +1,10 @@
+{
+  "schema": "zixcel://microsoft/mail/request/v1",
+  "account_ref": "account:example-work",
+  "authorization_ref": "authorization:example-mail-read",
+  "cloud": "public",
+  "folder_id": "inbox",
+  "content": "metadata",
+  "maximum_messages": 25,
+  "max_response_bytes": 1048576
+}

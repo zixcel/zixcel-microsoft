@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "zixcel://microsoft/sharepoint-daily-report-request-validation/v1",
+  "title": "Zixcel Microsoft SharePoint Daily Report Request Validation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "request_id",
+    "correlation_id",
+    "artifact_id",
+    "valid",
+    "network_calls_performed",
+    "redirects_followed",
+    "credentials_resolved"
+  ],
+  "properties": {
+    "schema": {
+      "const": "zixcel://microsoft/sharepoint-daily-report-request-validation/v1"
+    },
+    "request_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "correlation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "artifact_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "valid": {
+      "const": true
+    },
+    "network_calls_performed": {
+      "const": false
+    },
+    "redirects_followed": {
+      "const": false
+    },
+    "credentials_resolved": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    }
+  }
+}

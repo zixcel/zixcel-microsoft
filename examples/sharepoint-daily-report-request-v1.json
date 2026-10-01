@@ -1,0 +1,19 @@
+{
+  "schema": "zixcel://microsoft/sharepoint-daily-report-request/v1",
+  "request_id": "request-example-report-20260724",
+  "correlation_id": "correlation-example-report-20260724",
+  "artifact_id": "report-example-20260724",
+  "site_ref": "site:example-hub",
+  "drive_ref": "drive:shared-documents",
+  "drive_root_relative_path": "department-reports/example-unit/2026/07/24/report-example-20260724.json",
+  "expected_schema": "example://operations/department-daily-report/v1",
+  "expected_artifact": {
+    "headquarters_id": "example-headquarters",
+    "department_id": "example-unit",
+    "reporting_team_id": "example-team-01",
+    "classification": "internal-confidential",
+    "customer_data": false
+  },
+  "media_type": "application/json",
+  "max_bytes": 262144
+}

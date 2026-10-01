@@ -1,0 +1,17 @@
+{
+  "name": "@zixcel/microsoft-mail-presentation",
+  "version": "0.10.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "Credential-free Microsoft mailbox configuration presentation; no authentication or execution",
+  "files": [
+    "presentation",
+    "schemas/mail-request-v1.schema.json",
+    "!**/*.tgz",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "exports": {
+    ".": "./presentation/index.mjs"
+  }
+}

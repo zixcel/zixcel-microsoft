@@ -1,0 +1,63 @@
+{
+  "schema": "estate://operations/department-daily-report/v1",
+  "operational_report_id": "talent-profile-report-department-daily-20260723",
+  "record_mode": "simulation-seed",
+  "reporting_date": "2026-07-23",
+  "headquarters_id": "talent-management",
+  "department_id": "profile-portfolio",
+  "reporting_team_id": "profile-portfolio-team-01",
+  "owner_account_id": "profile-portfolio-role-01-01",
+  "window_started_at": "2026-07-22T00:00:00+09:00",
+  "window_ended_at": "2026-07-23T17:00:00+09:00",
+  "generated_at": "2026-07-23T17:10:00+09:00",
+  "source_case_ids": [
+    "talent-profile-case-public-consent",
+    "talent-profile-case-evidence-renewal",
+    "talent-profile-case-sensitive-field"
+  ],
+  "source_event_ids": [
+    "talent-profile-consent-event-04",
+    "talent-profile-renewal-event-07",
+    "talent-profile-sensitive-event-04"
+  ],
+  "source_task_ids": [
+    "work-task-talent-profile-case-public-consent",
+    "work-task-talent-profile-case-evidence-renewal",
+    "work-task-talent-profile-case-sensitive-field"
+  ],
+  "source_report_ids": [
+    "talent-profile-report-daily-20260723"
+  ],
+  "source_artifact_ids": [
+    "profile-portfolio-team-02-artifact-execution-evidence",
+    "profile-portfolio-team-02-artifact-operating-review-pack"
+  ],
+  "escalated_decision_ids": [
+    "talent-profile-decision-public-consent",
+    "talent-profile-decision-sensitive-field"
+  ],
+  "metrics": {
+    "completed_tasks": 1,
+    "open_tasks": 2,
+    "blocked_tasks": 1,
+    "reported_deliverables": 2,
+    "open_escalations": 2
+  },
+  "exceptions": [
+    {
+      "case_id": "talent-profile-case-public-consent",
+      "severity": "medium",
+      "status": "decision-recorded",
+      "decision_id": "talent-profile-decision-public-consent"
+    },
+    {
+      "case_id": "talent-profile-case-sensitive-field",
+      "severity": "high",
+      "status": "blocked-security-privacy",
+      "decision_id": "talent-profile-decision-sensitive-field"
+    }
+  ],
+  "classification": "restricted-sensitive",
+  "customer_data": false,
+  "summary": "プロフィール・ポートフォリオ部の日次報告。完了Evidenceを集約し、Privacy判断待ち1件とSecurity・Privacy例外1件を上位判断対象として維持する。"
+}

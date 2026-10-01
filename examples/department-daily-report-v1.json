@@ -1,0 +1,36 @@
+{
+  "schema": "example://operations/department-daily-report/v1",
+  "operational_report_id": "report-example-20260724",
+  "record_mode": "simulation-seed",
+  "reporting_date": "2026-07-24",
+  "headquarters_id": "example-headquarters",
+  "department_id": "example-unit",
+  "reporting_team_id": "example-team-01",
+  "owner_account_id": "example-role-01",
+  "window_started_at": "2026-07-24T00:00:00+09:00",
+  "window_ended_at": "2026-07-24T17:00:00+09:00",
+  "generated_at": "2026-07-24T17:10:00+09:00",
+  "source_case_ids": [],
+  "source_event_ids": [],
+  "source_task_ids": [
+    "work-task-example-daily-report"
+  ],
+  "source_report_ids": [
+    "example-team-daily-20260724"
+  ],
+  "source_artifact_ids": [
+    "example-team-01-artifact-review-pack"
+  ],
+  "escalated_decision_ids": [],
+  "metrics": {
+    "completed_tasks": 1,
+    "open_tasks": 0,
+    "blocked_tasks": 0,
+    "reported_deliverables": 1,
+    "open_escalations": 0
+  },
+  "exceptions": [],
+  "classification": "internal-confidential",
+  "customer_data": false,
+  "summary": "Offline accept boundary verification fixture."
+}

@@ -1,0 +1,7 @@
+schema = "zixcel://microsoft/config/v1"
+config_id = "corporate-observation"
+tenant_ref = "tenant:corporate"
+secret_ref = "secret://microsoft/graph/corporate-observer"
+cloud = "public"
+workloads = ["share-point", "outlook-mail", "outlook-calendar", "teams", "one-drive"]
+

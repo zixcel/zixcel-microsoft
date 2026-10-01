@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "zixcel://microsoft/provider-plan-request/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "request_id",
+    "expected_provider",
+    "workflow_authorization",
+    "network_access",
+    "secret_resolution",
+    "external_actions"
+  ],
+  "properties": {
+    "schema": { "const": "zixcel://microsoft/provider-plan-request/v1" },
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "expected_provider": { "const": "microsoft" },
+    "workflow_authorization": { "$ref": "#/$defs/workflowAuthorization" },
+    "network_access": { "const": false },
+    "secret_resolution": { "const": false },
+    "external_actions": { "const": false }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "text": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "workflowAuthorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "receipt_id",
+        "receipt_digest_sha256",
+        "workflow_id",
+        "workflow_version",
+        "workflow_plan_digest_sha256",
+        "decision_id",
+        "decision_digest_sha256",
+        "official_hat_id",
+        "hat_manifest_digest_sha256",
+        "recommended_option_id",
+        "executable",
+        "external_actions"
+      ],
+      "properties": {
+        "schema": { "const": "constillo.workflow-authorization-receipt.v1" },
+        "receipt_id": { "$ref": "#/$defs/text" },
+        "receipt_digest_sha256": { "$ref": "#/$defs/digest" },
+        "workflow_id": { "$ref": "#/$defs/text" },
+        "workflow_version": { "$ref": "#/$defs/text" },
+        "workflow_plan_digest_sha256": { "$ref": "#/$defs/digest" },
+        "decision_id": { "$ref": "#/$defs/text" },
+        "decision_digest_sha256": { "$ref": "#/$defs/digest" },
+        "official_hat_id": { "$ref": "#/$defs/text" },
+        "hat_manifest_digest_sha256": { "$ref": "#/$defs/digest" },
+        "recommended_option_id": { "$ref": "#/$defs/text" },
+        "executable": { "const": false },
+        "external_actions": { "const": false }
+      }
+    }
+  }
+}

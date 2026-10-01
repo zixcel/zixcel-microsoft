@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "zixcel://microsoft/sharepoint-daily-report-receipt/v1",
+  "title": "Zixcel Microsoft SharePoint Department Daily Report Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receipt_id",
+    "request_id",
+    "correlation_id",
+    "artifact_id",
+    "plan_id",
+    "provider",
+    "connector",
+    "status",
+    "artifact",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "zixcel://microsoft/sharepoint-daily-report-receipt/v1"
+    },
+    "receipt_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "request_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "correlation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "artifact_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "plan_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "provider": {
+      "const": "microsoft"
+    },
+    "connector": {
+      "const": "zixcel-microsoft"
+    },
+    "status": {
+      "const": "accepted"
+    },
+    "artifact": {
+      "$ref": "#/$defs/artifact"
+    },
+    "safety": {
+      "$ref": "#/$defs/receiptSafety"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "headquarters_id",
+        "department_id",
+        "reporting_team_id",
+        "expected_schema",
+        "observed_schema",
+        "media_type",
+        "byte_count",
+        "digest_sha256",
+        "classification",
+        "customer_data"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "headquarters_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "department_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "reporting_team_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "expected_schema": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 256,
+          "pattern": "^[a-z][a-z0-9+.-]{1,31}://[^?#\\\\\\s]+$"
+        },
+        "observed_schema": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 256,
+          "pattern": "^[a-z][a-z0-9+.-]{1,31}://[^?#\\\\\\s]+$"
+        },
+        "media_type": {
+          "const": "application/json"
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "digest_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "classification": {
+          "enum": [
+            "internal",
+            "internal-confidential",
+            "personal-confidential",
+            "restricted-sensitive",
+            "customer-confidential"
+          ]
+        },
+        "customer_data": {
+          "type": "boolean"
+        }
+      }
+    },
+    "receiptSafety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "source_mode",
+        "offline_validation_performed",
+        "network_calls_performed",
+        "redirects_followed",
+        "credentials_resolved",
+        "artifact_content_persisted"
+      ],
+      "properties": {
+        "scope": {
+          "const": "zixcel-microsoft-process"
+        },
+        "source_mode": {
+          "const": "host-supplied-local-artifact"
+        },
+        "offline_validation_performed": {
+          "const": true
+        },
+        "network_calls_performed": {
+          "const": false
+        },
+        "redirects_followed": {
+          "const": false
+        },
+        "credentials_resolved": {
+          "const": false
+        },
+        "artifact_content_persisted": {
+          "const": false
+        }
+      }
+    }
+  }
+}

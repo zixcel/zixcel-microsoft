@@ -1,0 +1,33 @@
+{
+  "schema": "zixcel://microsoft/sharepoint-daily-report-receipt/v1",
+  "receipt_id": "receipt-microsoft-sharepoint-743ce8f3f950677e",
+  "request_id": "request-talent-profile-daily-api-20260723",
+  "correlation_id": "report-profile-portfolio-20260723",
+  "artifact_id": "talent-profile-report-department-daily-20260723",
+  "plan_id": "plan-microsoft-sharepoint-3b7b05d571e9e9ef",
+  "provider": "microsoft",
+  "connector": "zixcel-microsoft",
+  "status": "accepted",
+  "artifact": {
+    "artifact_id": "talent-profile-report-department-daily-20260723",
+    "headquarters_id": "talent-management",
+    "department_id": "profile-portfolio",
+    "reporting_team_id": "profile-portfolio-team-01",
+    "expected_schema": "estate://operations/department-daily-report/v1",
+    "observed_schema": "estate://operations/department-daily-report/v1",
+    "media_type": "application/json",
+    "byte_count": 2241,
+    "digest_sha256": "9bd7eb6f5360ead46c9481b85995b37aabc74513aa7b12ac56e88dcaa21cea5a",
+    "classification": "restricted-sensitive",
+    "customer_data": false
+  },
+  "safety": {
+    "scope": "zixcel-microsoft-process",
+    "source_mode": "host-supplied-local-artifact",
+    "offline_validation_performed": true,
+    "network_calls_performed": false,
+    "redirects_followed": false,
+    "credentials_resolved": false,
+    "artifact_content_persisted": false
+  }
+}

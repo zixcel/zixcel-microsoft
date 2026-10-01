@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "zixcel://microsoft/sharepoint-daily-report-request/v1",
+  "title": "Zixcel Microsoft SharePoint Department Daily Report Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "request_id",
+    "correlation_id",
+    "artifact_id",
+    "site_ref",
+    "drive_ref",
+    "drive_root_relative_path",
+    "expected_schema",
+    "expected_artifact",
+    "media_type",
+    "max_bytes"
+  ],
+  "properties": {
+    "schema": {
+      "const": "zixcel://microsoft/sharepoint-daily-report-request/v1"
+    },
+    "request_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "correlation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "artifact_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "site_ref": {
+      "type": "string",
+      "pattern": "^site:[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "drive_ref": {
+      "type": "string",
+      "pattern": "^drive:[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "drive_root_relative_path": {
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*[\\\\:\\\"*<>?|#%])[^\\u0000-\\u001F\\u007F]+\\.json$"
+    },
+    "expected_schema": {
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 256,
+      "pattern": "^[a-z][a-z0-9+.-]{1,31}://[^?#\\\\\\s]+$"
+    },
+    "expected_artifact": {
+      "$ref": "#/$defs/expectedArtifact"
+    },
+    "media_type": {
+      "const": "application/json"
+    },
+    "max_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1048576
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "expectedArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "headquarters_id",
+        "department_id",
+        "reporting_team_id",
+        "classification",
+        "customer_data"
+      ],
+      "properties": {
+        "headquarters_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "department_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "reporting_team_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "classification": {
+          "$ref": "#/$defs/classification"
+        },
+        "customer_data": {
+          "type": "boolean"
+        }
+      }
+    },
+    "classification": {
+      "enum": [
+        "internal",
+        "internal-confidential",
+        "personal-confidential",
+        "restricted-sensitive",
+        "customer-confidential"
+      ]
+    }
+  }
+}

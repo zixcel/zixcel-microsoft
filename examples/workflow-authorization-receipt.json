@@ -1,0 +1,15 @@
+{
+  "schema": "constillo.workflow-authorization-receipt.v1",
+  "receipt_id": "workflow-receipt-b1d1886e5354e1506b5b98c7",
+  "receipt_digest_sha256": "sha256:b1d1886e5354e1506b5b98c7dc6615f5e1efd779e5e51bff7a0c55487f164155",
+  "workflow_id": "local-foundation-bounded-pilot",
+  "workflow_version": "1.0.0",
+  "workflow_plan_digest_sha256": "sha256:2693bbd82e9550edf1e08fb239267e0208187eff4f1487b8c306ee5710723c33",
+  "decision_id": "decision-96f3e7d9697b0f339e67cc0a",
+  "decision_digest_sha256": "sha256:96f3e7d9697b0f339e67cc0af69823a4414546e896e2a423581db9e341feb16e",
+  "official_hat_id": "hat/source-curator",
+  "hat_manifest_digest_sha256": "sha256:5b82dd0120280ac7f45ef2abbb6baabf9e5a0a3de37f9a5ab90ea00125056602",
+  "recommended_option_id": "bounded-pilot",
+  "executable": false,
+  "external_actions": false
+}

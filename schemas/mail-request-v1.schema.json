@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "zixcel://microsoft/mail/request/v1",
+  "title": "Microsoft 365 mailbox",
+  "description": "A bounded read proposal. Authentication and execution are separate; this configuration does not connect an account.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "account_ref", "authorization_ref", "cloud", "folder_id", "content", "maximum_messages", "max_response_bytes"],
+  "properties": {
+    "schema": {"const": "zixcel://microsoft/mail/request/v1"},
+    "account_ref": {"title": "Connected account", "type": "string", "minLength": 1, "maxLength": 160, "pattern": "^[^\\s\\u0000-\\u001f\\u007f]+$"},
+    "authorization_ref": {"title": "Read authorization", "type": "string", "minLength": 1, "maxLength": 160, "pattern": "^[^\\s\\u0000-\\u001f\\u007f]+$"},
+    "cloud": {"title": "Microsoft cloud", "enum": ["public", "us-government"]},
+    "folder_id": {"title": "Mail folder", "type": "string", "minLength": 1, "maxLength": 512, "pattern": "^[^\\s\\u0000-\\u001f\\u007f]+$", "not": {"enum": [".", ".."]}},
+    "content": {"title": "Information to read", "enum": ["metadata", "body"], "description": "Metadata requires Mail.ReadBasic. Body access requires separate Mail.Read consent. Neither choice permits sending or editing mail."},
+    "maximum_messages": {"title": "Messages per page", "type": "integer", "minimum": 1, "maximum": 100},
+    "max_response_bytes": {"title": "Response byte limit", "type": "integer", "minimum": 1, "maximum": 1048576}
+  }
+}
