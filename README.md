@@ -6,7 +6,7 @@ The host application owns account selection, consent, token custody and activati
 
 | Artifact | Purpose | Distribution |
 | --- | --- | --- |
-| `zixcel-microsoft` | Validate bounded acquisition requests and produce read-only plans | crates.io |
+| `zixcel-microsoft` | Validate bounded acquisition requests and produce read-only plans | GitHub source; Cargo registry publishing disabled |
 | `@zixcel/microsoft-mail-presentation` | Present configuration fields and missing prerequisites | npm |
 | `@zixcel/microsoft-mail-web` | Read delegated Graph mail changes and perform explicitly consented actions | npm |
 
