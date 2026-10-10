@@ -231,3 +231,35 @@ test('popup return page never displays account error details',()=>{
  assert.ok(html.includes("document.body.textContent = 'Microsoft authentication could not complete.'"));
  assert.ok(!html.includes('String(error && error.message'));
 });
+
+test('metadata synchronization requests no body or write permission',async()=>{
+ const logins=[];
+ const client={...fakeClient,async loginPopup(options){logins.push(options.scopes);return {account}}};
+ globalThis.fetch=async input=>page([], 'deltaLink', String(input));
+ const source=new MicrosoftMailSource(clientId,'organizations',redirectUri,client);
+ await source.initialize();await source.connect();await source.list();
+ assert.deepEqual(logins,[['Mail.ReadBasic']]);
+ assert.ok(requestedScopes.length>=3);
+ assert.ok(requestedScopes.every(scopes=>JSON.stringify(scopes)===JSON.stringify(['Mail.ReadBasic'])));
+});
+
+test('body acquisition requests separate read consent',async()=>{
+ globalThis.fetch=async()=>Response.json({id:'message',body:{content:'Example',contentType:'text'}});
+ const source=new MicrosoftMailSource(clientId,'organizations',redirectUri,fakeClient);
+ await source.initialize();await source.connect();
+ await source.detail({id:'message'});
+ assert.deepEqual(requestedScopes,[['Mail.Read']]);
+});
+
+test('an earlier account body is rejected after switching accounts',async()=>{
+ let selected=account,release;
+ const client={...fakeClient,async loginPopup(){return {account:selected}}};
+ globalThis.fetch=async()=>await new Promise(resolve=>{release=()=>resolve(Response.json({id:'message',body:{content:'Earlier account',contentType:'text'}}))});
+ const source=new MicrosoftMailSource(clientId,'organizations',redirectUri,client);
+ await source.initialize();await source.connect();
+ const pending=source.detail({id:'message'});
+ while(!release)await new Promise(resolve=>setImmediate(resolve));
+ selected={username:'other@example.invalid',homeAccountId:'account-2'};
+ await source.connect();release();
+ await assert.rejects(pending,/account changed during message acquisition/);
+});
