@@ -1,0 +1,47 @@
+name: Prepare reviewed npm artifacts
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  npm-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.15.0'
+          package-manager-cache: false
+      - name: Isolate public registry configuration
+        run: |
+          : > "$RUNNER_TEMP/user.npmrc"
+          : > "$RUNNER_TEMP/global.npmrc"
+          echo "NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/user.npmrc" >> "$GITHUB_ENV"
+          echo "NPM_CONFIG_GLOBALCONFIG=$RUNNER_TEMP/global.npmrc" >> "$GITHUB_ENV"
+          echo "NPM_CONFIG_REGISTRY=https://registry.npmjs.org" >> "$GITHUB_ENV"
+      - run: npm install --global --ignore-scripts --no-audit --no-fund pnpm@10.29.3
+      - name: Validate workspace and dependency graph
+        run: |
+          pnpm install --frozen-lockfile --ignore-scripts
+          pnpm -r --include-workspace-root typecheck
+          pnpm -r --include-workspace-root test
+          pnpm audit --audit-level=low
+      - name: Pack exact source distributions without lifecycle hooks
+        run: |
+          mkdir outgoing
+          npm pack --ignore-scripts --json --pack-destination "$GITHUB_WORKSPACE/outgoing"
+          (cd packages/zixcel-microsoft-mail-web && npm pack --ignore-scripts --json --pack-destination "$GITHUB_WORKSPACE/outgoing")
+          printf '%s\n' "$GITHUB_SHA" > outgoing/source-sha.txt
+          (cd outgoing && sha256sum ./*.tgz > SHA256SUMS)
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: reviewed-npm-packages
+          path: outgoing/
+          if-no-files-found: error
+          retention-days: 3

@@ -1,0 +1,55 @@
+{
+  "name": "@zixcel/microsoft-mail-web",
+  "version": "0.10.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "Browser-side Microsoft 365 mailbox source with MSAL and bounded Graph delta synchronization",
+  "files": [
+    "src",
+    "README.md",
+    "!**/*.tgz",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.d.mts",
+      "import": "./src/index.mjs"
+    },
+    "./redirect-document": {
+      "import": "./src/redirect-document.mjs",
+      "types": "./src/redirect-document.d.mts"
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "typecheck": "tsc --strict --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 test/public-types.mts",
+    "build": "node --check src/index.mjs && node --check src/redirect-document.mjs"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "5.22.0",
+    "@crowsi/provider-http-transport": "0.10.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zixcel/zixcel-microsoft.git",
+    "directory": "packages/zixcel-microsoft-mail-web"
+  },
+  "homepage": "https://github.com/zixcel/zixcel-microsoft#readme",
+  "bugs": {
+    "url": "https://github.com/zixcel/zixcel-microsoft/issues"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "packageManager": "pnpm@10.29.3",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "types": "./src/index.d.mts",
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "24.12.0"
+  }
+}

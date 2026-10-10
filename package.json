@@ -9,9 +9,41 @@
     "schemas/mail-request-v1.schema.json",
     "!**/*.tgz",
     "LICENSE",
-    "NOTICE"
+    "NOTICE",
+    "README.md",
+    "SECURITY.md",
+    "!presentation/test"
   ],
   "exports": {
-    ".": "./presentation/index.mjs"
+    ".": {
+      "types": "./presentation/index.d.mts",
+      "import": "./presentation/index.mjs"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zixcel/zixcel-microsoft.git"
+  },
+  "homepage": "https://github.com/zixcel/zixcel-microsoft#readme",
+  "bugs": {
+    "url": "https://github.com/zixcel/zixcel-microsoft/issues"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "packageManager": "pnpm@10.29.3",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "types": "./presentation/index.d.mts",
+  "scripts": {
+    "test": "node --test presentation/test/*.test.mjs",
+    "typecheck": "tsc --strict --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 presentation/test/public-types.mts",
+    "build": "node --check presentation/index.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "24.12.0"
   }
 }
