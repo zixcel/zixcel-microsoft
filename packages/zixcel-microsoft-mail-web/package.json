@@ -9,8 +9,7 @@
     "README.md",
     "!**/*.tgz",
     "LICENSE",
-    "NOTICE",
-    "SECURITY.md"
+    "NOTICE"
   ],
   "exports": {
     ".": {

@@ -47,4 +47,4 @@ pnpm test
 
 [Usage guide](docs/getting-started.md)
 
-[Implementation and public interfaces](src) · [Verification cases](test) · [Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md) · [License](LICENSE) · [Attribution notices](NOTICE)
+[Implementation and public interfaces](src) · [Verification cases](test) · [Contributing](../../CONTRIBUTING.md) · [Security reporting](../../SECURITY.md) · [License](LICENSE) · [Attribution notices](NOTICE)
