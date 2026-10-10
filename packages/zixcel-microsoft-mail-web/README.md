@@ -48,3 +48,5 @@ pnpm test
 [Usage guide](docs/getting-started.md)
 
 [Implementation and public interfaces](src) · [Verification cases](test) · [Contributing](../../CONTRIBUTING.md) · [Security reporting](../../SECURITY.md) · [License](LICENSE) · [Attribution notices](NOTICE)
+
+Metadata synchronization requests only delegated `Mail.ReadBasic`. Reading a message body requests `Mail.Read` separately through an explicit detail operation. An account switch invalidates in-flight body results before they can be returned. These boundaries supplement host authorization; mocked tests do not establish live Entra consent. See the [official delta permission table](https://learn.microsoft.com/en-us/graph/api/message-delta?view=graph-rest-1.0).

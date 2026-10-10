@@ -2,7 +2,8 @@ import { InteractionRequiredAuthError, PublicClientApplication } from '@azure/ms
 import { createProviderHttpTransport } from '@crowsi/provider-http-transport'
 
 const GRAPH = 'https://graph.microsoft.com/v1.0'
-const READ = ['User.Read', 'Mail.Read']
+const READ_BASIC = ['Mail.ReadBasic']
+const READ_BODY = ['Mail.Read']
 const WRITE = ['Mail.ReadWrite']
 const SEND = ['Mail.Send']
 const FOLDERS = [
@@ -65,7 +66,7 @@ export class MicrosoftMailSource {
 
   async #connect(recoverInterrupted) {
     const result = await this.#client.loginPopup({
-      scopes: READ, prompt: 'select_account',
+      scopes: READ_BASIC, prompt: 'select_account',
       ...(recoverInterrupted ? { overrideInteractionInProgress: true } : {})
     })
     if (this.#account?.homeAccountId !== result.account.homeAccountId) {
@@ -192,7 +193,7 @@ export class MicrosoftMailSource {
         if (signal.aborted || generation !== this.#generation) throw new Error('Microsoft account changed during synchronization')
         let result
         try {
-          result = await this.#request(path, READ, { signal }, false, account)
+          result = await this.#request(path, READ_BASIC, { signal }, false, account)
         } catch (error) {
           if (signal.aborted || generation !== this.#generation) {
             throw new Error('Microsoft account changed during synchronization', { cause: error })
@@ -240,10 +241,15 @@ export class MicrosoftMailSource {
   }
 
   async detail(message) {
+    const generation = this.#generation
+    const account = this.#account
     const query = new URLSearchParams({ '$select': 'id,body,subject,from,toRecipients,ccRecipients,bccRecipients,receivedDateTime,isRead,hasAttachments' })
-    const value = await this.#request(`/me/messages/${encodeURIComponent(message.id)}?${query}`, READ, {
+    const value = await this.#request(`/me/messages/${encodeURIComponent(message.id)}?${query}`, READ_BODY, {
       headers: { prefer: 'IdType="ImmutableId", outlook.body-content-type="html"' }
-    })
+    }, true, account)
+    if (generation !== this.#generation || account !== this.#account) {
+      throw new Error('Microsoft account changed during message acquisition')
+    }
     const bodyContentType = value.body?.contentType?.toLocaleLowerCase()
     if (bodyContentType !== undefined && bodyContentType !== 'html' && bodyContentType !== 'text') {
       throw new Error('Microsoft Graph message body content type is invalid')
