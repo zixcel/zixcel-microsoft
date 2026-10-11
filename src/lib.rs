@@ -8,8 +8,8 @@ mod oidc;
 mod plan;
 mod reports;
 
-pub mod sharepoint_daily_report;
 pub mod mail;
+pub mod sharepoint_daily_report;
 
 pub use authorization::{
     AuthorizedConnectorPlan, ProviderPlanRequest, WorkflowAuthorization, build_authorized_plan,
