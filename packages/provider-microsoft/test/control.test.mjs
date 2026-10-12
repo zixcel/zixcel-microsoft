@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createControl, operations } from '../dist/index.mjs'
+import { createControl, operations, cliCredentials } from '../dist/index.mjs'
 const account = { provider: "microsoft-graph", subject: 'synthetic-owner', account: 'synthetic-account' }
 const samples = {"account.read": {}, "mail.read": {}, "mail.set-read": {"message": "test-message", "isRead": true}}
 const token = 'synthetic-bearer-not-a-real-account'
@@ -55,4 +55,13 @@ test('propagates remote permission denial without secret/error body leakage', as
   const plan = f.control.prepare('account.read', {})
   const grant = f.control.approve(plan, Date.now() + 30000)
   await assert.rejects(f.control.execute(grant.id, plan), /provider\/http\/403/)
+})
+
+test('CLI credential construction rejects a different tenant without invoking az', () => {
+  const tenant = '11111111-1111-4111-8111-111111111111'
+  const subject = '22222222-2222-4222-8222-222222222222'
+  assert.throws(() => cliCredentials({ provider: 'microsoft-graph', subject, account: tenant },
+    '33333333-3333-4333-8333-333333333333'), /account-invalid/)
+  assert.throws(() => cliCredentials({ provider: 'microsoft-graph', subject: 'not-an-object-id', account: tenant },
+    tenant), /account-invalid/)
 })
