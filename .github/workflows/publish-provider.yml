@@ -47,5 +47,5 @@ jobs:
           npm ci --ignore-scripts --workspaces=false
           npm test --workspaces=false
           npm pack --ignore-scripts --workspaces=false
-          sha256sum zixcel-provider-microsoft-0.1.1.tgz
-          npm publish zixcel-provider-microsoft-0.1.1.tgz --access public --provenance
+          sha256sum zixcel-provider-microsoft-0.1.2.tgz
+          npm publish zixcel-provider-microsoft-0.1.2.tgz --access public --provenance
