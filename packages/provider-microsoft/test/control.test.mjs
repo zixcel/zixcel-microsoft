@@ -65,3 +65,12 @@ test('CLI credential construction rejects a different tenant without invoking az
   assert.throws(() => cliCredentials({ provider: 'microsoft-graph', subject: 'not-an-object-id', account: tenant },
     tenant), /account-invalid/)
 })
+
+test('rejects decoded credential echoes without exposing them to callers', async () => {
+  const escaped = [...token].map(character => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`).join('')
+  const control = createControl(account, { acquire: async () => token }, async () =>
+    new Response(`{"echo":"${escaped}"}`, { status: 200 }))
+  const plan = control.prepare('account.read', {})
+  const grant = control.approve(plan, Date.now() + 30000)
+  await assert.rejects(control.execute(grant.id, plan), /credential-rejected/)
+})
