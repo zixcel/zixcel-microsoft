@@ -64,3 +64,9 @@ and end-to-end host activation require separate integration verification.
 [Browser client](packages/zixcel-microsoft-mail-web/README.md) ·
 [Interface reference](docs/interface-reference.md) · [Security](SECURITY.md) ·
 [License](LICENSE) · [Notices](NOTICE)
+
+## Local administrator runtime
+
+See [the separate Node provider package](packages/provider-microsoft/README.md)
+for account-bound read/write operations and isolated fake-HTTP tests.
+The existing Rust planning API remains independently scoped.
