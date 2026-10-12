@@ -8,7 +8,7 @@ This is the Node runtime package, separate from any existing Rust planning API.
 ## Install
 
 ```sh
-npm install @zixcel/provider-microsoft@0.1.2
+npm install @zixcel/provider-microsoft@0.1.3
 ```
 
 Registry publication is a separate gate; the initial candidate is not declared
@@ -66,3 +66,5 @@ Apache-2.0. See LICENSE and NOTICE. Source: zixcel/zixcel-microsoft.
 
 The CLI credential port requires the selected account to equal the tenant and
 the subject to be an Entra object ID. Mismatches reject before invoking az.
+
+For independent mutation read-back, prepare `mail.message-read` for the same message; user identity and the first message page are not target-message state. It selects id/isRead under delegated Mail.ReadBasic. [Get message](https://learn.microsoft.com/en-us/graph/api/message-get?view=graph-rest-1.0).
