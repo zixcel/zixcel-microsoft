@@ -1,0 +1,44 @@
+{
+  "name": "@zixcel/provider-microsoft",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "microsoft local administrator operations with one-use Crowsi authorization",
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zixcel/zixcel-microsoft.git",
+    "directory": "packages/provider-microsoft"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "@crowsi/provider-http-transport": "0.11.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "24.19.2"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepack": "npm test"
+  }
+}
