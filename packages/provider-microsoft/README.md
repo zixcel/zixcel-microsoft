@@ -8,7 +8,7 @@ This is the Node runtime package, separate from any existing Rust planning API.
 ## Install
 
 ```sh
-npm install @zixcel/provider-microsoft@0.1.0
+npm install @zixcel/provider-microsoft@0.1.1
 ```
 
 Registry publication is a separate gate; the initial candidate is not declared
@@ -63,3 +63,6 @@ not implemented by this release. Do not substitute planning for observed rights,
 or estimates for final provider invoices.
 
 Apache-2.0. See LICENSE and NOTICE. Source: zixcel/zixcel-microsoft.
+
+The CLI credential port requires the selected account to equal the tenant and
+the subject to be an Entra object ID. Mismatches reject before invoking az.

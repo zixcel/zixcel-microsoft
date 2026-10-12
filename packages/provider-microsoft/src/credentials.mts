@@ -1,7 +1,9 @@
 import { localCommandCredential } from '@crowsi/provider-http-transport/local-control'
 import type { LocalAccount } from '@crowsi/provider-http-transport/local-control'
 export function cliCredentials(account: LocalAccount, tenant: string) {
-  if (account.provider !== 'microsoft-graph' || !/^[a-fA-F0-9-]{36}$/.test(tenant)) {
+  const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i
+  if (account.provider !== 'microsoft-graph' || !uuid.test(tenant) || !uuid.test(account.subject)
+    || account.account.toLowerCase() !== tenant.toLowerCase()) {
     throw new Error('provider/credential/account-invalid')
   }
   return localCommandCredential('az', ['account', 'get-access-token', '--tenant', tenant,

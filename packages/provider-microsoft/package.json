@@ -1,6 +1,6 @@
 {
   "name": "@zixcel/provider-microsoft",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "license": "Apache-2.0",
   "description": "microsoft local administrator operations with one-use Crowsi authorization",
