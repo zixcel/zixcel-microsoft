@@ -22,4 +22,5 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm test
+          node ../../.github/scripts/provider-consumer.mjs
           npm pack --ignore-scripts
