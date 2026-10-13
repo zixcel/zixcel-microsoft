@@ -1,6 +1,6 @@
 # OSS source contract: zixcel/zixcel-microsoft
 
-Check a Microsoft 365 integration configuration and produce a plan before implementing or enabling the connection.
+Owner-approved Microsoft Graph user/organization/mail operations; separate Rust planning and mail presentation components.
 
 ## Responsibility boundary
 

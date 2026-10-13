@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, writeFileSync, readFileSync, copyFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, readFileSync, copyFileSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { resolve, join } from 'node:path'
 const root = process.cwd(), manifest = JSON.parse(readFileSync('package.json'))
@@ -23,7 +23,15 @@ try {
  copyFileSync(resolve(root, '../../playground/provider-operations/demo.mjs'), join(project, 'demo.mjs'))
  writeFileSync(join(project, 'consumer.mts'), `import { createControl } from '${manifest.name}';\nconst control = createControl({provider:'synthetic',subject:'owner',account:'account'},{acquire:async()=> 'synthetic'}, async()=>new Response('{}'));\ncontrol.prepare('account.read', {});\n`)
  run('node', ['node_modules/typescript/bin/tsc', '--noEmit', '--strict', '--skipLibCheck', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', 'consumer.mts'])
- process.stdout.write(run('node', ['--test', 'control.test.mjs']))
+ const publicTests = ['control.test.mjs']
+ for (const name of readdirSync('test').filter(name => name.endsWith('.test.mjs') && name !== 'control.test.mjs')) {
+  const sourceTest = readFileSync(join('test', name), 'utf8')
+  const imports = [...sourceTest.matchAll(/['"]\.\.\/dist\/([^'"]+)['"]/g)]
+  if (!imports.length || imports.some(match => match[1] !== 'index.mjs')) continue
+  writeFileSync(join(project, name), sourceTest.replaceAll("'../dist/index.mjs'", JSON.stringify(manifest.name)))
+  publicTests.push(name)
+ }
+ process.stdout.write(run('node', ['--test', ...publicTests]))
  process.stdout.write(run('node', ['demo.mjs']))
  console.log(JSON.stringify({ name: manifest.name, version: manifest.version, publicImports: true, isolatedTGZ: true, realAccounts: false }))
 } finally { rmSync(project, { recursive: true, force: true }) }
