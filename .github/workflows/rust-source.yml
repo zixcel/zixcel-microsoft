@@ -1,0 +1,25 @@
+name: Rust source acceptance
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CARGO_BUILD_JOBS: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Install declared Rust tooling
+        run: rustup toolchain install 1.97.1 --profile minimal --component rustfmt --component clippy
+      - name: Test every maintained source target and feature
+        run: cargo +1.97.1 test --locked --all-targets --all-features
+      - name: Check source formatting
+        run: cargo +1.97.1 fmt --all -- --check
+      - name: Check all source targets
+        run: cargo +1.97.1 clippy --locked --all-targets --all-features -- -D warnings
