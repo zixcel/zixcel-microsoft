@@ -72,3 +72,5 @@ for account-bound read/write operations and isolated fake-HTTP tests.
 The existing Rust planning API remains independently scoped.
 
 [Isolated public API playground and owner operation boundaries](playground/provider-operations/README.md) · [日本語](README.ja.md)
+
+[OSS responsibility and source completion](docs/oss-source-contract.md) defines the supported package boundary and required acceptance. It does not declare unexecuted source, distribution or production checks complete.
