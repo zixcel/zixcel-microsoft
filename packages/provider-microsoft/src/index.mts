@@ -1,7 +1,9 @@
+import { discoveryOperations } from './discovery.mjs'
 import { createLocalProviderControl, parameters, segment } from '@crowsi/provider-http-transport/local-control'
 import type { CredentialSource, LocalAccount, LocalOperation } from '@crowsi/provider-http-transport/local-control'
 const origin = 'https://graph.microsoft.com'
 export const operations: readonly LocalOperation[] = Object.freeze([
+  ...discoveryOperations,
   { id: 'account.read', effect: 'read', requiredPermissions: ['User.Read (delegated)'],
     build(input) { parameters(input, []); return { method: 'GET', url: `${origin}/v1.0/me?$select=id,displayName,userPrincipalName` } } },
   { id: 'mail.read', effect: 'read', requiredPermissions: ['Mail.ReadBasic (delegated)'],
@@ -21,3 +23,14 @@ export function createControl(account: LocalAccount, credentials: CredentialSour
 }
 
 export { cliCredentials } from './credentials.mjs'
+
+export const serviceProfile = Object.freeze({
+  provider: "microsoft-graph",
+  accountScope: "Microsoft Entra tenant ID and delegated subject object ID.",
+  credentialSource: "Owner-provided delegated credential; /me operations are not app-only APIs.",
+  permissionCoverage: "HTTP acceptance or organization information is not consent/RBAC/effective API access inventory.",
+  billingCoverage: "Billing coverage is not implied by Microsoft Graph organization or mail APIs.",
+  permissionState: 'not-observed' as const,
+  operations: Object.freeze(operations.map(({ id, effect, requiredPermissions }) =>
+    Object.freeze({ id, effect, requiredPermissions: Object.freeze([...requiredPermissions]) }))),
+})

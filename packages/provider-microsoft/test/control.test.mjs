@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createControl, operations, cliCredentials } from '../dist/index.mjs'
 const account = { provider: "microsoft-graph", subject: 'synthetic-owner', account: 'synthetic-account' }
-const samples = {"account.read":{},"mail.read":{},"mail.set-read":{"message":"test-message","isRead":true},"mail.message-read":{"message":"test-message"}}
+const samples = {"account.read":{},"mail.read":{},"mail.set-read":{"message":"test-message","isRead":true},"mail.message-read":{"message":"test-message"},"organization.read":{}}
 const token = 'synthetic-bearer-not-a-real-account'
 function fixture() {
   const requests = []

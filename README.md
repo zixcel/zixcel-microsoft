@@ -1,7 +1,7 @@
 # Microsoft integration contracts
 
-This repository provides credential-free Microsoft 365 planning contracts in Rust,
-a display-only mailbox descriptor, and a separately installable browser mail client.
+Owner-approved Microsoft Graph user/organization/mail operations; separate Rust planning and mail presentation components.
+It also maintains a display-only mailbox descriptor and a separately installable browser mail client.
 The host application owns account selection, consent, token custody and activation.
 
 | Artifact | Purpose | Distribution |
@@ -72,3 +72,11 @@ for account-bound read/write operations and isolated fake-HTTP tests.
 The existing Rust planning API remains independently scoped.
 
 [Isolated public API playground and owner operation boundaries](playground/provider-operations/README.md) · [日本語](README.ja.md)
+
+[OSS responsibility and source completion](docs/oss-source-contract.md) defines the supported package boundary and required acceptance. It does not declare unexecuted source, distribution or production checks complete.
+
+## Node administrator baseline
+
+The runtime implementation is in `packages/provider-microsoft`. Its README defines the reviewed operation catalog, account/credential scope, permission and billing coverage, source additions, examples and isolated test commands. Rust planning-only packages and presentation packages retain their own scopes; a planning fixture is not proof of an external API effect.
+
+Run the Node runtime package's frozen install and tests from that directory. Source additions are reviewed separately from the currently published immutable version and from live-account acceptance. No provider connection or account change occurs during source tests.

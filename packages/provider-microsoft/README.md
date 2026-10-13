@@ -68,3 +68,7 @@ The CLI credential port requires the selected account to equal the tenant and
 the subject to be an Entra object ID. Mismatches reject before invoking az.
 
 For independent mutation read-back, prepare `mail.message-read` for the same message; user identity and the first message page are not target-message state. It selects id/isRead under delegated Mail.ReadBasic. [Get message](https://learn.microsoft.com/en-us/graph/api/message-get?view=graph-rest-1.0).
+
+## Administrator discovery (new source catalog)
+
+`serviceProfile` describes the actual account scope, credential source, bounded operation list, and limits of permission/billing coverage. It contains no credentials, performs no login/request and reports `not-observed`; required permissions remain declarations. Discovery is a separate one-use reviewed read, not automatic account selection or authorization. Each cursor/page requires its own plan and grant. Source additions are not contained in the previously published package version until a new release is accepted.
