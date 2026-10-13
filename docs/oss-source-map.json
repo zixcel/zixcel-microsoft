@@ -1,0 +1,409 @@
+{
+  "repository": "zixcel/zixcel-microsoft",
+  "purpose": "Check a Microsoft 365 integration configuration and produce a plan before implementing or enabling the connection.",
+  "responsibility_boundary": "Own the named reusable integration/data mechanism. Product roles/UI and operational approvals stay with consumers; transport/custody reuse managed Crowsi components where capabilities fit. Planning-only APIs must remain clearly distinguished from implemented external operations.",
+  "packages": [
+    {
+      "manifest": "Cargo.toml",
+      "package": "zixcel-microsoft",
+      "ecosystem": "rust",
+      "description": "Planning and offline-accept Microsoft service connector boundary for Zixcel",
+      "interfaces": {
+        "lib": "src/lib.rs",
+        "features": {},
+        "bins": [],
+        "public_modules": [
+          "mail",
+          "sharepoint_daily_report"
+        ],
+        "public_reexports": [
+          "authorization::{\n    AuthorizedConnectorPlan, ProviderPlanRequest, WorkflowAuthorization, build_authorized_plan,\n    parse_provider_plan_request,\n}",
+          "boundary::ConnectorError",
+          "config::{ConnectorConfig, MicrosoftCloud, MicrosoftWorkload, parse_config}",
+          "oidc::{\n    MicrosoftAuthenticationMethod, OidcLoginPlan, OidcLoginRequest, OidcProviderProfile,\n    build_oidc_login_plan,\n}",
+          "plan::{ConnectorPlan, PlanStep, build_plan}",
+          "reports::{\n    CapabilityReport, DoctorReport, ValidationReport, capabilities, doctor, validation_report,\n}"
+        ],
+        "implicit_bins": []
+      },
+      "declared_commands": {}
+    },
+    {
+      "manifest": "package.json",
+      "package": "@zixcel/microsoft-mail-presentation",
+      "ecosystem": "npm",
+      "description": "Credential-free Microsoft mailbox configuration presentation; no authentication or execution",
+      "interfaces": {
+        "exports": {
+          ".": {
+            "types": "./presentation/index.d.mts",
+            "import": "./presentation/index.mjs"
+          }
+        },
+        "bin": {},
+        "main": null,
+        "types": "./presentation/index.d.mts"
+      },
+      "declared_commands": {
+        "test": "node --test presentation/test/*.test.mjs",
+        "typecheck": "tsc --strict --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 presentation/test/public-types.mts",
+        "build": "node --check presentation/index.mjs"
+      }
+    },
+    {
+      "manifest": "packages/provider-microsoft/package.json",
+      "package": "@zixcel/provider-microsoft",
+      "ecosystem": "npm",
+      "description": "microsoft local administrator operations with one-use Crowsi authorization",
+      "interfaces": {
+        "exports": {
+          ".": {
+            "types": "./dist/index.d.mts",
+            "import": "./dist/index.mjs"
+          }
+        },
+        "bin": {},
+        "main": null,
+        "types": null
+      },
+      "declared_commands": {
+        "build": "tsc -p tsconfig.json",
+        "test": "npm run build && node --test test/*.test.mjs",
+        "prepack": "npm test"
+      }
+    },
+    {
+      "manifest": "packages/zixcel-microsoft-mail-web/package.json",
+      "package": "@zixcel/microsoft-mail-web",
+      "ecosystem": "npm",
+      "description": "Browser-side Microsoft 365 mailbox source with MSAL and bounded Graph delta synchronization",
+      "interfaces": {
+        "exports": {
+          ".": {
+            "types": "./src/index.d.mts",
+            "import": "./src/index.mjs"
+          },
+          "./redirect-document": {
+            "import": "./src/redirect-document.mjs",
+            "types": "./src/redirect-document.d.mts"
+          }
+        },
+        "bin": {},
+        "main": null,
+        "types": "./src/index.d.mts"
+      },
+      "declared_commands": {
+        "test": "node --test test/*.test.mjs",
+        "typecheck": "tsc --strict --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 test/public-types.mts",
+        "build": "node --check src/index.mjs && node --check src/redirect-document.mjs"
+      }
+    }
+  ],
+  "schema_definitions": [
+    "schemas/README.md",
+    "schemas/authorized-connector-plan-v1.schema.json",
+    "schemas/mail-request-v1.schema.json",
+    "schemas/microsoft-oidc-profile-v1.schema.json",
+    "schemas/provider-plan-request-v1.schema.json",
+    "schemas/sharepoint-daily-report-plan-v1.schema.json",
+    "schemas/sharepoint-daily-report-receipt-v1.schema.json",
+    "schemas/sharepoint-daily-report-request-v1.schema.json",
+    "schemas/sharepoint-daily-report-request-validation-v1.schema.json"
+  ],
+  "test_sources": [
+    "packages/provider-microsoft/test/control.test.mjs",
+    "packages/provider-microsoft/test/discovery.test.mjs",
+    "packages/zixcel-microsoft-mail-web/test/mail.test.mjs",
+    "packages/zixcel-microsoft-mail-web/test/public-types.mts",
+    "presentation/test/presentation.test.mjs",
+    "presentation/test/public-types.mts",
+    "src/boundary.rs",
+    "src/oidc/validation.rs",
+    "src/sharepoint_daily_report/digest.rs",
+    "src/sharepoint_daily_report/identity.rs",
+    "src/sharepoint_daily_report/path_safety.rs",
+    "src/sharepoint_daily_report/time.rs",
+    "tests/authorization.rs",
+    "tests/cli.rs",
+    "tests/connector.rs",
+    "tests/daily_report_accept.rs",
+    "tests/daily_report_plan.rs",
+    "tests/mail.rs",
+    "tests/oidc_login.rs"
+  ],
+  "example_sources": [
+    "examples/config.toml",
+    "examples/department-daily-report-v1.json",
+    "examples/mail-request.json",
+    "examples/provider-plan-request.json",
+    "examples/sharepoint-daily-report-request-v1.json",
+    "examples/talent-profile-report-department-daily-20260723.json",
+    "examples/talent-profile-report-department-daily-20260723.offline-receipt.json",
+    "examples/workflow-authorization-receipt.json",
+    "playground/provider-operations/README.ja.md",
+    "playground/provider-operations/README.md",
+    "playground/provider-operations/demo.mjs"
+  ],
+  "workflow_definitions": [
+    {
+      "path": ".github/workflows/oss-policy.yml",
+      "jobs": [
+        {
+          "job": "repository-policy",
+          "condition": null,
+          "runs_on": "ubuntu-latest",
+          "steps": [
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "condition": null
+            },
+            {
+              "name": "Verify repository policy",
+              "run": "python3 .github/oss-policy-check.py",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Verify policy regression tests",
+              "run": "cd .github && python3 -m unittest discover -s policy-tests",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Check policy types",
+              "run": "python3 -m venv \"$RUNNER_TEMP/policy-types\"\n\"$RUNNER_TEMP/policy-types/bin/pip\" install -r .github/policy/requirements.txt\n\"$RUNNER_TEMP/policy-types/bin/mypy\" --strict .github/policy .github/oss-policy-check.py .github/policy-tests\n",
+              "uses": null,
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/prepare-npm-artifact.yml",
+      "jobs": [
+        {
+          "job": "npm-package",
+          "condition": null,
+          "runs_on": "ubuntu-24.04",
+          "steps": [
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "condition": null
+            },
+            {
+              "name": "Isolate public registry configuration",
+              "run": ": > \"$RUNNER_TEMP/user.npmrc\"\n: > \"$RUNNER_TEMP/global.npmrc\"\necho \"NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/user.npmrc\" >> \"$GITHUB_ENV\"\necho \"NPM_CONFIG_GLOBALCONFIG=$RUNNER_TEMP/global.npmrc\" >> \"$GITHUB_ENV\"\necho \"NPM_CONFIG_REGISTRY=https://registry.npmjs.org\" >> \"$GITHUB_ENV\"\n",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": "npm install --global --ignore-scripts --no-audit --no-fund pnpm@10.29.3",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Validate workspace and dependency graph",
+              "run": "pnpm install --frozen-lockfile --ignore-scripts\npnpm -r --include-workspace-root typecheck\npnpm -r --include-workspace-root test\npnpm audit --audit-level=low\n",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Pack exact source distributions without lifecycle hooks",
+              "run": "mkdir outgoing\nnpm pack --ignore-scripts --json --pack-destination \"$GITHUB_WORKSPACE/outgoing\"\n(cd packages/zixcel-microsoft-mail-web && npm pack --ignore-scripts --json --pack-destination \"$GITHUB_WORKSPACE/outgoing\")\nprintf '%s\\n' \"$GITHUB_SHA\" > outgoing/source-sha.txt\n(cd outgoing && sha256sum ./*.tgz > SHA256SUMS)\n",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/provider-control.yml",
+      "jobs": [
+        {
+          "job": "test",
+          "condition": null,
+          "runs_on": "ubuntu-24.04",
+          "steps": [
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "condition": null
+            },
+            {
+              "name": "Test isolated account read/write fixtures",
+              "run": "npm ci --ignore-scripts\nnpm test\nnode ../../.github/scripts/provider-consumer.mjs\nnpm pack --ignore-scripts\n",
+              "uses": null,
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/publish-provider.yml",
+      "jobs": [
+        {
+          "job": "prepare",
+          "condition": "github.ref == 'refs/heads/main' && github.event.repository.private == false",
+          "runs_on": "ubuntu-24.04",
+          "steps": [
+            {
+              "name": "Require exact reviewed source without publication identity",
+              "run": "[[ \"$EXPECTED_SHA\" =~ ^[a-f0-9]{40}$ && \"$EXPECTED_SHA\" == \"$GITHUB_SHA\" ]]\ntest -z \"$ACTIONS_ID_TOKEN_REQUEST_TOKEN\"\n",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": "npm install --global npm@12.2.0 --ignore-scripts",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Verify source and isolated candidate without OIDC",
+              "run": "npm ci --ignore-scripts\nnpm test\nnode ../../.github/scripts/provider-consumer.mjs\n",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Bind prepared archive",
+              "run": "node ../../.github/scripts/prepare-provider-artifact.mjs",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "condition": null
+            }
+          ]
+        },
+        {
+          "job": "publish",
+          "condition": null,
+          "runs_on": "ubuntu-24.04",
+          "steps": [
+            {
+              "name": "Recheck reviewed source and OIDC context",
+              "run": "[[ \"$EXPECTED_SHA\" =~ ^[a-f0-9]{40}$ && \"$EXPECTED_SHA\" == \"$GITHUB_SHA\" ]]\ntest -n \"$ACTIONS_ID_TOKEN_REQUEST_URL\"\ntest -n \"$ACTIONS_ID_TOKEN_REQUEST_TOKEN\"\n",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": "npm install --global npm@12.2.0 --ignore-scripts",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+              "condition": null
+            },
+            {
+              "name": "Publish only the exact prepared archive",
+              "run": "node ../../.github/scripts/publish-provider.mjs \"$RUNNER_TEMP/provider-release/$PREPARED_FILENAME\"",
+              "uses": null,
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/rust-source.yml",
+      "jobs": [
+        {
+          "job": "source",
+          "condition": null,
+          "runs_on": "ubuntu-24.04",
+          "steps": [
+            {
+              "name": null,
+              "run": null,
+              "uses": "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "condition": null
+            },
+            {
+              "name": "Install declared Rust tooling",
+              "run": "rustup toolchain install 1.97.1 --profile minimal --component rustfmt --component clippy",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Test every maintained source target and feature",
+              "run": "cargo +1.97.1 test --locked --all-targets --all-features",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Check source formatting",
+              "run": "cargo +1.97.1 fmt --all -- --check",
+              "uses": null,
+              "condition": null
+            },
+            {
+              "name": "Check all source targets",
+              "run": "cargo +1.97.1 clippy --locked --all-targets --all-features -- -D warnings",
+              "uses": null,
+              "condition": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "evidence_policy": "Declarations and source paths are not proof of an executed acceptance. Exact CI head and result are recorded separately. No live accounts or production acceptance is inferred."
+}
