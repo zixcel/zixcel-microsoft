@@ -9,14 +9,14 @@ Connect a browser mail interface to Microsoft 365 with explicit delegated consen
 
 ## Current scope
 
-The shared bounded transport is the official `@crowsi/provider-http-transport@0.10.2` npm release; no sibling transport source or TGZ is required.
+The shared bounded transport is the official `@crowsi/provider-http-transport` npm release; no sibling transport source or TGZ is required.
 
 The application owns its Entra registration and session. Network access uses the configured bounded transport; mailbox content is not package data.
 
 Install the browser package independently from npm:
 
 ```sh
-npm install @zixcel/microsoft-mail-web@0.10.0
+npm install @zixcel/microsoft-mail-web
 ```
 
 ```ts

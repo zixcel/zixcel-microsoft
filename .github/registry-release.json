@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "repository": "zixcel/zixcel-microsoft",
+  "defaultBranch": "main",
+  "requiredWorkflows": [
+    "oss-policy.yml",
+    "prepare-npm-artifact.yml",
+    "provider-control.yml",
+    "rust-source.yml"
+  ],
+  "packages": [
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "name": "@zixcel/microsoft-mail-presentation",
+      "installDirectory": "."
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/provider-microsoft/package.json",
+      "name": "@zixcel/provider-microsoft",
+      "installDirectory": "packages/provider-microsoft"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/zixcel-microsoft-mail-web/package.json",
+      "name": "@zixcel/microsoft-mail-web",
+      "installDirectory": "."
+    }
+  ]
+}
