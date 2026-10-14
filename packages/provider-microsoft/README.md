@@ -8,7 +8,7 @@ This is the Node runtime package, separate from any existing Rust planning API.
 ## Install
 
 ```sh
-npm install @zixcel/provider-microsoft@0.1.3
+npm install @zixcel/provider-microsoft
 ```
 
 Registry publication is a separate gate; the initial candidate is not declared
