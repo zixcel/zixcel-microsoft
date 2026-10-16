@@ -21,8 +21,8 @@ importers:
         specifier: 5.25.0
         version: 5.25.0
       '@crowsi/provider-http-transport':
-        specifier: 0.10.2
-        version: 0.10.2
+        specifier: 0.11.2
+        version: 0.11.2
     devDependencies:
       '@types/node':
         specifier: 24.12.0
@@ -41,8 +41,8 @@ packages:
     resolution: {integrity: sha512-HOBR0Gfo39TMrkxNG8k6cfjRkrRjXZc3JQs3ebMWQc9S4cihuknMYra3sgmzbZB752oQBqBN9+WF7c826p2vIQ==}
     engines: {node: '>=0.8.0'}
 
-  '@crowsi/provider-http-transport@0.10.2':
-    resolution: {integrity: sha512-N0qH8ubN6mp6equxbWthi+7mfVzmK77tODJx+MEN1WBXKFtSwY42GcMl0j5Rtyi5x3odnPLKJR0oHbsqsyBg3g==}
+  '@crowsi/provider-http-transport@0.11.2':
+    resolution: {integrity: sha512-FzmApo6R+5qeisjEfyBF4jNO7O3BF01Gb2JZk/613ze1USW+9fjMDo0jqvtdJtdvb66+9JVEa6eEJegXkRnfLA==}
     engines: {node: '>=22'}
 
   '@types/node@24.12.0':
@@ -184,7 +184,7 @@ snapshots:
 
   '@azure/msal-common@16.14.2': {}
 
-  '@crowsi/provider-http-transport@0.10.2': {}
+  '@crowsi/provider-http-transport@0.11.2': {}
 
   '@types/node@24.12.0':
     dependencies:
