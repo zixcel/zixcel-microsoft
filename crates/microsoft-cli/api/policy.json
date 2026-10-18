@@ -1,0 +1,63 @@
+{
+  "schema": "zix-native-policy/v1",
+  "namespace": "microsoft",
+  "package": "zixcel-microsoft-cli",
+  "version": "0.1.0",
+  "credential_environment": "ZIX_MICROSOFT_ACCESS_TOKEN",
+  "origin": "https://graph.microsoft.com",
+  "base_path": "/v1.0",
+  "routes_sha256": "7cefd7a637477270a9111c40a8112fd1be7ad5d4c1f53b5ca6aeb32093974e0d",
+  "operations": [
+    {
+      "api": "user_GetUser",
+      "command": {
+        "id": "users.read",
+        "words": [
+          "users",
+          "get"
+        ],
+        "effect": "read",
+        "description": "Read microsoft users get.",
+        "required_permissions": [
+          "User.ReadBasic.All according to supplied Graph credential"
+        ],
+        "arguments": [
+          {
+            "name": "user",
+            "required": true,
+            "maximum": 36
+          }
+        ]
+      },
+      "path_arguments": {
+        "user-id": "user"
+      },
+      "argument_rules": {
+        "user": "uuid"
+      },
+      "query": {
+        "$select": "id,displayName,userPrincipalName"
+      },
+      "headers": {},
+      "identity": [
+        {
+          "pointer": "/id",
+          "expected": "{user}"
+        }
+      ],
+      "projection": {
+        "pointer": "",
+        "collection": false,
+        "fields": {
+          "id": "/id",
+          "display-name": "/displayName",
+          "principal-name": "/userPrincipalName"
+        },
+        "required": [
+          "id"
+        ],
+        "success_pointer": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schema": "zix-api-review/v1",
+  "source_sha256": "acfa71bb4facdfc8a599248bccab1f90728b5750c75967e8d090e7da376f83ff",
+  "format": "openapi_yaml",
+  "operations": [
+    {
+      "id": "user_GetUser",
+      "binding": null
+    }
+  ],
+  "reference_limit": 1024,
+  "source_uri": "https://raw.githubusercontent.com/microsoftgraph/msgraph-sdk-powershell/c91610500f426dc16197e23aaba6872278791787/openApiDocs/v1.0/Users.yml"
+}

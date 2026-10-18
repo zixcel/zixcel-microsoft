@@ -1,0 +1,12 @@
+{
+  "arguments": {
+    "user": "00000000-0000-0000-0000-000000000001"
+  },
+  "url": "https://graph.microsoft.com/v1.0/users/00000000-0000-0000-0000-000000000001?%24select=id%2CdisplayName%2CuserPrincipalName",
+  "raw": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "displayName": "Synthetic user",
+    "userPrincipalName": "synthetic@example.invalid",
+    "unselected-private-field": "not selected"
+  }
+}
