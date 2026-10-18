@@ -15,7 +15,7 @@ external-actions = false
 network_client = false
 
 [workspace]
-members = ["."]
+members = [".", "crates/*"]
 resolver = "3"
 
 [dependencies]
