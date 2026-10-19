@@ -40,5 +40,15 @@
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test test/*.test.mjs",
     "prepack": "npm test"
-  }
+  },
+  "keywords": [
+    "ai-agents",
+    "llm",
+    "microsoft-graph",
+    "microsoft-365",
+    "cli",
+    "automation",
+    "local-first",
+    "rust"
+  ]
 }
