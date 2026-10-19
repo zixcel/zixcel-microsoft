@@ -101,7 +101,13 @@ fn valid_id(value: &str) -> bool {
 }
 
 fn digest(bytes: &[u8]) -> String {
-    format!("sha256:{:x}", Sha256::digest(bytes))
+    (Sha256::digest(bytes))
+        .iter()
+        .fold(String::from("sha256:"), |mut encoded, byte| {
+            use std::fmt::Write as _;
+            write!(encoded, "{byte:02x}").expect("writing to String cannot fail");
+            encoded
+        })
 }
 
 fn error(message: &'static str) -> ConnectorError {

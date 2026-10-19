@@ -117,7 +117,14 @@ pub fn build_mail_plan(value: &MailRequest) -> Result<MailPlan, ConnectorError> 
         .map_err(|_| ConnectorError::new("request", "serialization failed"))?;
     Ok(MailPlan {
         schema: "zixcel://microsoft/mail/plan/v1",
-        plan_id: format!("{:x}", Sha256::digest(bytes)),
+        plan_id: (Sha256::digest(bytes)).iter().fold(
+            String::with_capacity(64),
+            |mut encoded, byte| {
+                use std::fmt::Write as _;
+                write!(encoded, "{byte:02x}").expect("writing to String cannot fail");
+                encoded
+            },
+        ),
         account_ref: value.account_ref.clone(),
         authorization_ref: value.authorization_ref.clone(),
         method: "GET",
