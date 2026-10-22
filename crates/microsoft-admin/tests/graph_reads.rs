@@ -155,11 +155,34 @@ fn user_license_assignment_is_selected_without_inferring_mailbox_provisioning() 
 #[test]
 fn large_projected_directory_stops_with_partial_evidence() {
     let users = (0..100)
-        .map(|_| json!({"id":MAILBOX,"displayName":"x".repeat(4000)}))
+        .map(|n| json!({"id":format!("33333333-3333-3333-3333-{n:012}"),"displayName":"x".repeat(4000)}))
         .collect::<Vec<_>>();
     let mut f = fake(vec![Ok(json!({"value":users}))]);
     let r = observe(&mut f, &scope(), Read::Users).unwrap();
     assert_eq!(r["observation"]["state"], "partial");
     assert_eq!(r["observation"]["reason"], "projected_output_limit");
     assert!(serde_json::to_vec(&r).unwrap().len() < 100 * 1024);
+}
+#[test]
+fn selected_user_response_must_match_the_requested_identity() {
+    let mut f = fake(vec![Ok(json!({"id":TRUSTEE}))]);
+    assert!(
+        observe(
+            &mut f,
+            &scope(),
+            Read::User {
+                user: MAILBOX.into()
+            }
+        )
+        .is_err()
+    );
+}
+#[test]
+fn duplicate_resource_ids_never_form_a_complete_inventory() {
+    let mut f = fake(vec![Ok(
+        json!({"value":[{"id":"example.org"},{"id":"example.org"}]}),
+    )]);
+    let r = observe(&mut f, &scope(), Read::Domains).unwrap();
+    assert_eq!(r["observation"]["complete"], false);
+    assert_eq!(r["observation"]["reason"], "duplicate_resource_identity");
 }

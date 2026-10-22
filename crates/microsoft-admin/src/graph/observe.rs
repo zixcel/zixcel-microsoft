@@ -16,31 +16,12 @@ pub enum Read {
 pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<Value> {
     scope.validate()?;
     let (initial, fields, many) = read.resource(&scope.tenant)?;
-    let identity = http
-        .get("/v1.0/me?$select=id")
-        .map_err(|_| Error("subject_unverified"))?;
-    if identity["id"].as_str() != Some(&scope.subject) {
-        return Err(Error("subject_mismatch"));
-    }
-    let tenant_path = format!("/v1.0/organization/{}?$select=id", scope.tenant);
-    let tenant = http
-        .get(&tenant_path)
-        .map_err(|_| Error("tenant_unverified"))?;
-    if tenant["id"].as_str() != Some(&scope.tenant) {
-        return Err(Error("tenant_mismatch"));
-    }
-    if let Read::DomainDns { domain } = &read {
-        let d = http
-            .get(&format!("/v1.0/domains/{domain}?$select=id,isVerified"))
-            .map_err(|_| Error("domain_unverified"))?;
-        if d["id"].as_str() != Some(domain) || d["isVerified"] != true {
-            return Err(Error("domain_unverified"));
-        }
-    }
+    super::identity::verify(http, scope, &read)?;
     let mut result = Observation::failed("not_attempted");
     let mut path = initial.clone();
     let mut rows = Vec::new();
     let mut output_bytes = 0usize;
+    let mut seen_ids = std::collections::BTreeSet::new();
     let mut seen = std::collections::BTreeSet::new();
     'pages: for _ in 0..4 {
         if !seen.insert(path.clone()) {
@@ -61,6 +42,11 @@ pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<V
             }
         };
         result.pages += 1;
+        if matches!(&read,Read::User{user} if raw["id"].as_str()!=Some(user))
+            || matches!(&read,Read::Organization if raw["id"].as_str()!=Some(&scope.tenant))
+        {
+            return Err(Error("response_identity_mismatch"));
+        }
         let items = if many {
             raw["value"]
                 .as_array()
@@ -79,6 +65,15 @@ pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<V
                 .is_none_or(|s| s.is_empty() || s.len() > 256)
             {
                 return Err(Error("response_identity_missing"));
+            }
+            if !seen_ids.insert(
+                item["id"]
+                    .as_str()
+                    .ok_or(Error("response_identity_missing"))?
+                    .to_owned(),
+            ) {
+                result.reason = "duplicate_resource_identity".into();
+                break 'pages;
             }
             let selected = select(item, &fields, 0)?;
             output_bytes += serde_json::to_vec(&selected)
