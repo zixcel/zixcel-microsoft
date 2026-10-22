@@ -1,5 +1,5 @@
 use super::continuation::continuation;
-use super::{Observation, Read, ReadError, Transport, projection::select};
+use super::{Observation, Read, Transport, projection::select};
 use crate::{Error, Result, Scope};
 use serde_json::{Value, json};
 pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<Value> {
@@ -20,13 +20,9 @@ pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<V
         let raw = match http.get(&path) {
             Ok(v) => v,
             Err(e) => {
-                result.reason = match e {
-                    ReadError::Http(401 | 403) => "permission_denied",
-                    ReadError::Http(404) => "not_found_or_hidden",
-                    ReadError::Budget => "request_or_byte_limit",
-                    _ => "transport_or_schema_failure",
-                }
-                .into();
+                let (reason, status) = super::read_failure::classify(e);
+                result.reason = reason.into();
+                result.http_status = status;
                 break;
             }
         };
