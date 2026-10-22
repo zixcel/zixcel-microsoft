@@ -89,3 +89,11 @@ Registry releases: [version tags and GitHub OIDC](docs/registry-release.md).
 [Reviewed Rust adapter](crates/microsoft-cli/README.md) adds scoped read commands
 through the common `zix` protocol. Source/development tests and native distribution
 are separate; no real credentials or cloud operations are used by CI.
+
+## Tenant discovery and Exchange administration
+
+The [Microsoft administration guide](docs/microsoft-administration.md) describes
+the Rust [admin library](crates/microsoft-admin) and native CLI. These are separate
+from this root planning-only crate. They provide bounded Graph reads and typed,
+operator-approved Exchange recipient changes; no authentication, real changes or
+new runtime installation is enabled by the source update.

@@ -1,0 +1,18 @@
+mod backend;
+mod change_validation;
+mod execution;
+mod journal;
+mod model;
+mod planning;
+mod postcondition;
+mod powershell;
+mod process;
+mod profile;
+mod validation;
+pub use execution::{Backend, Receipt, execute};
+pub use journal::Journal;
+pub use model::{Change, Plan, Recipient, Snapshot};
+pub use planning::plan;
+pub use powershell::PowerShell;
+pub use profile::ExchangeProfile;
+pub const EXCHANGE_MODULE_VERSION: &str = "3.10.1";

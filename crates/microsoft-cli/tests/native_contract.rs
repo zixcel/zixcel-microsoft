@@ -52,7 +52,7 @@ fn actual_native_manifest_and_missing_credential_protocol_need_no_node_or_accoun
             .as_array()
             .unwrap()
             .iter()
-            .all(|c| c["effect"] == "read")
+            .all(|c| c["effect"] == "read" || c["effect"] == "operator-write")
     );
     let mut child = Command::new(env!("CARGO_BIN_EXE_zix-microsoft"))
         .env_clear()
