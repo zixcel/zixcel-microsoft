@@ -13,6 +13,8 @@ pub struct Receipt {
     pub write_attempted: bool,
     pub state: &'static str,
     pub replay_allowed: bool,
+    pub remote_acknowledged: bool,
+    pub effective_access: &'static str,
     pub sign_in_verified: bool,
 }
 pub fn execute(
@@ -40,11 +42,14 @@ pub fn execute(
         write_attempted: true,
         state: "outcome_unknown",
         replay_allowed: false,
+        remote_acknowledged: false,
+        effective_access: "not_inferred_from_selected_explicit_permissions",
         sign_in_verified: false,
     };
     if backend.apply(p).is_err() {
         return Ok(receipt);
     }
+    receipt.remote_acknowledged = true;
     let after = match backend.snapshot(&p.scope, Some(&p.change)) {
         Ok(s) => s,
         Err(_) => return Ok(receipt),

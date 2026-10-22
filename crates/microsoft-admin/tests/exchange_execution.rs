@@ -59,6 +59,7 @@ fn write_disconnect_and_readback_failure_are_unknown_not_retryable() {
         let r = execute(&mut f, &j, &p, &digest(&p).unwrap(), || 100).unwrap();
         assert_eq!(r.state, "outcome_unknown");
         assert!(!r.replay_allowed);
+        assert_eq!(r.remote_acknowledged, !write_failure);
         assert!(d.path().join(format!("{TENANT}.active")).exists());
         assert_eq!(f.writes, 1);
     }

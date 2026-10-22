@@ -18,6 +18,7 @@ impl PowerShell {
         graph_token: Option<&str>,
         timeout: Duration,
     ) -> Result<Self> {
+        let token = Zeroizing::new(token);
         profile.validate()?;
         if token.is_empty()
             || token.len() > 16384
@@ -34,7 +35,7 @@ impl PowerShell {
             .transpose()?;
         Ok(Self {
             profile,
-            token: Zeroizing::new(token),
+            token,
             graph,
             deadline: Instant::now() + timeout,
         })

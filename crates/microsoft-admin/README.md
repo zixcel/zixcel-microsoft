@@ -37,12 +37,16 @@ a slow write can therefore end with an unknown outcome and must not be resent.
 The journal must be a private, owner-provisioned canonical directory. An fsynced
 per-plan attempt marker is created before invoking a mutation, plus a tenant lock.
 A process crash, timeout, failed write response or failed post-read never authorizes
-replay. Only verified post-state releases the tenant lock. A later operator must
+replay. This is one adapter-level cmdlet invocation, not a guarantee of exactly-once
+HTTP execution inside Microsoft's module/service. Shared mailbox internal names
+are deterministically derived from the approved address to avoid creating a
+different recipient on an SDK retry. Only verified post-state releases the tenant lock. A later operator must
 inspect the real state before manually resolving an uncertain lock; do not delete
 markers or generate replacement plans merely to repeat a write.
 
 Post-state must match the expected delta and preserve other observed recipients,
-addresses, domains and selected permissions. Shared creation additionally requires
+addresses, domains and selected explicit permissions. Removal of one explicit
+grant does not prove the absence of group-based or inherited effective access. Shared creation additionally requires
 Graph evidence that direct sign-in is blocked. Unknown sign-in state is not success.
 Snapshots are bounded, not a transaction or a global lock against other admins.
 Tenant-side concurrent changes can still require manual reconciliation.
