@@ -26,7 +26,7 @@ pub(crate) fn verify(before: &Snapshot, after: &Snapshot, change: &Change) -> Re
                     && !before
                         .accepted_domains
                         .iter()
-                        .any(|d| d.ends_with(".onmicrosoft.com") && *a == format!("{alias}@{d}"))
+                        .any(|d| *a == format!("{alias}@{d}"))
             })
         {
             return Ok(false);

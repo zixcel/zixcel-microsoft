@@ -6,14 +6,14 @@ use zixcel_microsoft_admin::{
     exchange::{Change, execute, plan},
 };
 #[test]
-fn only_the_exact_generated_alias_in_an_accepted_onmicrosoft_domain_is_admitted() {
+fn only_the_exact_generated_alias_in_an_authoritative_domain_is_admitted() {
     let address = "security@example.org";
     let hash = Sha256::digest(address.as_bytes())
         .iter()
         .map(|b| format!("{b:02x}"))
         .collect::<String>();
     let generated = format!("shared-{}@tenant.onmicrosoft.com", &hash[..20]);
-    for mode in 0..4 {
+    for mode in 0..6 {
         let (_d, j) = journal();
         let mut before = snapshot();
         before
@@ -30,7 +30,9 @@ fn only_the_exact_generated_alias_in_an_accepted_onmicrosoft_domain_is_admitted(
                 0 => generated.clone(),
                 1 => "other@tenant.onmicrosoft.com".into(),
                 2 => format!("shared-{}@outside.onmicrosoft.com", &hash[..20]),
-                _ => "unapproved@example.org".into(),
+                3 => "unapproved@example.org".into(),
+                4 => format!("shared-{}@example.org", &hash[..20]),
+                _ => format!("shared-{}@outside.example", &hash[..20]),
             },
         ];
         after.recipients.push(new);
@@ -50,7 +52,7 @@ fn only_the_exact_generated_alias_in_an_accepted_onmicrosoft_domain_is_admitted(
         let r = execute(&mut f, &j, &p, &digest(&p).unwrap(), || 100).unwrap();
         assert_eq!(
             r.state,
-            if mode == 0 {
+            if mode == 0 || mode == 4 {
                 "verified"
             } else {
                 "outcome_unknown"
