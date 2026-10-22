@@ -154,6 +154,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "crowsi-process-adapter"
+version = "0.10.0"
+source = "git+https://github.com/crowsi-net/crowsi-process-adapter?rev=bb2c7abb0dad073434c4d6fe0a8bc983746f322b#bb2c7abb0dad073434c4d6fe0a8bc983746f322b"
+dependencies = [
+ "processkit",
+ "tokio",
+]
+
+[[package]]
 name = "crowsi-provider-read-http"
 version = "0.1.0"
 source = "git+https://github.com/crowsi-net/crowsi-transport-foundation?rev=8daf36688e1618f294274c61ebfe607f77639534#8daf36688e1618f294274c61ebfe607f77639534"
@@ -1722,7 +1731,7 @@ name = "zix-cli"
 version = "0.2.4"
 source = "git+https://github.com/zixcel/cli?rev=c2ee2e9670efe81473bf7067a8efa1944589619e#c2ee2e9670efe81473bf7067a8efa1944589619e"
 dependencies = [
- "crowsi-process-adapter",
+ "crowsi-process-adapter 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustix",
  "serde",
  "serde-saphyr",
@@ -1781,7 +1790,7 @@ dependencies = [
 name = "zixcel-microsoft-admin"
 version = "0.1.0"
 dependencies = [
- "crowsi-process-adapter",
+ "crowsi-process-adapter 0.10.0 (git+https://github.com/crowsi-net/crowsi-process-adapter?rev=bb2c7abb0dad073434c4d6fe0a8bc983746f322b)",
  "crowsi-provider-read-http",
  "serde",
  "serde_json",
