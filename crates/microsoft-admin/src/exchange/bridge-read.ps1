@@ -13,12 +13,13 @@ function Read-ZixRecipients($r) {
         $kind = if ("$($m.RecipientTypeDetails)" -in @('SharedMailbox','UserMailbox')) { "$($m.RecipientTypeDetails)" } else { 'Other' }
         $full = $false; $send = $false
         if ($trustee -and $id -eq $target) {
-            $delegate = Get-User -Identity $trustee -ErrorAction Stop
-            if ("$($delegate.ExternalDirectoryObjectId)".ToLowerInvariant() -ne $trustee) { throw 'trustee_mismatch' }
-            $permissions = @(Get-EXOMailboxPermission -Identity $id -User $trustee -ErrorAction Stop)
-            if (@($permissions | Where-Object { $_.Deny -or $_.IsInherited }).Count -gt 0) { throw 'ambiguous_permission' }
+            $delegate = @(Get-EXORecipient -ExternalDirectoryObjectId $trustee -Properties ExternalDirectoryObjectId,PrimarySmtpAddress -ErrorAction Stop)
+            if ($delegate.Count -ne 1 -or "$($delegate[0].ExternalDirectoryObjectId)".ToLowerInvariant() -ne $trustee -or !"$($delegate[0].PrimarySmtpAddress)") { throw 'trustee_mismatch' }
+            $delegateAddress = "$($delegate[0].PrimarySmtpAddress)"
+            $permissions = @(Get-EXOMailboxPermission -ExternalDirectoryObjectId $id -User $delegateAddress -ResultSize 21 -ErrorAction Stop)
+            if ($permissions.Count -gt 20 -or @($permissions | Where-Object { $_.Deny -or $_.IsInherited }).Count -gt 0) { throw 'ambiguous_permission' }
             $full = @($permissions | Where-Object { $_.AccessRights -contains 'FullAccess' }).Count -gt 0
-            $sendPermissions = @(Get-EXORecipientPermission -Identity $id -Trustee $trustee -ResultSize 21 -ErrorAction Stop)
+            $sendPermissions = @(Get-EXORecipientPermission -ExternalDirectoryObjectId $id -Trustee $delegateAddress -ResultSize 21 -ErrorAction Stop)
             if ($sendPermissions.Count -gt 20 -or @($sendPermissions | Where-Object { $_.AccessControlType -ne 'Allow' }).Count -gt 0) { throw 'ambiguous_send_permission' }
             $send = @($sendPermissions | Where-Object { $_.AccessRights -contains 'SendAs' }).Count -gt 0
         }

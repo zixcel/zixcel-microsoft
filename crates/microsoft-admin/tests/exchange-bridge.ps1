@@ -2,6 +2,8 @@ $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot/../src/exchange/bridge-read.ps1"
 . "$PSScriptRoot/../src/exchange/bridge-write.ps1"
 $script:writes = @()
+function Get-EXOMailbox { param($ExternalDirectoryObjectId,$Properties,$ErrorAction) [pscustomobject]@{ExternalDirectoryObjectId=$ExternalDirectoryObjectId; ExchangeGuid='55555555-5555-5555-5555-555555555555'} }
+function Get-EXORecipient { param($ExternalDirectoryObjectId,$Properties,$ErrorAction) [pscustomobject]@{ExternalDirectoryObjectId=$ExternalDirectoryObjectId;PrimarySmtpAddress='delegate@example.org'} }
 function New-Mailbox { param($Shared,$Name,$DisplayName,$PrimarySmtpAddress,$ErrorAction) $script:writes += @{ kind='create'; display=$DisplayName; address=$PrimarySmtpAddress } }
 function Set-Mailbox { param($Identity,$EmailAddresses,$ErrorAction) $script:writes += @{ kind='alias'; target=$Identity; delta=$EmailAddresses } }
 $bad = "not code '; throw 'must not execute"

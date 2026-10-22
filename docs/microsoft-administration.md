@@ -5,6 +5,11 @@ No central release repository, HAT, semantic model or private company dataset is
 required. Roles, tenant UUID, subject UUID, addresses and trusted runtime profiles
 are supplied by the caller. No example contains usable credentials.
 
+The resource-budget adapter is pinned to accepted public source bb2c7abb because
+the existing crates.io 0.10.0 does not contain its budget API. The older published
+crate remains in the shared CLI dependency graph; no duplicate process is started
+by that fact. This package is not claimed to be an independently published crate.
+
 ## Read-only discovery
 
 After independent installation/manifest verification and separately approved
@@ -14,6 +19,7 @@ appear in shell history, arguments, source, logs or public receipts. An identity
 OIDC login does not grant the following permissions.
 
 ```sh
+zix microsoft admin doctor
 zix microsoft organization get --tenant TENANT_UUID --subject SUBJECT_UUID
 zix microsoft licenses list --tenant TENANT_UUID --subject SUBJECT_UUID
 zix microsoft domains list --tenant TENANT_UUID --subject SUBJECT_UUID
@@ -45,7 +51,8 @@ Owner supplies a private JSON profile via `ZIX_MICROSOFT_EXCHANGE_PROFILE`:
 }
 ```
 
-Provision this runtime only after installation approval. The module must be the
+Provision this runtime only after installation approval. The working directory must be owner-only (0700); the profile must be private (0600).
+The module must be the
 reviewed official version 3.10.1; runtime code is trusted executable code, not LLM
 configuration. Direct shared-mailbox login is not used. Supply a separate delegated
 Exchange audience token through `ZIX_MICROSOFT_EXCHANGE_TOKEN`; a Graph token is not
