@@ -16,7 +16,7 @@ function Write-ZixRecipient($c) {
         if (!$trustee) { throw 'trustee_address_missing' }
     }
     switch ($c.operation) {
-        'create_shared' { New-Mailbox -Shared -Name $name -DisplayName $c.display_name -PrimarySmtpAddress $c.address -ErrorAction Stop | Out-Null }
+        'create_shared' { New-Mailbox -Shared -Name $name -Alias $name -DisplayName $c.display_name -PrimarySmtpAddress $c.address -ErrorAction Stop | Out-Null }
         'add_alias' { Set-Mailbox -Identity $identity -EmailAddresses @{Add=$c.address} -ErrorAction Stop }
         'remove_alias' { Set-Mailbox -Identity $identity -EmailAddresses @{Remove=$c.address} -ErrorAction Stop }
         'grant_full_access' { Add-MailboxPermission -Identity $identity -User $trustee -AccessRights FullAccess -InheritanceType All -AutoMapping:$false -ErrorAction Stop | Out-Null }

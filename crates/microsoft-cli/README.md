@@ -4,7 +4,7 @@ The independent native `zix-microsoft` binary implements the Zix provider protoc
 Use [Microsoft administration](../../docs/microsoft-administration.md) for required
 permissions, trusted Exchange profile, exact commands and one-use plan execution.
 
-Version 0.2.1 retains `users get` and adds organization/license/domain/user discovery,
+Version 0.2.2 retains `users get` and adds organization/license/domain/user discovery,
 domain DNS requirements and separate Exchange snapshot/plan/apply commands. Graph
 read routes use the Crowsi transport; Exchange uses fixed official PowerShell cmdlets
 and Crowsi-owned bounded child processes. Manifest v2 marks apply as operator-write.
@@ -28,3 +28,5 @@ regressions are required; a v1-shaped direct request does not establish v2 compa
 Identity preflight failures now distinguish authentication rejection (HTTP 401),
 permission denial (HTTP 403), service/limit failures and transport failure without
 printing credential values or remote response bodies.
+
+Patch 0.2.2 preserves read-only Exchange DiscoveryMailbox records without an Entra UUID while retaining all SMTP address-conflict checks. Such observation references never authorize a write.
