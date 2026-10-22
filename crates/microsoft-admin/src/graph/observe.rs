@@ -1,18 +1,7 @@
 use super::continuation::continuation;
-use super::{Observation, ReadError, Transport, projection::select};
+use super::{Observation, Read, ReadError, Transport, projection::select};
 use crate::{Error, Result, Scope};
-use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "operation", rename_all = "snake_case", deny_unknown_fields)]
-pub enum Read {
-    Organization,
-    Licenses,
-    Domains,
-    Users,
-    User { user: String },
-    DomainDns { domain: String },
-}
 pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<Value> {
     scope.validate()?;
     let (initial, fields, many) = read.resource(&scope.tenant)?;
