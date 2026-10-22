@@ -8,7 +8,10 @@ use zixcel_microsoft_admin::{
 #[test]
 fn only_the_exact_generated_alias_in_an_accepted_onmicrosoft_domain_is_admitted() {
     let address = "security@example.org";
-    let hash = format!("{:x}", Sha256::digest(address.as_bytes()));
+    let hash = Sha256::digest(address.as_bytes())
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect::<String>();
     let generated = format!("shared-{}@tenant.onmicrosoft.com", &hash[..20]);
     for mode in 0..4 {
         let (_d, j) = journal();

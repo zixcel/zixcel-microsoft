@@ -17,7 +17,10 @@ pub(crate) fn verify(before: &Snapshot, after: &Snapshot, change: &Change) -> Re
             || new.full_access
             || new.send_as
             || new.aliases.iter().any(|a| {
-                let digest = format!("{:x}", Sha256::digest(address.as_bytes()));
+                let digest = Sha256::digest(address.as_bytes())
+                    .iter()
+                    .map(|b| format!("{b:02x}"))
+                    .collect::<String>();
                 let alias = format!("shared-{}", &digest[..20]);
                 a != address
                     && !before
