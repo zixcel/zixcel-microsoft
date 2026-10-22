@@ -1729,7 +1729,7 @@ dependencies = [
 [[package]]
 name = "zix-cli"
 version = "0.2.4"
-source = "git+https://github.com/zixcel/cli?rev=c2ee2e9670efe81473bf7067a8efa1944589619e#c2ee2e9670efe81473bf7067a8efa1944589619e"
+source = "git+https://github.com/zixcel/cli?rev=8fbd566aa53a52d4a588fef537683be2a604b02a#8fbd566aa53a52d4a588fef537683be2a604b02a"
 dependencies = [
  "crowsi-process-adapter 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustix",
@@ -1745,8 +1745,8 @@ dependencies = [
 
 [[package]]
 name = "zix-native-provider"
-version = "0.1.0"
-source = "git+https://github.com/zixcel/cli?rev=c2ee2e9670efe81473bf7067a8efa1944589619e#c2ee2e9670efe81473bf7067a8efa1944589619e"
+version = "0.2.0"
+source = "git+https://github.com/zixcel/cli?rev=8fbd566aa53a52d4a588fef537683be2a604b02a#8fbd566aa53a52d4a588fef537683be2a604b02a"
 dependencies = [
  "crowsi-provider-read-http",
  "serde",
@@ -1754,12 +1754,13 @@ dependencies = [
  "url",
  "zeroize",
  "zix-cli",
+ "zix-operation-contracts",
 ]
 
 [[package]]
 name = "zix-operation-contracts"
 version = "0.1.0"
-source = "git+https://github.com/zixcel/cli?rev=c2ee2e9670efe81473bf7067a8efa1944589619e#c2ee2e9670efe81473bf7067a8efa1944589619e"
+source = "git+https://github.com/zixcel/cli?rev=8fbd566aa53a52d4a588fef537683be2a604b02a#8fbd566aa53a52d4a588fef537683be2a604b02a"
 dependencies = [
  "serde",
  "serde_json",

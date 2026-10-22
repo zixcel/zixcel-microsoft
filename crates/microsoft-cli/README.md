@@ -20,3 +20,7 @@ library's official interface references are in its README and the guide; no upst
 prose or schema is redistributed. Build with the existing declared Rust toolchain:
 `cargo build --locked -p zixcel-microsoft-cli`. Package version, source/content hashes,
 notices and the actual dispatcher must be checked before independent publication.
+
+The SDK is pinned to accepted source 8fbd566a (native SDK 0.2.0), which verifies
+the dispatcher's manifest-v2 binding. Both direct protocol and actual dispatcher
+regressions are required; a v1-shaped direct request does not establish v2 compatibility.

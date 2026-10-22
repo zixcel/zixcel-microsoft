@@ -36,6 +36,7 @@ fn invoke(r: &Request) -> Result<Value, Error> {
         let p = crate::provider()?;
         let mut old = r.clone();
         old.limits.timeout_ms = old.limits.timeout_ms.min(20000);
+        old.binding = None;
         let prepared = p.prepare(&old)?;
         let t = token()?;
         let mut http = LiveRead::new(

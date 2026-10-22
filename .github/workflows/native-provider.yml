@@ -18,6 +18,10 @@ jobs:
           toolchain: 1.97.1
           components: rustfmt, clippy
           targets: x86_64-unknown-linux-musl
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
       - name: Verify official Exchange command mapping without connecting
         shell: pwsh
         run: ./crates/microsoft-admin/tests/exchange-bridge.ps1
@@ -35,6 +39,7 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends musl-tools
+          cargo build --locked -p zix-cli --bin zix
           cargo build --locked --release -p zixcel-microsoft-cli --bin zix-microsoft --target x86_64-unknown-linux-musl
           cargo run --locked -p zixcel-microsoft-cli --bin package-native -- "$PWD/target/x86_64-unknown-linux-musl/release/zix-microsoft" "$RUNNER_TEMP/native" x86_64-unknown-linux-musl
           cd "$RUNNER_TEMP/native"
@@ -45,6 +50,7 @@ jobs:
           sha256sum --check CONTENTS.sha256
           ./zix-microsoft --manifest > observed-manifest.json
           cmp observed-manifest.json microsoft.extension.json
+          node "$GITHUB_WORKSPACE/tools/native-release/test-dispatcher.mts" "$GITHUB_WORKSPACE/target/debug/zix" "$PWD/zix-microsoft" "$PWD/microsoft.extension.json"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: native-provider-linux-${{ github.sha }}

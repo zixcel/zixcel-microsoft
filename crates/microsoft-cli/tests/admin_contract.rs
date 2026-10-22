@@ -3,6 +3,24 @@ use std::{
     io::Write,
     process::{Command, Stdio},
 };
+fn binding() -> Value {
+    let path = env!("CARGO_BIN_EXE_zix-microsoft");
+    let r = Command::new(path)
+        .arg("--manifest")
+        .env_clear()
+        .output()
+        .unwrap();
+    assert!(r.status.success());
+    let m: Value = serde_json::from_slice(&r.stdout).unwrap();
+    let bytes = std::fs::read(path).unwrap();
+    serde_json::to_value(zix_operation_contracts::Binding::for_catalog(
+        m["package"].as_str().unwrap(),
+        m["version"].as_str().unwrap(),
+        &m,
+        &zix_cli::files::digest(&bytes),
+    ))
+    .unwrap()
+}
 fn invoke(op: &str, args: Value) -> Value {
     let mut c = Command::new(env!("CARGO_BIN_EXE_zix-microsoft"))
         .arg("--zix-provider-v1")
@@ -12,7 +30,7 @@ fn invoke(op: &str, args: Value) -> Value {
         .stderr(Stdio::piped())
         .spawn()
         .unwrap();
-    c.stdin.take().unwrap().write_all(serde_json::to_string(&json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":op,"arguments":args,"limits":{"timeout_ms":40000,"maximum_response_bytes":65536}})).unwrap().as_bytes()).unwrap();
+    c.stdin.take().unwrap().write_all(serde_json::to_string(&json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":op,"arguments":args,"binding":binding(),"limits":{"timeout_ms":40000,"maximum_response_bytes":65536}})).unwrap().as_bytes()).unwrap();
     let r = c.wait_with_output().unwrap();
     assert!(r.status.success());
     serde_json::from_slice(&r.stdout).unwrap()
