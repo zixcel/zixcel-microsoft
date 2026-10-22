@@ -117,3 +117,13 @@ actual email delivery and DNS migration are separate operational acceptance step
 - [Graph user properties](https://learn.microsoft.com/en-us/graph/api/resources/user)
 - [Exchange New-Mailbox](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/new-mailbox)
 - [Exchange aliases](https://learn.microsoft.com/en-us/exchange/recipients-in-exchange-online/manage-user-mailboxes/add-or-remove-email-addresses)
+
+## System recipient inventory
+
+`Get-EXORecipient` includes system recipients, not only sign-in users. A DiscoveryMailbox
+without an Entra UUID remains in the inventory with its observed SMTP addresses and
+an explicit `exchange-system:<primary>` reference. This is an observation reference,
+never an Entra UUID or a writable target. Only DiscoveryMailbox receives this rule;
+missing IDs on other recipient kinds still stop the snapshot. Address conflicts include
+all system addresses. Observed SMTP dot-atoms allow RFC punctuation such as braces;
+the stricter address and UUID contracts for requested writes remain unchanged.

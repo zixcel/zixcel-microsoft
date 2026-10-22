@@ -31,4 +31,16 @@ foreach ($w in ($script:writes | Select-Object -Skip 3)) { if ($w.trustee -ne 'd
 $tokens=$null;$errors=$null
 [System.Management.Automation.Language.Parser]::ParseFile("$PSScriptRoot/../src/exchange/bridge-main.ps1",[ref]$tokens,[ref]$errors) | Out-Null
 if ($errors.Count -ne 0) {throw 'bridge syntax invalid'}
-'Exchange command mapping and syntax tests passed; no module import, authentication or remote requests.'
+function Get-AcceptedDomain { param($ResultSize,$ErrorAction) [pscustomobject]@{DomainType='Authoritative';DomainName='example.org'} }
+function Get-EXORecipient { param($ResultSize,$Properties,$ErrorAction)
+    [pscustomobject]@{ExternalDirectoryObjectId='';PrimarySmtpAddress='discovery{55555555-5555-5555-5555-555555555555}@example.org';EmailAddresses=@('SMTP:discovery{55555555-5555-5555-5555-555555555555}@example.org');RecipientTypeDetails='DiscoveryMailbox';DisplayName='Synthetic discovery'}
+}
+$s=Read-ZixRecipients ([pscustomobject]@{scope=@{tenant='11111111-1111-1111-1111-111111111111';subject='22222222-2222-2222-2222-222222222222'};change=$null})
+if (!$s.complete -or $s.recipients.Count -ne 1 -or $s.recipients[0].kind -ne 'DiscoveryMailbox' -or $s.recipients[0].id -ne ('exchange-system:'+$s.recipients[0].primary)) {throw 'system_recipient_not_retained'}
+function Get-EXORecipient { param($ResultSize,$Properties,$ErrorAction)
+    [pscustomobject]@{ExternalDirectoryObjectId='';PrimarySmtpAddress='user@example.org';EmailAddresses=@('SMTP:user@example.org');RecipientTypeDetails='UserMailbox';DisplayName='Synthetic user'}
+}
+$refused=$false
+try { Read-ZixRecipients ([pscustomobject]@{scope=@{};change=$null}) } catch { $refused=$true }
+if (!$refused) {throw 'missing_user_identity_accepted'}
+'Exchange command mapping, system inventory and syntax tests passed; no module import, authentication or remote requests.'

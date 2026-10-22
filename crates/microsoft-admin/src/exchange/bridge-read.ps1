@@ -8,9 +8,11 @@ function Read-ZixRecipients($r) {
     foreach ($m in ($all | Select-Object -First 200)) {
         $id = "$($m.ExternalDirectoryObjectId)".ToLowerInvariant()
         $primary = "$($m.PrimarySmtpAddress)".ToLowerInvariant()
+        $rawKind = "$($m.RecipientTypeDetails)"
+        if (!$id -and $primary -and $rawKind -eq 'DiscoveryMailbox') { $id = 'exchange-system:' + $primary }
         if (!$id -or !$primary) { throw 'incomplete_recipient' }
         $aliases = @($m.EmailAddresses | Where-Object { "$_" -match '^smtp:' } | ForEach-Object { ("$_").Substring(5).ToLowerInvariant() } | Sort-Object -Unique)
-        $kind = if ("$($m.RecipientTypeDetails)" -in @('SharedMailbox','UserMailbox')) { "$($m.RecipientTypeDetails)" } else { 'Other' }
+        $kind = if ("$($m.RecipientTypeDetails)" -in @('SharedMailbox','UserMailbox','DiscoveryMailbox')) { "$($m.RecipientTypeDetails)" } else { 'Other' }
         $full = $false; $send = $false
         if ($trustee -and $id -eq $target) {
             $delegate = @(Get-EXORecipient -ExternalDirectoryObjectId $trustee -Properties ExternalDirectoryObjectId,PrimarySmtpAddress -ErrorAction Stop)

@@ -3,6 +3,7 @@ mod change_validation;
 mod execution;
 mod journal;
 mod model;
+mod observed_address;
 mod packet;
 mod planning;
 mod postcondition;
