@@ -1,5 +1,6 @@
 function Read-ZixRecipients($r) {
-    $domains = @(Get-AcceptedDomain -ResultSize 101 -ErrorAction Stop | Where-Object { $_.DomainType -eq 'Authoritative' } | ForEach-Object { "$($_.DomainName)".ToLowerInvariant() })
+    $allDomains = @(Get-AcceptedDomain -ResultSize 101 -ErrorAction Stop)
+    $domains = @($allDomains | Where-Object { $_.DomainType -eq 'Authoritative' } | ForEach-Object { "$($_.DomainName)".ToLowerInvariant() })
     $all = @(Get-EXORecipient -ResultSize 201 -Properties EmailAddresses,PrimarySmtpAddress,RecipientTypeDetails,ExternalDirectoryObjectId -ErrorAction Stop)
     $rows = @()
     $trustee = if ($r.change -and $r.change.PSObject.Properties['trustee']) { "$($r.change.trustee)" } else { $null }
@@ -17,9 +18,11 @@ function Read-ZixRecipients($r) {
             $permissions = @(Get-EXOMailboxPermission -Identity $id -User $trustee -ErrorAction Stop)
             if (@($permissions | Where-Object { $_.Deny -or $_.IsInherited }).Count -gt 0) { throw 'ambiguous_permission' }
             $full = @($permissions | Where-Object { $_.AccessRights -contains 'FullAccess' }).Count -gt 0
-            $send = @(Get-EXORecipientPermission -Identity $id -Trustee $trustee -ErrorAction Stop | Where-Object { $_.AccessRights -contains 'SendAs' -and $_.AccessControlType -eq 'Allow' }).Count -gt 0
+            $sendPermissions = @(Get-EXORecipientPermission -Identity $id -Trustee $trustee -ResultSize 21 -ErrorAction Stop)
+            if ($sendPermissions.Count -gt 20 -or @($sendPermissions | Where-Object { $_.AccessControlType -ne 'Allow' }).Count -gt 0) { throw 'ambiguous_send_permission' }
+            $send = @($sendPermissions | Where-Object { $_.AccessRights -contains 'SendAs' }).Count -gt 0
         }
         $rows += @{ id=$id; display_name="$($m.DisplayName)"; kind=$kind; primary=$primary; aliases=$aliases; full_access=$full; send_as=$send; sign_in_blocked=$null }
     }
-    @{ scope=$r.scope; observed_at=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds(); accepted_domains=$domains; recipients=$rows; complete=($all.Count -le 200 -and $domains.Count -le 100); trustee=$trustee }
+    @{ scope=$r.scope; observed_at=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds(); accepted_domains=$domains; recipients=$rows; complete=($all.Count -le 200 -and $allDomains.Count -le 100); trustee=$trustee }
 }

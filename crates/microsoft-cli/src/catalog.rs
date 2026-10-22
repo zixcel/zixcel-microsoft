@@ -79,6 +79,9 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
             "required_permissions":permissions,"environment":{"credential_environment":env,"runtime_environment":[]}}))
             .map_err(|_|Error("invalid_admin_manifest"))?);
     }
+    m.commands.push(serde_json::from_value(json!({"id":"admin.doctor","words":["admin","doctor"],"effect":"read",
+        "description":"Report local setup prerequisites without tokens, login or remote calls.","required_permissions":[],"arguments":[],
+        "environment":{"credential_environment":["ZIX_MICROSOFT_EXCHANGE_PROFILE"],"runtime_environment":[]}})).map_err(|_|Error("invalid_admin_manifest"))?);
     // The original exact-user read retains its smaller credential exposure and validation.
     m.commands[0].environment=Some(serde_json::from_value(json!({"credential_environment":["ZIX_MICROSOFT_ACCESS_TOKEN"],"runtime_environment":[]}))
         .map_err(|_|Error("invalid_admin_manifest"))?);

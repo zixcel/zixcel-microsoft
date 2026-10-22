@@ -55,6 +55,34 @@ pub enum Change {
     },
 }
 impl Change {
+    pub fn validate_syntax(&self) -> crate::Result<()> {
+        if let Some(id) = self.mailbox() {
+            crate::uuid(id)?;
+        }
+        if let Some(id) = self.trustee() {
+            crate::uuid(id)?;
+        }
+        match self {
+            Self::CreateShared {
+                address,
+                display_name,
+            } => {
+                crate::email(address)?;
+                if display_name.is_empty()
+                    || display_name.len() > 120
+                    || display_name.chars().any(char::is_control)
+                {
+                    return Err(crate::Error("invalid_display_name"));
+                }
+            }
+            Self::AddAlias { address, .. } | Self::RemoveAlias { address, .. } => {
+                crate::email(address)?
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+
     pub fn mailbox(&self) -> Option<&str> {
         match self {
             Self::CreateShared { .. } => None,

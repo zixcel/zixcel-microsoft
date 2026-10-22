@@ -128,3 +128,19 @@ fn shared_creation_requires_independent_blocked_sign_in_evidence() {
         assert_eq!(r.state == "verified", blocked == Some(true));
     }
 }
+#[test]
+fn slow_preflight_cannot_execute_after_approval_expired() {
+    let (_d, j) = journal();
+    let p = plan(snapshot(), alias(), 100).unwrap();
+    let mut f = Fake::alias();
+    let calls = std::cell::Cell::new(0);
+    assert!(
+        execute(&mut f, &j, &p, &digest(&p).unwrap(), || {
+            let n = calls.get();
+            calls.set(n + 1);
+            if n < 2 { 100 } else { 221 }
+        })
+        .is_err()
+    );
+    assert_eq!(f.writes, 0);
+}

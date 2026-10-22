@@ -1,6 +1,7 @@
 use super::{Change, Plan, Snapshot, validation};
 use crate::{Error, Result};
 pub fn plan(before: Snapshot, change: Change, now: u64) -> Result<Plan> {
+    change.validate_syntax()?;
     validation::snapshot(&before, now)?;
     super::change_validation::change(&before, &change)?;
     Ok(Plan {

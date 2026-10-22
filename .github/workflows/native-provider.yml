@@ -24,6 +24,10 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo test --locked --workspace --all-targets --all-features
       - run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+      - name: Audit locked native dependencies
+        run: |
+          cargo install cargo-audit --version 0.22.2 --locked --no-default-features
+          cargo audit --deny warnings
       - name: Prepare static native candidate without publication
         env:
           ZIX_RELEASE_SOURCE: ${{ github.sha }}

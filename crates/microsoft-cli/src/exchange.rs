@@ -29,6 +29,9 @@ pub fn invoke(
         .get("change-file")
         .map(|f| crate::input::read(f))
         .transpose()?;
+    if let Some(c) = &change {
+        c.validate_syntax().map_err(|e| Error(e.0))?;
+    }
     let approved = if r.operation == "exchange.apply" {
         let p: zix_operation_contracts::LocalPlan = crate::input::read(arg("plan-file")?)?;
         if !p.matches("exchange.apply", &binding, arg("approval-sha256")?) {

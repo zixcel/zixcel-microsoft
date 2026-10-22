@@ -27,6 +27,24 @@ impl ExchangeProfile {
         {
             return Err(Error("exchange_runtime_unavailable"));
         }
+        use std::os::unix::fs::MetadataExt;
+        let uid = std::fs::metadata("/proc/self")
+            .map_err(|_| Error("owner_unavailable"))?
+            .uid();
+        let working = std::fs::metadata(&self.working_directory)
+            .map_err(|_| Error("exchange_runtime_unavailable"))?;
+        if working.mode() & 0o077 != 0 || working.uid() != uid {
+            return Err(Error("unsafe_exchange_working_directory"));
+        }
+        for path in [&self.pwsh, &self.module_manifest] {
+            for parent in path.ancestors() {
+                let m =
+                    std::fs::metadata(parent).map_err(|_| Error("exchange_runtime_unavailable"))?;
+                if m.mode() & 0o022 != 0 || (m.uid() != 0 && m.uid() != uid) {
+                    return Err(Error("unsafe_exchange_runtime_permissions"));
+                }
+            }
+        }
         crate::email(&self.user_principal_name)?;
         // This is an owner-supplied trusted module/runtime profile, never LLM request input.
         Ok(())

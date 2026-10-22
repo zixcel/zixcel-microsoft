@@ -13,6 +13,15 @@ pub(super) fn continuation(next: &str, initial: &str) -> Result<String> {
     {
         return Err(Error("unsafe_continuation"));
     }
+    let selected = initial.split_once("$select=").map(|(_, v)| v).unwrap_or("");
+    for (key, value) in u.query_pairs() {
+        if key == "$select" && value != selected {
+            return Err(Error("unsafe_continuation"));
+        }
+        if key == "$top" && value.parse::<u16>().ok().is_none_or(|n| n == 0 || n > 100) {
+            return Err(Error("unsafe_continuation"));
+        }
+    }
     Ok(format!(
         "{}?{}",
         u.path(),

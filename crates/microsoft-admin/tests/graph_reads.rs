@@ -119,3 +119,17 @@ fn oversized_graph_collections_remain_partial() {
     assert_eq!(r["observation"]["state"], "partial");
     assert_eq!(r["observation"]["complete"], false);
 }
+#[test]
+fn continuation_cannot_expand_fields_or_page_size() {
+    for q in ["$select=id,passwordProfile", "$top=99999"] {
+        let mut f = fake(vec![Ok(
+            json!({"value":[],"@odata.nextLink":format!("https://graph.microsoft.com/v1.0/users?{q}")}),
+        )]);
+        assert!(observe(&mut f, &scope(), Read::Users).is_err());
+    }
+}
+#[test]
+fn missing_row_identity_is_not_a_complete_inventory() {
+    let mut f = fake(vec![Ok(json!({"value":[{"isVerified":true}]}))]);
+    assert!(observe(&mut f, &scope(), Read::Domains).is_err());
+}

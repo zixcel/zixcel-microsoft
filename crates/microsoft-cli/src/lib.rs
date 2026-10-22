@@ -1,4 +1,5 @@
 pub mod catalog;
+mod doctor;
 mod exchange;
 mod input;
 pub mod invoke;

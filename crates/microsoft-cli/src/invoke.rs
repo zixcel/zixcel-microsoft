@@ -17,6 +17,9 @@ pub fn execute(r: &Request) -> Result<Value, Failure> {
 }
 fn invoke(r: &Request) -> Result<Value, Error> {
     zix_native_provider::validate_request(&crate::manifest()?, r)?;
+    if r.operation == "admin.doctor" {
+        return crate::doctor::report();
+    }
     let arg = |k| {
         r.arguments
             .get(k)

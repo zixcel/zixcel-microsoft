@@ -2,6 +2,9 @@ use super::{Backend, Change, Plan, PowerShell, Snapshot};
 use crate::{Error, Result, Scope};
 impl Backend for PowerShell {
     fn snapshot(&mut self, scope: &Scope, change: Option<&Change>) -> Result<Snapshot> {
+        if let Some(c) = change {
+            c.validate_syntax()?;
+        }
         let value = self.invoke(scope, "snapshot", change)?;
         let mut s: Snapshot =
             serde_json::from_value(value).map_err(|_| Error("invalid_exchange_snapshot"))?;

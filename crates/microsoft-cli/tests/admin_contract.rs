@@ -62,3 +62,10 @@ fn invalid_tenant_and_dns_host_fail_before_authentication() {
     );
     assert_eq!(r["error"], "invalid_domain");
 }
+#[test]
+fn doctor_requires_no_account_or_tokens_and_performs_no_installation() {
+    let r = invoke("admin.doctor", json!({}));
+    assert_eq!(r["result"]["credentials_read"], false);
+    assert_eq!(r["result"]["remote_requests"], false);
+    assert_eq!(r["result"]["exchange_profile"], "not_configured");
+}

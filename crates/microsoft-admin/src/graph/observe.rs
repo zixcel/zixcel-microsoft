@@ -72,6 +72,12 @@ pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<V
             break;
         }
         for item in &items {
+            if item["id"]
+                .as_str()
+                .is_none_or(|s| s.is_empty() || s.len() > 256)
+            {
+                return Err(Error("response_identity_missing"));
+            }
             rows.push(select(item, &fields, 0)?);
         }
         match raw.get("@odata.nextLink") {

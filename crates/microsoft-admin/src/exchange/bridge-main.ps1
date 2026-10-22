@@ -5,8 +5,11 @@ $InformationPreference = 'SilentlyContinue'
 Set-StrictMode -Version Latest
 $r = $null
 try {
-    $inputText = [Console]::In.ReadToEnd()
-    if ($inputText.Length -gt 65536) { throw 'request_limit' }
+    $chars = [char[]]::new(65537)
+    $length = [Console]::In.ReadBlock($chars,0,$chars.Length)
+    if ($length -gt 65536) { throw 'request_limit' }
+    $inputText = [string]::new($chars,0,$length)
+    [Array]::Clear($chars,0,$chars.Length)
     $r = ConvertFrom-Json -InputObject $inputText -Depth 10
     $inputText = $null
     if ($r.mode -notin @('snapshot','apply')) { throw 'unknown_mode' }

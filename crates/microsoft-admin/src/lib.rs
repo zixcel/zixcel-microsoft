@@ -16,5 +16,8 @@ impl std::error::Error for Error {}
 pub fn digest(value: &impl serde::Serialize) -> Result<String> {
     use sha2::{Digest, Sha256};
     let bytes = serde_json::to_vec(value).map_err(|_| Error("encoding_failed"))?;
-    Ok(format!("{:x}", Sha256::digest(bytes)))
+    Ok(Sha256::digest(bytes)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect())
 }

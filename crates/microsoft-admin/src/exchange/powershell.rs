@@ -2,7 +2,7 @@ use super::{Change, ExchangeProfile, process};
 use crate::{Error, Result, Scope};
 use crowsi_process_adapter::{Launch, ProcessBudget};
 
-use serde_json::{Value, json};
+use serde_json::Value;
 use std::time::{Duration, Instant};
 use zeroize::Zeroizing;
 pub struct PowerShell {
@@ -53,9 +53,7 @@ impl PowerShell {
             "\n",
             include_str!("bridge-main.ps1")
         );
-        let input=Zeroizing::new(serde_json::to_vec(&json!({"scope":scope,"mode":mode,"change":change,
-            "user":self.profile.user_principal_name,"module":self.profile.module_manifest,"token":self.token.as_str()}))
-            .map_err(|_|Error("encoding_failed"))?);
+        let input = super::packet::encode(scope, mode, change, &self.profile, &self.token)?;
         let launch = Launch::new("/usr/bin/prlimit")
             .args([
                 "--core=0:0",

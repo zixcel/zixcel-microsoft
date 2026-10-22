@@ -32,6 +32,7 @@ pub fn execute(
     if !planning::same_state(&fresh, &p.before)? {
         return Err(Error("remote_state_drift"));
     }
+    planning::validate(p, now())?;
     let admission = journal.admit(&hash, &p.scope)?;
     let mut receipt = Receipt {
         schema: "zix-microsoft-exchange-receipt/v1",
