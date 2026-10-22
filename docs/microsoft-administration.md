@@ -100,6 +100,14 @@ New shared recipients must also be confirmed sign-in-blocked through Graph.
 
 ## Acceptance and official interfaces
 
+Identity preflight failures distinguish `subject_*` (`/me`), `tenant_*` and
+`domain_*` phases. `authentication_rejected` means HTTP 401, `permission_denied`
+means HTTP 403, and `transport_failed` means no usable HTTP response was obtained;
+it does not establish token expiry or missing consent. Rate limits, remote service
+failures, unexpected HTTP responses, response decoding and read limits have separate
+codes. No raw response body, token or authentication header is emitted. A failed
+identity check stops before resource discovery and is never retried automatically.
+
 Development tests use synthetic tenants and no real credentials. Live tenant reads,
 Exchange module/runtime compatibility, credential consent/custody, mailbox changes,
 actual email delivery and DNS migration are separate operational acceptance steps.

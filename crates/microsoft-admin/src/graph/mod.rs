@@ -1,5 +1,6 @@
 mod continuation;
 mod identity;
+mod identity_failure;
 mod observe;
 mod projection;
 mod read;
