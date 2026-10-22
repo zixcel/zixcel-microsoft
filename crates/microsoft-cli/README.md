@@ -29,4 +29,4 @@ Identity preflight failures now distinguish authentication rejection (HTTP 401),
 permission denial (HTTP 403), service/limit failures and transport failure without
 printing credential values or remote response bodies.
 
-Patch 0.2.2 preserves read-only Exchange DiscoveryMailbox records without an Entra UUID while retaining all SMTP address-conflict checks. Such observation references never authorize a write.
+Patch 0.2.2 reads polymorphic DNS requirements without selecting derived fields on the base server entity, and preserves HTTP failure classes in bounded observations. It also preserves read-only Exchange DiscoveryMailbox records without an Entra UUID while retaining all SMTP address-conflict checks. Such observation references never authorize a write.

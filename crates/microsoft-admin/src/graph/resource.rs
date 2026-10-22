@@ -63,6 +63,7 @@ impl Read {
                     vec![
                         "id",
                         "recordType",
+                        "isOptional",
                         "label",
                         "supportedService",
                         "ttl",
@@ -75,10 +76,14 @@ impl Read {
                 )
             }
         };
-        Ok((
-            format!("/v1.0/{path}?$select={}", fields.join(",")),
-            fields,
-            many,
-        ))
+        // DNS record collections contain derived MX/TXT/CNAME properties. Fetch the
+        // bounded collection, then project locally instead of selecting derived fields
+        // on the base domainDnsRecord entity at the server.
+        let initial = if matches!(self, Self::DomainDns { .. }) {
+            format!("/v1.0/{path}")
+        } else {
+            format!("/v1.0/{path}?$select={}", fields.join(","))
+        };
+        Ok((initial, fields, many))
     }
 }

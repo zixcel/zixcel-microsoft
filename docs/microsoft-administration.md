@@ -108,6 +108,14 @@ failures, unexpected HTTP responses, response decoding and read limits have sepa
 codes. No raw response body, token or authentication header is emitted. A failed
 identity check stops before resource discovery and is never retried automatically.
 
+Resource reads also retain `observation.http_status` when a server returned a
+status. HTTP 400 is `request_rejected`, 401 is `authentication_rejected`, and 403
+is `permission_denied`; none is inferred from an empty collection. A failure after
+an accepted page preserves partial data and never becomes complete or auto-retried.
+DNS configuration collections contain derived MX, TXT and CNAME fields. Their
+bounded GET uses the documented collection URL without a base-type `$select`;
+only the declared local projection is returned, including `isOptional`.
+
 Development tests use synthetic tenants and no real credentials. Live tenant reads,
 Exchange module/runtime compatibility, credential consent/custody, mailbox changes,
 actual email delivery and DNS migration are separate operational acceptance steps.

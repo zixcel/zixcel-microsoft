@@ -4,6 +4,7 @@ mod identity_failure;
 mod observe;
 mod projection;
 mod read;
+mod read_failure;
 mod resource;
 mod transport;
 pub use observe::observe;
@@ -19,6 +20,8 @@ pub struct Observation {
     pub data: Value,
     pub pages: usize,
     pub complete: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub http_status: Option<u16>,
 }
 impl Observation {
     fn failed(reason: &str) -> Self {
@@ -28,6 +31,7 @@ impl Observation {
             data: Value::Null,
             pages: 0,
             complete: false,
+            http_status: None,
         }
     }
 }
