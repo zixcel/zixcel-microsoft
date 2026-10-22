@@ -17,3 +17,5 @@ pub use planning::plan;
 pub use powershell::PowerShell;
 pub use profile::ExchangeProfile;
 pub const EXCHANGE_MODULE_VERSION: &str = "3.10.1";
+#[cfg(test)]
+mod process_tests;

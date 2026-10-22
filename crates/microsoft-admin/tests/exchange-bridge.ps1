@@ -18,6 +18,16 @@ if ($script:writes[1].delta.Add -ne 'help@example.org') {throw 'alias replaced i
 $refused=$false
 try { Write-ZixRecipient ([pscustomobject]@{operation='arbitrary'; command='whoami'}) } catch { $refused=$true }
 if (!$refused -or $script:writes.Count -ne 2) {throw 'unknown operation accepted'}
+function Add-MailboxPermission { param($Identity,$User,$AccessRights,$InheritanceType,$AutoMapping,$ErrorAction) $script:writes += @{kind='full'; target=$Identity; trustee=$User; rights=$AccessRights} }
+function Remove-MailboxPermission { param($Identity,$User,$AccessRights,$InheritanceType,$Confirm,$ErrorAction) $script:writes += @{kind='remove-full'; target=$Identity; trustee=$User; rights=$AccessRights} }
+function Add-RecipientPermission { param($Identity,$Trustee,$AccessRights,$Confirm,$ErrorAction) $script:writes += @{kind='send'; target=$Identity; trustee=$Trustee; rights=$AccessRights} }
+function Remove-RecipientPermission { param($Identity,$Trustee,$AccessRights,$Confirm,$ErrorAction) $script:writes += @{kind='remove-send'; target=$Identity; trustee=$Trustee; rights=$AccessRights} }
+foreach ($op in @('remove_alias','grant_full_access','revoke_full_access','grant_send_as','revoke_send_as')) {
+    Write-ZixRecipient ([pscustomobject]@{operation=$op;mailbox='33333333-3333-3333-3333-333333333333';address='help@example.org';trustee='44444444-4444-4444-4444-444444444444'}) | Out-Null
+}
+if ($script:writes.Count -ne 7) {throw 'not every typed write was mapped exactly once'}
+foreach ($w in ($script:writes | Select-Object -Skip 1)) { if ($w.target -ne '55555555-5555-5555-5555-555555555555') {throw 'Entra id was not resolved to Exchange id'} }
+foreach ($w in ($script:writes | Select-Object -Skip 3)) { if ($w.trustee -ne 'delegate@example.org') {throw 'trustee identity mismatch'} }
 $tokens=$null;$errors=$null
 [System.Management.Automation.Language.Parser]::ParseFile("$PSScriptRoot/../src/exchange/bridge-main.ps1",[ref]$tokens,[ref]$errors) | Out-Null
 if ($errors.Count -ne 0) {throw 'bridge syntax invalid'}
