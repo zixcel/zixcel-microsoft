@@ -55,6 +55,9 @@ impl Journal {
         f.write_all(hash.as_bytes())
             .and_then(|_| f.sync_all())
             .map_err(|_| Error("journal_write_failed"))?;
+        File::open(&self.root)
+            .and_then(|d| d.sync_all())
+            .map_err(|_| Error("journal_sync_failed"))?;
         Ok(Admission { lock, marker })
     }
 }
@@ -78,6 +81,9 @@ impl Admission {
         f.write_all(b"verified by independent post-read\n")
             .and_then(|_| f.sync_all())
             .map_err(|_| Error("journal_write_failed"))?;
-        fs::remove_file(&self.lock).map_err(|_| Error("lock_cleanup_failed"))
+        fs::remove_file(&self.lock).map_err(|_| Error("lock_cleanup_failed"))?;
+        File::open(self.lock.parent().ok_or(Error("journal_unavailable"))?)
+            .and_then(|d| d.sync_all())
+            .map_err(|_| Error("journal_sync_failed"))
     }
 }
