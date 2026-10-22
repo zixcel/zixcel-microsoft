@@ -33,18 +33,29 @@ impl Read {
                 ],
                 true,
             ),
-            Self::Users => (
-                "users".into(),
-                vec![
-                    "id",
-                    "displayName",
-                    "userPrincipalName",
-                    "mail",
-                    "proxyAddresses",
-                    "accountEnabled",
-                ],
-                true,
-            ),
+            Self::Users | Self::User { .. } => {
+                let (path, many) = match self {
+                    Self::User { user } => {
+                        crate::uuid(user)?;
+                        (format!("users/{user}"), false)
+                    }
+                    _ => ("users".into(), true),
+                };
+                (
+                    path,
+                    vec![
+                        "id",
+                        "displayName",
+                        "userPrincipalName",
+                        "mail",
+                        "proxyAddresses",
+                        "accountEnabled",
+                        "assignedLicenses",
+                        "assignedPlans",
+                    ],
+                    many,
+                )
+            }
             Self::DomainDns { domain } => {
                 crate::domain(domain)?;
                 (

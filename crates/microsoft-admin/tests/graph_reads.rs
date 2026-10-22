@@ -133,3 +133,33 @@ fn missing_row_identity_is_not_a_complete_inventory() {
     let mut f = fake(vec![Ok(json!({"value":[{"isVerified":true}]}))]);
     assert!(observe(&mut f, &scope(), Read::Domains).is_err());
 }
+#[test]
+fn user_license_assignment_is_selected_without_inferring_mailbox_provisioning() {
+    let mut f = fake(vec![Ok(
+        json!({"id":MAILBOX,"assignedLicenses":[{"skuId":"sku","disabledPlans":["disabled"]}],"assignedPlans":[{"servicePlanId":"plan","capabilityStatus":"Enabled","private":"hidden"}]}),
+    )]);
+    let r = observe(
+        &mut f,
+        &scope(),
+        Read::User {
+            user: MAILBOX.into(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        r["observation"]["data"]["assignedLicenses"][0]["skuId"],
+        "sku"
+    );
+    assert!(!r.to_string().contains("hidden"));
+}
+#[test]
+fn large_projected_directory_stops_with_partial_evidence() {
+    let users = (0..100)
+        .map(|_| json!({"id":MAILBOX,"displayName":"x".repeat(4000)}))
+        .collect::<Vec<_>>();
+    let mut f = fake(vec![Ok(json!({"value":users}))]);
+    let r = observe(&mut f, &scope(), Read::Users).unwrap();
+    assert_eq!(r["observation"]["state"], "partial");
+    assert_eq!(r["observation"]["reason"], "projected_output_limit");
+    assert!(serde_json::to_vec(&r).unwrap().len() < 100 * 1024);
+}

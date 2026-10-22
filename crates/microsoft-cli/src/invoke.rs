@@ -64,6 +64,9 @@ fn invoke(r: &Request) -> Result<Value, Error> {
             "admin.licenses" => Read::Licenses,
             "admin.domains" => Read::Domains,
             "admin.users" => Read::Users,
+            "admin.user" => Read::User {
+                user: arg("user")?.into(),
+            },
             "admin.domain-dns" => Read::DomainDns {
                 domain: arg("domain")?.into(),
             },
@@ -72,6 +75,9 @@ fn invoke(r: &Request) -> Result<Value, Error> {
         // Validate domain inputs before reading credentials.
         if let Read::DomainDns { domain } = &op {
             zixcel_microsoft_admin::domain(domain).map_err(|e| Error(e.0))?;
+        }
+        if let Read::User { user } = &op {
+            zixcel_microsoft_admin::uuid(user).map_err(|e| Error(e.0))?;
         }
         let t = token()?;
         let mut http = LiveRead::new(&t, timeout).map_err(|_| Error("transport_setup"))?;

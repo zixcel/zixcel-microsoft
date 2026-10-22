@@ -10,6 +10,7 @@ pub enum Read {
     Licenses,
     Domains,
     Users,
+    User { user: String },
     DomainDns { domain: String },
 }
 pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<Value> {
@@ -39,8 +40,9 @@ pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<V
     let mut result = Observation::failed("not_attempted");
     let mut path = initial.clone();
     let mut rows = Vec::new();
+    let mut output_bytes = 0usize;
     let mut seen = std::collections::BTreeSet::new();
-    for _ in 0..4 {
+    'pages: for _ in 0..4 {
         if !seen.insert(path.clone()) {
             result.reason = "pagination_cycle".into();
             break;
@@ -78,7 +80,16 @@ pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<V
             {
                 return Err(Error("response_identity_missing"));
             }
-            rows.push(select(item, &fields, 0)?);
+            let selected = select(item, &fields, 0)?;
+            output_bytes += serde_json::to_vec(&selected)
+                .map_err(|_| Error("encoding_failed"))?
+                .len()
+                + 1;
+            if output_bytes > 96 * 1024 {
+                result.reason = "projected_output_limit".into();
+                break 'pages;
+            }
+            rows.push(selected);
         }
         match raw.get("@odata.nextLink") {
             None => {

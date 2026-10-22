@@ -25,6 +25,7 @@ zix microsoft licenses list --tenant TENANT_UUID --subject SUBJECT_UUID
 zix microsoft domains list --tenant TENANT_UUID --subject SUBJECT_UUID
 zix microsoft domains dns-records --tenant TENANT_UUID --subject SUBJECT_UUID --domain example.org
 zix microsoft users list --tenant TENANT_UUID --subject SUBJECT_UUID
+zix microsoft users inspect --tenant TENANT_UUID --subject SUBJECT_UUID --user USER_UUID
 ```
 
 All new reads verify delegated `/me` and the selected organization. Required

@@ -7,7 +7,8 @@ by importing or building it. Caller-owned tenant and subject UUIDs are mandatory
 ## Supported operations
 
 - Graph: organization, subscribed licenses/service plans, verified domains,
-  domain mail-service DNS requirements, directory users and proxy addresses.
+  domain mail-service DNS requirements, directory users, proxy addresses and
+  per-user license/service-plan assignments.
 - Exchange: bounded recipient snapshots, create shared mailbox, add/remove a
   secondary address, grant/revoke FullAccess and SendAs separately.
 - Directory users/addresses are not evidence of an Exchange mailbox or active license.
@@ -20,7 +21,7 @@ by importing or building it. Caller-owned tenant and subject UUIDs are mandatory
 Graph uses the Crowsi HTTPS read transport: verified TLS, no proxy inheritance,
 redirects or automatic retries. Each operation confirms `/me` and the selected
 organization, then processes at most four pages / 200 items, eight requests and
-2 MiB of aggregate response bytes. Incomplete/denied observations stay explicit.
+2 MiB of aggregate response bytes and 96 KiB of projected row data. Incomplete/denied observations stay explicit.
 Only declared fields are returned; reports can still contain private directory
 information and must be stored privately, not in public Issues or repositories.
 

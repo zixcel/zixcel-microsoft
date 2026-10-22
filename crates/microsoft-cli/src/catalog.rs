@@ -18,6 +18,7 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
         ("admin.licenses", vec!["licenses", "list"], vec![], "read"),
         ("admin.domains", vec!["domains", "list"], vec![], "read"),
         ("admin.users", vec!["users", "list"], vec![], "read"),
+        ("admin.user", vec!["users", "inspect"], vec!["user"], "read"),
         (
             "admin.domain-dns",
             vec!["domains", "dns-records"],
