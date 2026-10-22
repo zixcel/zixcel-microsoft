@@ -10,7 +10,7 @@ $bad = "not code '; throw 'must not execute"
 $c = [pscustomobject]@{operation='create_shared'; display_name=$bad; address='security@example.org'}
 # Switch parameter behavior matches the official cmdlet; use a mock with a real switch.
 Remove-Item Function:New-Mailbox
-function New-Mailbox { param([switch]$Shared,$Name,$DisplayName,$PrimarySmtpAddress,$ErrorAction) if (!$Shared) { throw 'shared required' }; $script:writes += @{ kind='create'; display=$DisplayName; address=$PrimarySmtpAddress } }
+function New-Mailbox { param([switch]$Shared,$Name,$Alias,$DisplayName,$PrimarySmtpAddress,$ErrorAction) if (!$Shared -or $Alias -ne $Name -or $Alias -notmatch '^shared-[a-f0-9]{20}$') { throw 'shared identity required' }; $script:writes += @{ kind='create'; display=$DisplayName; address=$PrimarySmtpAddress } }
 $v=Write-ZixRecipient $c
 if (!$v.acknowledged -or $script:writes.Count -ne 1 -or $script:writes[0].display -ne $bad) { throw 'literal mapping failure' }
 Write-ZixRecipient ([pscustomobject]@{operation='add_alias'; mailbox='33333333-3333-3333-3333-333333333333'; address='help@example.org'}) | Out-Null

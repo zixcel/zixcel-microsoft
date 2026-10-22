@@ -1,5 +1,6 @@
 use super::{Change, Snapshot, planning};
 use crate::Result;
+use sha2::{Digest, Sha256};
 pub(crate) fn verify(before: &Snapshot, after: &Snapshot, change: &Change) -> Result<bool> {
     let mut expected = before.clone();
     if let Change::CreateShared {
@@ -15,7 +16,15 @@ pub(crate) fn verify(before: &Snapshot, after: &Snapshot, change: &Change) -> Re
             || new.sign_in_blocked != Some(true)
             || new.full_access
             || new.send_as
-            || new.aliases.iter().any(|a| a != address)
+            || new.aliases.iter().any(|a| {
+                let digest = format!("{:x}", Sha256::digest(address.as_bytes()));
+                let alias = format!("shared-{}", &digest[..20]);
+                a != address
+                    && !before
+                        .accepted_domains
+                        .iter()
+                        .any(|d| d.ends_with(".onmicrosoft.com") && *a == format!("{alias}@{d}"))
+            })
         {
             return Ok(false);
         }

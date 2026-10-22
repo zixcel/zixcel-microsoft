@@ -127,3 +127,8 @@ never an Entra UUID or a writable target. Only DiscoveryMailbox receives this ru
 missing IDs on other recipient kinds still stop the snapshot. Address conflicts include
 all system addresses. Observed SMTP dot-atoms allow RFC punctuation such as braces;
 the stricter address and UUID contracts for requested writes remain unchanged.
+
+Shared creation sets an explicit deterministic Exchange alias. Post-read may contain
+that exact generated alias in an already-authoritative `onmicrosoft.com` domain;
+other unexpected aliases still prevent verified success. This never proves Entra
+sign-in blocking: independent blocked-sign-in evidence is still required.
