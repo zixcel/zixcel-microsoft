@@ -52,7 +52,7 @@ fn actual_native_manifest_and_missing_credential_protocol_need_no_node_or_accoun
             .as_array()
             .unwrap()
             .iter()
-            .all(|c| c["effect"] == "read")
+            .all(|c| c["effect"] == "read" || c["effect"] == "operator-write")
     );
     let mut child = Command::new(env!("CARGO_BIN_EXE_zix-microsoft"))
         .env_clear()
@@ -66,7 +66,22 @@ fn actual_native_manifest_and_missing_credential_protocol_need_no_node_or_accoun
         .stdin
         .take()
         .unwrap()
-        .write_all(&serde_json::to_vec(&request()).unwrap())
+        .write_all(
+            &serde_json::to_vec(&{
+                let mut value = serde_json::to_value(request()).unwrap();
+                let bytes = std::fs::read(env!("CARGO_BIN_EXE_zix-microsoft")).unwrap();
+                value["binding"] =
+                    serde_json::to_value(zix_operation_contracts::Binding::for_catalog(
+                        m["package"].as_str().unwrap(),
+                        m["version"].as_str().unwrap(),
+                        &m,
+                        &zix_cli::files::digest(&bytes),
+                    ))
+                    .unwrap();
+                value
+            })
+            .unwrap(),
+        )
         .unwrap();
     let output = child.wait_with_output().unwrap();
     assert!(output.status.success());

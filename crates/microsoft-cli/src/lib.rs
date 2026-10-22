@@ -1,3 +1,9 @@
+pub mod catalog;
+mod doctor;
+mod exchange;
+mod input;
+pub mod invoke;
+pub use catalog::manifest;
 pub fn provider() -> zix_native_provider::Result<zix_native_provider::Provider> {
     zix_native_provider::Provider::load(
         include_bytes!("../api/routes.json"),

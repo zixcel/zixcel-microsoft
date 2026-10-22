@@ -1,0 +1,34 @@
+$ErrorActionPreference = 'Stop'
+. "$PSScriptRoot/../src/exchange/bridge-read.ps1"
+. "$PSScriptRoot/../src/exchange/bridge-write.ps1"
+$script:writes = @()
+function Get-EXOMailbox { param($ExternalDirectoryObjectId,$Properties,$ErrorAction) [pscustomobject]@{ExternalDirectoryObjectId=$ExternalDirectoryObjectId; ExchangeGuid='55555555-5555-5555-5555-555555555555'} }
+function Get-EXORecipient { param($ExternalDirectoryObjectId,$Properties,$ErrorAction) [pscustomobject]@{ExternalDirectoryObjectId=$ExternalDirectoryObjectId;PrimarySmtpAddress='delegate@example.org'} }
+function New-Mailbox { param($Shared,$Name,$DisplayName,$PrimarySmtpAddress,$ErrorAction) $script:writes += @{ kind='create'; display=$DisplayName; address=$PrimarySmtpAddress } }
+function Set-Mailbox { param($Identity,$EmailAddresses,$ErrorAction) $script:writes += @{ kind='alias'; target=$Identity; delta=$EmailAddresses } }
+$bad = "not code '; throw 'must not execute"
+$c = [pscustomobject]@{operation='create_shared'; display_name=$bad; address='security@example.org'}
+# Switch parameter behavior matches the official cmdlet; use a mock with a real switch.
+Remove-Item Function:New-Mailbox
+function New-Mailbox { param([switch]$Shared,$Name,$DisplayName,$PrimarySmtpAddress,$ErrorAction) if (!$Shared) { throw 'shared required' }; $script:writes += @{ kind='create'; display=$DisplayName; address=$PrimarySmtpAddress } }
+$v=Write-ZixRecipient $c
+if (!$v.acknowledged -or $script:writes.Count -ne 1 -or $script:writes[0].display -ne $bad) { throw 'literal mapping failure' }
+Write-ZixRecipient ([pscustomobject]@{operation='add_alias'; mailbox='33333333-3333-3333-3333-333333333333'; address='help@example.org'}) | Out-Null
+if ($script:writes[1].delta.Add -ne 'help@example.org') {throw 'alias replaced instead of added'}
+$refused=$false
+try { Write-ZixRecipient ([pscustomobject]@{operation='arbitrary'; command='whoami'}) } catch { $refused=$true }
+if (!$refused -or $script:writes.Count -ne 2) {throw 'unknown operation accepted'}
+function Add-MailboxPermission { param($Identity,$User,$AccessRights,$InheritanceType,$AutoMapping,$ErrorAction) $script:writes += @{kind='full'; target=$Identity; trustee=$User; rights=$AccessRights} }
+function Remove-MailboxPermission { param($Identity,$User,$AccessRights,$InheritanceType,$Confirm,$ErrorAction) $script:writes += @{kind='remove-full'; target=$Identity; trustee=$User; rights=$AccessRights} }
+function Add-RecipientPermission { param($Identity,$Trustee,$AccessRights,$Confirm,$ErrorAction) $script:writes += @{kind='send'; target=$Identity; trustee=$Trustee; rights=$AccessRights} }
+function Remove-RecipientPermission { param($Identity,$Trustee,$AccessRights,$Confirm,$ErrorAction) $script:writes += @{kind='remove-send'; target=$Identity; trustee=$Trustee; rights=$AccessRights} }
+foreach ($op in @('remove_alias','grant_full_access','revoke_full_access','grant_send_as','revoke_send_as')) {
+    Write-ZixRecipient ([pscustomobject]@{operation=$op;mailbox='33333333-3333-3333-3333-333333333333';address='help@example.org';trustee='44444444-4444-4444-4444-444444444444'}) | Out-Null
+}
+if ($script:writes.Count -ne 7) {throw 'not every typed write was mapped exactly once'}
+foreach ($w in ($script:writes | Select-Object -Skip 1)) { if ($w.target -ne '55555555-5555-5555-5555-555555555555') {throw 'Entra id was not resolved to Exchange id'} }
+foreach ($w in ($script:writes | Select-Object -Skip 3)) { if ($w.trustee -ne 'delegate@example.org') {throw 'trustee identity mismatch'} }
+$tokens=$null;$errors=$null
+[System.Management.Automation.Language.Parser]::ParseFile("$PSScriptRoot/../src/exchange/bridge-main.ps1",[ref]$tokens,[ref]$errors) | Out-Null
+if ($errors.Count -ne 0) {throw 'bridge syntax invalid'}
+'Exchange command mapping and syntax tests passed; no module import, authentication or remote requests.'

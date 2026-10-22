@@ -1,7 +1,9 @@
 fn main() -> std::process::ExitCode {
-    zix_native_provider::entry(
-        include_bytes!("../api/routes.json"),
-        include_bytes!("../api/policy.json"),
-        env!("CARGO_PKG_VERSION"),
-    )
+    match zixcel_microsoft_cli::manifest() {
+        Ok(m) => zix_native_provider::serve(m, zixcel_microsoft_cli::invoke::execute),
+        Err(e) => {
+            eprintln!("{{\"error\":\"{}\"}}", e.0);
+            std::process::ExitCode::from(2)
+        }
+    }
 }

@@ -1,29 +1,26 @@
-# Native microsoft observations
+# Native Microsoft administration
 
-This source-only Rust adapter uses the shared `zix-provider/v1` host and Crowsi
-HTTPS/process boundaries. API identifiers, paths and server facts were checked
-against the official source in `api/sources.lock.json`; `api/policy.json` separately
-pins the route bytes, credentials, argument rules, identity checks and projections.
-No upstream prose, examples or schema bodies are redistributed here.
+The independent native `zix-microsoft` binary implements the Zix provider protocol.
+Use [Microsoft administration](../../docs/microsoft-administration.md) for required
+permissions, trusted Exchange profile, exact commands and one-use plan execution.
 
-Build with the existing Rust toolchain: `cargo build --locked -p zixcel-microsoft-cli`.
-The binary `zix-microsoft` exposes `--manifest` without credentials. Register verified
-binary/manifest hashes in Zix; the native runtime needs no Node installation.
-Provide `ZIX_MICROSOFT_ACCESS_TOKEN` only in the selected process environment;
-never put a bearer token in arguments, policy files, logs or Issue comments.
-No implicit login, API activation, permission grant or credential fallback occurs.
+Version 0.2.0 retains `users get` and adds organization/license/domain/user discovery,
+domain DNS requirements and separate Exchange snapshot/plan/apply commands. Graph
+read routes use the Crowsi transport; Exchange uses fixed official PowerShell cmdlets
+and Crowsi-owned bounded child processes. Manifest v2 marks apply as operator-write.
 
-Commands: `zix microsoft users get`.
-Use `zix microsoft --help` for required scope arguments after installation.
-This adapter only exposes reviewed reads, one response at a time. It does not
-follow pagination or claim account-wide completeness, effective IAM or zero cost.
-Responses include only declared scalar fields and validate selected resource IDs.
+No implicit login, module installation, permission grant, token fallback, DNS write,
+mail send, registry publication or live-account acceptance occurs on import/build.
+Secrets are supplied by the credential owner, never as arguments or configuration.
+Directory entries do not prove Exchange mailboxes. Unknown write outcomes cannot be
+replayed. The complete native operation is limited to 40 seconds.
 
-Existing owner TypeScript writes keep their separate Crowsi approvals. Importing
-an upstream method does not enable it in this native adapter. Neither this source
-change nor synthetic tests publish a package or prove real-account acceptance.
-Native release/tag protection and distribution remain separate acceptance work.
+The original single-user API facts remain locked under `api/`. The additional admin
+library's official interface references are in its README and the guide; no upstream
+prose or schema is redistributed. Build with the existing declared Rust toolchain:
+`cargo build --locked -p zixcel-microsoft-cli`. Package version, source/content hashes,
+notices and the actual dispatcher must be checked before independent publication.
 
-Owner CI also prepares a static musl candidate with dependency notices, source
-record and archive/contents hashes. CI artifacts are review candidates, not a
-GitHub Release; no tag or publishing permission is added by this workflow.
+The SDK is pinned to accepted source 8fbd566a (native SDK 0.2.0), which verifies
+the dispatcher's manifest-v2 binding. Both direct protocol and actual dispatcher
+regressions are required; a v1-shaped direct request does not establish v2 compatibility.
