@@ -85,11 +85,7 @@ pub(super) fn invoke(r: &Request) -> Result<Value, Error> {
         response.require_success().map_err(|e| Error(e.0))?;
         let d: Device = serde_json::from_slice(&response.bytes)
             .map_err(|_| Error("invalid_device_authorization_response"))?;
-        if ![
-            "https://microsoft.com/devicelogin",
-            "https://www.microsoft.com/devicelogin",
-        ]
-        .contains(&d.verification_uri.as_str())
+        if !allowed_verification_uri(&d.verification_uri)
             || d.user_code.is_empty()
             || d.user_code.len() > 32
             || !d
@@ -128,4 +124,42 @@ pub(super) fn invoke(r: &Request) -> Result<Value, Error> {
         timestamp,
         timeout,
     )
+}
+
+fn allowed_verification_uri(uri: &str) -> bool {
+    matches!(
+        uri,
+        "https://microsoft.com/devicelogin"
+            | "https://www.microsoft.com/devicelogin"
+            | "https://login.microsoft.com/device"
+    )
+}
+
+#[cfg(test)]
+mod device_uri_tests {
+    use super::allowed_verification_uri;
+
+    #[test]
+    fn current_and_legacy_microsoft_verification_pages_are_accepted_exactly() {
+        for uri in [
+            "https://microsoft.com/devicelogin",
+            "https://www.microsoft.com/devicelogin",
+            "https://login.microsoft.com/device",
+        ] {
+            assert!(allowed_verification_uri(uri));
+        }
+        for uri in [
+            "http://login.microsoft.com/device",
+            "https://login.microsoft.com.evil.example/device",
+            "https://login.microsoft.com@evil.example/device",
+            "https://evil.example/device",
+            "https://login.microsoft.com/device?redirect=https://evil.example",
+            "https://login.microsoft.com/device#other",
+            "https://login.microsoft.com:443/device",
+            "https://login.microsoft.com/other",
+            "",
+        ] {
+            assert!(!allowed_verification_uri(uri));
+        }
+    }
 }

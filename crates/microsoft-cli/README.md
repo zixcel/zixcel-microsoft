@@ -1,5 +1,9 @@
 # Native Microsoft administration
 
+Patch 0.3.3 accepts the current Microsoft device verification page by exact
+HTTPS URL match, retaining the legacy URLs and rejecting other origins,
+paths, queries and fragments.
+
 Patch 0.3.2 caps Graph read transport budgets at 40 seconds while preserving
 shorter caller deadlines, so the native 120-second operation budget does not
 prevent authenticated Graph discovery from starting.
