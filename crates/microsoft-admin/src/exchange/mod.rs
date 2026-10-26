@@ -1,5 +1,6 @@
 mod backend;
 mod change_validation;
+mod dns_target;
 mod execution;
 mod journal;
 mod model;

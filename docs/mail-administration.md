@@ -1,6 +1,6 @@
 # Local mail administration
 
-Native Microsoft 0.3.0 requires zix CLI 0.4.0. The GNU Linux archive includes
+Native Microsoft 0.3.1 requires zix CLI 0.4.0. The GNU Linux archive includes
 Crowsi Secret Service custody; the static archive retains token-environment use
 but rejects `auth` operations with `credential_store_not_in_build`. The core is
 provider-neutral: it supplies multiple explicitly bound credentials and never

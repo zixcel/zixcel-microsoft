@@ -46,12 +46,12 @@ if (!$refused) {throw 'missing_user_identity_accepted'}
 'Exchange command mapping, system inventory and syntax tests passed; no module import, authentication or remote requests.'
 . "$PSScriptRoot/../src/exchange/bridge-management.ps1"
 function Get-AcceptedDomain { param($Identity,$ErrorAction) [pscustomobject]@{DomainType='Authoritative';DomainName=$Identity} }
-function Get-DkimSigningConfig { param($Identity,$ErrorAction) [pscustomobject]@{Domain=$Identity;Enabled=$false;Selector1CNAME='Selector1.Example.NET.';Selector2CNAME='selector2.example.net.'} }
+function Get-DkimSigningConfig { param($Identity,$ErrorAction) [pscustomobject]@{Domain=$Identity;Enabled=$false;Selector1CNAME='Selector1-example-net._domainkey.Initial.onmicrosoft.com.';Selector2CNAME='selector2-example-net._domainkey.initial.onmicrosoft.com.'} }
 function New-DkimSigningConfig { param($DomainName,$Enabled,$KeySize,$ErrorAction) if ($Enabled -ne $false -or $KeySize -ne 2048) {throw 'unsafe DKIM preparation'}; $script:writes += @{kind='dkim-new';domain=$DomainName} }
 function Set-DkimSigningConfig { param($Identity,$Enabled,$ErrorAction) if ($Enabled -ne $true) {throw 'unexpected DKIM disable'}; $script:writes += @{kind='dkim-enable';domain=$Identity} }
 $c=[pscustomobject]@{operation='prepare_dkim';domain='example.net'}
 $s=Read-ZixDkim $c
-if ($s.target.selector1 -ne 'selector1.example.net' -or $s.target.enabled -ne $false) {throw 'DKIM selectors not observed'}
+if ($s.target.selector1 -ne 'selector1-example-net._domainkey.initial.onmicrosoft.com' -or $s.target.enabled -ne $false) {throw 'DKIM selectors not observed'}
 Write-ZixDkim $c | Out-Null
 Write-ZixDkim ([pscustomobject]@{operation='enable_dkim';domain='example.net'}) | Out-Null
 if ($script:writes.Count -ne 9 -or $script:writes[-1].kind -ne 'dkim-enable') {throw 'DKIM mapping failure'}
