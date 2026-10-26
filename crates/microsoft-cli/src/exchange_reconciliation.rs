@@ -78,7 +78,7 @@ pub fn invoke(
     let original: Plan =
         serde_json::from_value(original.plan).map_err(|_| Error("invalid_plan"))?;
     let journal = Journal::open(Path::new(&input.journal_directory)).map_err(|e| Error(e.0))?;
-    let p = reconciliation::plan(&mut backend, &journal, scope, original, now())
+    let p = reconciliation::plan(&mut backend, &journal, scope, original, now)
         .map_err(|e| Error(e.0))?;
     let envelope = zix_operation_contracts::LocalPlan::new(
         "exchange.apply".into(),

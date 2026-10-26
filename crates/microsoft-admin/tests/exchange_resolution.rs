@@ -70,7 +70,7 @@ fn reviewed_additions_archive_lock_without_rewriting_history_or_replaying_write(
             f.0.recipients[0].full_access = false;
             f.0.recipients[0].send_as = true;
         }
-        let p = reconciliation::plan(&mut f, &j, &scope(), old, 1000).unwrap();
+        let p = reconciliation::plan(&mut f, &j, &scope(), old, || 1000).unwrap();
         assert_eq!(
             p.service_alias_additions[MAILBOX],
             ["support@example.onmicrosoft.com"]
@@ -126,7 +126,7 @@ fn refuses_missing_grant_identity_domain_removal_primary_and_unrelated_permissio
             _ => f.0.accepted_domains.pop().map(|_| ()).unwrap(),
         }
         assert!(
-            reconciliation::plan(&mut f, &j, &scope(), old, 1000).is_err(),
+            reconciliation::plan(&mut f, &j, &scope(), old, || 1000).is_err(),
             "mode {mode}"
         );
         assert!(d.path().join(format!("{TENANT}.active")).exists());
@@ -141,10 +141,10 @@ fn refuses_early_expired_modified_journal_plan_and_postreview_drift() {
         let mut f = observed(&old);
         if mode == 0 {
             f.0.observed_at = 699;
-            assert!(reconciliation::plan(&mut f, &j, &scope(), old, 699).is_err());
+            assert!(reconciliation::plan(&mut f, &j, &scope(), old, || 699).is_err());
             continue;
         }
-        let mut p = reconciliation::plan(&mut f, &j, &scope(), old, 1000).unwrap();
+        let mut p = reconciliation::plan(&mut f, &j, &scope(), old, || 1000).unwrap();
         match mode {
             1 => f.0.recipients[0].display_name = "Changed".into(),
             2 => {
@@ -165,4 +165,40 @@ fn refuses_early_expired_modified_journal_plan_and_postreview_drift() {
         );
         assert!(d.path().join(format!("{TENANT}.active")).exists());
     }
+}
+
+#[test]
+fn planning_uses_clock_after_read_and_execution_rechecks_after_delayed_read() {
+    use std::{cell::Cell, rc::Rc};
+    struct DelayedRead {
+        observed: Snapshot,
+        clock: Rc<Cell<u64>>,
+    }
+    impl Backend for DelayedRead {
+        fn snapshot(&mut self, _: &Scope, _: Option<&Change>) -> Result<Snapshot> {
+            self.clock.set(self.clock.get() + 10);
+            let mut s = self.observed.clone();
+            s.observed_at = self.clock.get();
+            Ok(s)
+        }
+        fn apply(&mut self, _: &Plan) -> Result<()> {
+            panic!("no remote mutation")
+        }
+    }
+    let (d, j) = journal();
+    let old = original();
+    seed(&d, &old);
+    let clock = Rc::new(Cell::new(1000));
+    let mut f = DelayedRead {
+        observed: observed(&old).0,
+        clock: clock.clone(),
+    };
+    let p = reconciliation::plan(&mut f, &j, &scope(), old, || clock.get()).unwrap();
+    assert_eq!(p.created_at, 1010);
+    assert_eq!(p.observation.observed_at, 1010);
+    assert_eq!(p.expires_at, 1310);
+    let receipt = reconciliation::execute(&mut f, &j, &scope(), &p, || clock.get()).unwrap();
+    assert_eq!(receipt["observation"]["observed_at"], 1020);
+    assert_eq!(receipt["remote_write_attempted"], false);
+    assert!(!d.path().join(format!("{TENANT}.active")).exists());
 }
