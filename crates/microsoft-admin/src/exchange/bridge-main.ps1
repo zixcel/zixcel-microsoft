@@ -12,14 +12,19 @@ try {
     [Array]::Clear($chars,0,$chars.Length)
     $r = ConvertFrom-Json -InputObject $inputText -Depth 10
     $inputText = $null
-    if ($r.mode -notin @('snapshot','apply')) { throw 'unknown_mode' }
+    if ($r.mode -notin @('snapshot','apply','management_snapshot','management_apply')) { throw 'unknown_mode' }
     Import-Module -Name $r.module -RequiredVersion '3.10.1' -ErrorAction Stop
     Connect-ExchangeOnline -AccessToken $r.token -UserPrincipalName $r.user -ShowBanner:$false -SkipLoadingCmdletHelp -ErrorAction Stop | Out-Null
     $connections = @(Get-ConnectionInformation | Where-Object { $_.State -eq 'Connected' })
     if ($connections.Count -ne 1 -or "$($connections[0].TenantID)".ToLowerInvariant() -ne $r.scope.tenant -or "$($connections[0].UserPrincipalName)".ToLowerInvariant() -ne $r.user) { throw 'connection_identity_mismatch' }
     $user = Get-User -Identity $r.user -ErrorAction Stop
     if ("$($user.ExternalDirectoryObjectId)".ToLowerInvariant() -ne $r.scope.subject) { throw 'subject_mismatch' }
-    $result = if ($r.mode -eq 'snapshot') { Read-ZixRecipients $r } else { Write-ZixRecipient $r.change }
+    $result = switch ($r.mode) {
+        'snapshot' { Read-ZixRecipients $r }
+        'apply' { Write-ZixRecipient $r.change }
+        'management_snapshot' { Read-ZixDkim $r.management_change }
+        'management_apply' { Write-ZixDkim $r.management_change }
+    }
     ConvertTo-Json -InputObject $result -Depth 12 -Compress
 } catch {
     # Do not print provider exceptions, request/token, account or module paths.

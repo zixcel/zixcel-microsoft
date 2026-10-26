@@ -1,6 +1,6 @@
 [package]
 name = "zixcel-microsoft-admin"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.97"
 license = "Apache-2.0"
@@ -14,8 +14,9 @@ sha2 = "0.11"
 url = "2"
 zeroize = "1"
 crowsi-provider-read-http = { git = "https://github.com/crowsi-net/crowsi-transport-foundation", rev = "8daf36688e1618f294274c61ebfe607f77639534" }
-crowsi-process-adapter = { git = "https://github.com/crowsi-net/crowsi-process-adapter", rev = "bb2c7abb0dad073434c4d6fe0a8bc983746f322b" }
+crowsi-process-adapter = { git = "https://github.com/crowsi-net/crowsi-process-adapter", rev = "09d52193f20614c3bb5458f6b1ae5cdf52be0a1a" }
 tokio = { version = "1", features = ["rt", "io-util", "time", "macros"] }
+reqwest = { version = "0.12.28", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 [dev-dependencies]
 tempfile = "3"
 [lints.rust]

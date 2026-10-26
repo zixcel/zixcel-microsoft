@@ -2,6 +2,8 @@
 //! Provider administration, not credential enrollment, a mail server or domain policy.
 pub mod exchange;
 pub mod graph;
+pub mod http;
+pub mod management;
 mod scope;
 pub use scope::{Scope, domain, email, uuid};
 pub type Result<T> = std::result::Result<T, Error>;

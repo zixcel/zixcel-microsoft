@@ -45,9 +45,7 @@ pub fn invoke(
     } else {
         None
     };
-    let profile = std::env::var("ZIX_MICROSOFT_EXCHANGE_PROFILE")
-        .map_err(|_| Error("exchange_profile_missing"))?;
-    let profile: ExchangeProfile = crate::input::read(&profile)?;
+    let profile = profile(r)?;
     let exo = std::env::var("ZIX_MICROSOFT_EXCHANGE_TOKEN")
         .map_err(|_| Error("exchange_credential_missing"))?;
     let graph = token()?;
@@ -83,4 +81,14 @@ pub fn invoke(
         _ => return Err(Error("unknown_operation")),
     };
     value.map_err(|_| Error("encoding_failed"))
+}
+
+pub(crate) fn profile(r: &Request) -> Result<ExchangeProfile, Error> {
+    let path = r
+        .arguments
+        .get("runtime-profile")
+        .cloned()
+        .or_else(|| std::env::var("ZIX_MICROSOFT_EXCHANGE_PROFILE").ok())
+        .ok_or(Error("exchange_profile_missing"))?;
+    crate::input::read(&path)
 }

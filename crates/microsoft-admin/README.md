@@ -30,9 +30,14 @@ owner-selected, absolute-path PowerShell profile. The module/runtime are externa
 prerequisites, never automatically installed. Only fixed cmdlets receive typed data;
 there is no caller-supplied script, command name or undocumented Exchange REST API.
 Graph and Exchange bearer credentials are separate, transient caller inputs.
-Crowsi controls the child tree with strict 512 MiB / 32-process / CPU / file limits;
-unsupported containment fails before starting PowerShell. Core dumps are disabled
-with the platform prlimit utility. The full native request is bounded to 40 seconds;
+Crowsi uses an explicit systemd user-service backend with strict 512 MiB /
+32-task / one-CPU / 64 MiB per-file limits, zero swap and disabled core dumps.
+All limits are applied before PowerShell starts; service creation failure never
+falls back to an unbounded process. DOTNET_PROCESSOR_COUNT=1 bounds runtime thread
+selection. The file cap accommodates .NET executable memfd mappings; the former
+8 MiB cap prevented the official runtime from starting. A service has a 30-second
+lifetime and one-second stop timeout, including after host death; immediate
+parent-death teardown is not claimed. The full native request is bounded to 120 seconds;
 a slow write can therefore end with an unknown outcome and must not be resent.
 
 The journal must be a private, owner-provisioned canonical directory. An fsynced
@@ -69,3 +74,6 @@ and parses the production bridge without importing Exchange or authenticating.
 Real Microsoft tenant, module compatibility, consent and strict child containment
 acceptance remain separately required before live use; synthetic tests are not that
 acceptance and no skipped real-account test is a success.
+
+See [mail administration](../../docs/mail-administration.md) for explicit auth,
+Graph mutations, DKIM, probes, runtime acceptance and remaining owner prerequisites.

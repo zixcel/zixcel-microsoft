@@ -8,4 +8,5 @@ pub enum Read {
     Users,
     User { user: String },
     DomainDns { domain: String },
+    DomainVerification { domain: String },
 }
