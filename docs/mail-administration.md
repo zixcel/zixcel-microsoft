@@ -1,6 +1,8 @@
 # Local mail administration
 
-Native Microsoft 0.3.1 requires zix CLI 0.4.0. The GNU Linux archive includes
+Native Microsoft 0.3.2 requires zix CLI 0.4.0. Graph read transport budgets
+are capped at 40 seconds within the provider's 120-second operation budget;
+shorter caller budgets are preserved. The GNU Linux archive includes
 Crowsi Secret Service custody; the static archive retains token-environment use
 but rejects `auth` operations with `credential_store_not_in_build`. The core is
 provider-neutral: it supplies multiple explicitly bound credentials and never
