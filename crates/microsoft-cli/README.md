@@ -1,5 +1,9 @@
 # Native Microsoft administration
 
+Patch 0.3.4 records code-only management failure evidence in receipts and attempt
+journals while preserving unknown-outcome locks and replay refusal. The update
+does not recover error details omitted by earlier versions or release old locks.
+
 Patch 0.3.3 accepts the current Microsoft device verification page by exact
 HTTPS URL match, retaining the legacy URLs and rejecting other origins,
 paths, queries and fragments.

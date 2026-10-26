@@ -73,6 +73,21 @@ pub(crate) struct Admission {
     marker: PathBuf,
 }
 impl Admission {
+    pub(crate) fn record_failure(
+        &self,
+        failure: &crate::management::MutationFailure,
+    ) -> Result<()> {
+        let mut bytes = serde_json::to_vec(&serde_json::json!({"failure":failure}))
+            .map_err(|_| Error("encoding_failed"))?;
+        bytes.push(b'\n');
+        let mut file = OpenOptions::new()
+            .append(true)
+            .open(&self.marker)
+            .map_err(|_| Error("journal_write_failed"))?;
+        file.write_all(&bytes)
+            .and_then(|_| file.sync_all())
+            .map_err(|_| Error("journal_write_failed"))
+    }
     pub fn completed(self) -> Result<()> {
         let mut f = OpenOptions::new()
             .append(true)
