@@ -98,7 +98,7 @@ jobs:
             echo 'Existing release: verification only; no overwrite.'
           else
             grep -q '(HTTP 404)' "$RUNNER_TEMP/error"; test "$GITHUB_RUN_ATTEMPT" = 1
-            gh release create "$GITHUB_REF_NAME" ./*.tar.gz SHA256SUMS --repo "$GITHUB_REPOSITORY" --verify-tag --target "$GITHUB_SHA" --title "$GITHUB_REF_NAME" --notes "Source $GITHUB_SHA; archive SHA256 $DIGEST."
+            gh release create "$GITHUB_REF_NAME" ./*.tar.gz SHA256SUMS --repo "$GITHUB_REPOSITORY" --verify-tag --target "$GITHUB_SHA" --title "$GITHUB_REF_NAME" --notes "Source $GITHUB_SHA; SHA256SUMS index SHA256 $DIGEST."
           fi
           mkdir readback
           gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern "*.tar.gz" --pattern SHA256SUMS --dir readback

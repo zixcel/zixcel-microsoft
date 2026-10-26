@@ -4,7 +4,7 @@ The independent native `zix-microsoft` binary implements the Zix provider protoc
 Use [Microsoft administration](../../docs/microsoft-administration.md) for required
 permissions, trusted Exchange profile, exact commands and one-use plan execution.
 
-Version 0.3.0 retains `users get` and adds organization/license/domain/user discovery,
+Version 0.3.1 retains `users get` and adds organization/license/domain/user discovery,
 domain DNS requirements and separate Exchange snapshot/plan/apply commands. Graph
 read routes use the Crowsi transport; Exchange uses fixed official PowerShell cmdlets
 and Crowsi-owned bounded child processes. Manifest v2 marks apply as operator-write.
@@ -21,7 +21,7 @@ prose or schema is redistributed. Build with the existing declared Rust toolchai
 `cargo build --locked -p zixcel-microsoft-cli`. Package version, source/content hashes,
 notices and the actual dispatcher must be checked before independent publication.
 
-The SDK is pinned to accepted source (native SDK 0.3.0), which verifies
+The SDK is pinned to accepted source (native SDK 0.3.1), which verifies
 the dispatcher's manifest-v2 binding. Both direct protocol and actual dispatcher
 regressions are required; a v1-shaped direct request does not establish v2 compatibility.
 
@@ -31,7 +31,7 @@ printing credential values or remote response bodies.
 
 Patch 0.2.2 reads polymorphic DNS requirements without selecting derived fields on the base server entity, and preserves HTTP failure classes in bounded observations. It also preserves read-only Exchange DiscoveryMailbox records without an Entra UUID while retaining all SMTP address-conflict checks. Such observation references never authorize a write.
 
-Version 0.3.0 adds explicit device authorization, Crowsi token-cache custody and
+Version 0.3.1 adds explicit device authorization, Crowsi token-cache custody and
 refresh, domain add/verify, user create/usage-location/account enablement, existing
 license assignment, DKIM prepare/enable, and own-mailbox send/receive probes.
 See [mail enablement guide](../../docs/mail-administration.md). CLI 0.4.0 supplies

@@ -185,11 +185,28 @@ fn validate_management_state(c: &crate::management::Change, v: &Value) -> Result
             return Err(Error("invalid_dkim_snapshot"));
         }
         for name in [&t.selector1, &t.selector2] {
-            if !name.is_empty() {
-                crate::domain(name)?;
+            if !name.is_empty() && !super::dns_target::valid(name) {
+                return Err(Error("invalid_dkim_target"));
             }
         }
         let _ = t.enabled;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod dkim_target_tests {
+    use super::*;
+    #[test]
+    fn official_dns_selector_targets_are_accepted_without_relaxing_tenant_domains() {
+        let change = crate::management::Change::PrepareDkim {
+            domain: "example.net".into(),
+        };
+        let state = serde_json::json!({"eligible":true,"target":{"domain":"example.net","enabled":false,"selector1":"selector1-example-net._domainkey.initial.onmicrosoft.com","selector2":"selector2-example-net._domainkey.initial.a-v1.dkim.mail.microsoft"}});
+        assert!(validate_management_state(&change, &state).is_ok());
+        assert!(crate::domain("_domainkey.example.net").is_err());
+        let mut invalid = state;
+        invalid["target"]["selector1"] = serde_json::json!("https://other.example");
+        assert!(validate_management_state(&change, &invalid).is_err());
+    }
 }
