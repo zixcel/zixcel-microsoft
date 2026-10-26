@@ -46,7 +46,7 @@ impl PowerShell {
         mode: &str,
         change: Option<&Change>,
     ) -> Result<Value> {
-        self.call(scope, mode, change, None)
+        self.call(scope, mode, change, None, None)
     }
     fn call(
         &self,
@@ -54,10 +54,13 @@ impl PowerShell {
         mode: &str,
         change: Option<&Change>,
         management: Option<&crate::management::Change>,
+        audit_mailbox: Option<&str>,
     ) -> Result<Value> {
         scope.validate()?;
         let script = concat!(
             include_str!("bridge-read.ps1"),
+            "\n",
+            include_str!("bridge-audit.ps1"),
             "\n",
             include_str!("bridge-write.ps1"),
             "\n",
@@ -65,8 +68,16 @@ impl PowerShell {
             "\n",
             include_str!("bridge-main.ps1")
         );
-        let input = if management.is_some() {
-            super::packet::encode_all(scope, mode, change, management, &self.profile, &self.token)?
+        let input = if management.is_some() || audit_mailbox.is_some() {
+            super::packet::encode_all(
+                scope,
+                mode,
+                change,
+                management,
+                audit_mailbox,
+                &self.profile,
+                &self.token,
+            )?
         } else {
             super::packet::encode(scope, mode, change, &self.profile, &self.token)?
         };
@@ -124,20 +135,29 @@ impl crate::management::Backend for PowerShell {
     fn observe(&mut self, scope: &Scope, change: &crate::management::Change) -> Result<Value> {
         change.validate()?;
         self.verify_management_identity(scope)?;
-        let v = self.call(scope, "management_snapshot", None, Some(change))?;
+        let v = self.call(scope, "management_snapshot", None, Some(change), None)?;
         validate_management_state(change, &v)?;
         Ok(v)
     }
     fn mutate(&mut self, scope: &Scope, change: &crate::management::Change) -> Result<()> {
         change.validate()?;
         self.verify_management_identity(scope)?;
-        if self.call(scope, "management_apply", None, Some(change))?["acknowledged"] != true {
+        if self.call(scope, "management_apply", None, Some(change), None)?["acknowledged"] != true {
             return Err(Error("exchange_not_acknowledged"));
         }
         Ok(())
     }
 }
 impl PowerShell {
+    pub fn mailbox_audit(&mut self, scope: &Scope, mailbox: &str) -> Result<Value> {
+        crate::uuid(mailbox)?;
+        self.verify_management_identity(scope)?;
+        let v = self.call(scope, "mailbox_audit", None, None, Some(mailbox))?;
+        if v["mailbox"] != mailbox || v["read_only"] != true {
+            return Err(Error("invalid_mailbox_audit"));
+        }
+        Ok(v)
+    }
     fn verify_management_identity(&mut self, scope: &Scope) -> Result<()> {
         use crate::graph::Transport;
         let g = self

@@ -60,6 +60,7 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
             );
         }
         if id == "exchange.snapshot" {
+            args.push(json!({"name":"mailbox","required":false,"maximum":36}));
             args.push(json!({"name":"change-file","required":false,"maximum":2048}));
         }
         let exchange = id.starts_with("exchange.");

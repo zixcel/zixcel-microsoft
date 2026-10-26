@@ -12,6 +12,9 @@ pub fn invoke(
     timeout: Duration,
     now: fn() -> u64,
 ) -> Result<Value, Error> {
+    if crate::reconciliation::selected(r)? {
+        return crate::reconciliation::invoke(r, scope, timeout, now);
+    }
     let arg = |n| {
         r.arguments
             .get(n)

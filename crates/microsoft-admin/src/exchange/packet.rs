@@ -8,13 +8,14 @@ pub(super) fn encode(
     profile: &ExchangeProfile,
     token: &str,
 ) -> Result<Zeroizing<Vec<u8>>> {
-    encode_all(scope, mode, change, None, profile, token)
+    encode_all(scope, mode, change, None, None, profile, token)
 }
 pub(super) fn encode_all(
     scope: &Scope,
     mode: &str,
     change: Option<&Change>,
     management: Option<&crate::management::Change>,
+    audit_mailbox: Option<&str>,
     profile: &ExchangeProfile,
     token: &str,
 ) -> Result<Zeroizing<Vec<u8>>> {
@@ -24,6 +25,7 @@ pub(super) fn encode_all(
         mode: &'a str,
         change: Option<&'a Change>,
         user: &'a str,
+        audit_mailbox: Option<&'a str>,
         management_change: Option<&'a crate::management::Change>,
         module: &'a std::path::Path,
         token: &'a str,
@@ -32,6 +34,7 @@ pub(super) fn encode_all(
         serde_json::to_vec(&Input {
             scope,
             mode,
+            audit_mailbox,
             management_change: management,
             change,
             user: &profile.user_principal_name,

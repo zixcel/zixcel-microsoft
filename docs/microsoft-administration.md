@@ -140,3 +140,8 @@ Shared creation sets an explicit deterministic Exchange alias. Post-read may con
 that exact generated alias in an already-authoritative domain;
 other unexpected aliases still prevent verified success. This never proves Entra
 sign-in blocking: independent blocked-sign-in evidence is still required.
+
+For explicit domain-verification journal resolution, mailbox primary-address
+cutover, and delegate/delivery inspection commands, see
+[mail-administration.md](mail-administration.md). Diagnostic readback alone never
+authorizes replay or automatic lock removal.

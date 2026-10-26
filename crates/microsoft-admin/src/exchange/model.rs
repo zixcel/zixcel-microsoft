@@ -33,6 +33,10 @@ pub enum Change {
         mailbox: String,
         address: String,
     },
+    SetPrimarySmtp {
+        mailbox: String,
+        address: String,
+    },
     RemoveAlias {
         mailbox: String,
         address: String,
@@ -75,9 +79,9 @@ impl Change {
                     return Err(crate::Error("invalid_display_name"));
                 }
             }
-            Self::AddAlias { address, .. } | Self::RemoveAlias { address, .. } => {
-                crate::email(address)?
-            }
+            Self::AddAlias { address, .. }
+            | Self::RemoveAlias { address, .. }
+            | Self::SetPrimarySmtp { address, .. } => crate::email(address)?,
             _ => {}
         }
         Ok(())
@@ -88,6 +92,7 @@ impl Change {
             Self::CreateShared { .. } => None,
             Self::AddAlias { mailbox, .. }
             | Self::RemoveAlias { mailbox, .. }
+            | Self::SetPrimarySmtp { mailbox, .. }
             | Self::GrantFullAccess { mailbox, .. }
             | Self::RevokeFullAccess { mailbox, .. }
             | Self::GrantSendAs { mailbox, .. }

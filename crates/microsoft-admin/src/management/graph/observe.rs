@@ -2,7 +2,7 @@ use super::{Change, Error, Graph, Result, Scope, Value, json, selected, user};
 pub(super) fn state(g: &mut Graph, scope: &Scope, c: &Change) -> Result<Value> {
     let target = match c {
         Change::AddDomain { domain } | Change::VerifyDomain { domain } => {
-            let v=g.get(&format!("/v1.0/domains/{domain}?$select=id,isVerified,isDefault,isInitial,authenticationType,supportedServices"),matches!(c,Change::AddDomain{..}))?;
+            let v=g.get(&format!("/v1.0/domains/{domain}?$select=id,isVerified,isDefault,isInitial,authenticationType,supportedServices,state"),matches!(c,Change::AddDomain{..}))?;
             if v.is_null() {
                 return Ok(json!({"target":null,"eligible":true}));
             }
@@ -15,6 +15,7 @@ pub(super) fn state(g: &mut Graph, scope: &Scope, c: &Change) -> Result<Value> {
                     "isInitial",
                     "authenticationType",
                     "supportedServices",
+                    "state",
                 ],
             )?;
             if v["id"] != *domain {

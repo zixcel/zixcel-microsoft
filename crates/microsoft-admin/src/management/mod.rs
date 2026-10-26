@@ -1,6 +1,7 @@
 mod failure;
 mod graph;
 mod model;
+pub mod reconciliation;
 mod rules;
 use crate::{Error, Result, Scope, exchange::Journal};
 pub use failure::{FailurePhase, FailureReason, MutationFailure, ProviderCode};
