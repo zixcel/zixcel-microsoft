@@ -3,13 +3,12 @@ function Read-ZixDkim($c) {
     $domain = "$($c.domain)"
     $accepted = @(Get-AcceptedDomain -Identity $domain -ErrorAction Stop)
     if ($accepted.Count -ne 1 -or "$($accepted[0].DomainName)".ToLowerInvariant() -ne $domain -or "$($accepted[0].DomainType)" -ne 'Authoritative') { throw 'authoritative_domain_required' }
-    try { $config = @(Get-DkimSigningConfig -Identity $domain -ErrorAction Stop) }
-    catch {
-        if ($_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound) {
-            return @{ target=$null; eligible=$true }
-        }
-        throw
-    }
+    # Enumerate successfully before inferring absence. Exchange versions differ
+    # in the error category raised by -Identity when no signing config exists.
+    $all = @(Get-DkimSigningConfig -ErrorAction Stop)
+    if ($all.Count -gt 100) { throw 'dkim_observation_limit' }
+    $config = @($all | Where-Object { "$($_.Domain)".ToLowerInvariant() -eq $domain })
+    if ($config.Count -eq 0) { return @{ target=$null; eligible=$true } }
     if ($config.Count -ne 1 -or "$($config[0].Domain)".ToLowerInvariant() -ne $domain -or $config[0].Enabled -isnot [bool]) { throw 'dkim_identity_mismatch' }
     @{ target=@{domain=$domain; enabled=$config[0].Enabled; selector1="$($config[0].Selector1CNAME)".ToLowerInvariant().TrimEnd('.'); selector2="$($config[0].Selector2CNAME)".ToLowerInvariant().TrimEnd('.')}; eligible=$true }
 }
