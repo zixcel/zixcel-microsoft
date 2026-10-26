@@ -200,3 +200,48 @@ fn account_change_requires_exact_preservation_and_probe_does_not_claim_delivery(
         "sent_copy_observed_delivery_unverified"
     );
 }
+
+#[test]
+fn upn_change_requires_blocked_cloud_account_and_preserves_all_other_fields() {
+    let change = Change::SetUserPrincipalName {
+        user: scope().subject,
+        upn: "shared@example.net".into(),
+    };
+    let before = json!({"target":{"id":scope().subject,"userPrincipalName":"old@example.net","accountEnabled":false,"displayName":"Shared","assignedLicenses":[]},"eligible":true,"on_premises_sync_enabled":null});
+    for mode in 0..4 {
+        let mut b = Fake {
+            state: before.clone(),
+            after: before.clone(),
+            writes: 0,
+            fail: false,
+        };
+        match mode {
+            0 => b.state["target"]["accountEnabled"] = json!(true),
+            1 => b.state["on_premises_sync_enabled"] = json!(true),
+            2 => b.state["eligible"] = json!(false),
+            _ => b.state["target"]["userPrincipalName"] = json!("shared@example.net"),
+        }
+        assert!(management::plan(&mut b, scope(), change.clone(), 100).is_err());
+        assert_eq!(b.writes, 0);
+    }
+    for drift in [false, true] {
+        let mut b = Fake {
+            state: before.clone(),
+            after: before.clone(),
+            writes: 0,
+            fail: false,
+        };
+        b.after["target"]["userPrincipalName"] = json!("shared@example.net");
+        if drift {
+            b.after["target"]["accountEnabled"] = json!(true);
+        }
+        let p = management::plan(&mut b, scope(), change.clone(), 100).unwrap();
+        let (_d, j) = journal();
+        let r = management::execute(&mut b, &j, &p, &digest(&p).unwrap(), || 101).unwrap();
+        assert_eq!(
+            r["state"],
+            if drift { "outcome_unknown" } else { "verified" }
+        );
+        assert_eq!(b.writes, 1);
+    }
+}

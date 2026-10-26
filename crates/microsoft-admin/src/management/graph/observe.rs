@@ -34,6 +34,32 @@ pub(super) fn state(g: &mut Graph, scope: &Scope, c: &Change) -> Result<Value> {
             }
             user(g, upn, true)?
         }
+        Change::SetUserPrincipalName { user: id, upn } => {
+            let domain = upn.split_once('@').ok_or(Error("invalid_address"))?.1;
+            let d = g.get(
+                &format!("/v1.0/domains/{domain}?$select=id,isVerified"),
+                false,
+            )?;
+            if d["id"] != domain || d["isVerified"] != true {
+                return Err(Error("domain_unverified"));
+            }
+            let target = user(g, id, false)?;
+            let source = g.get(
+                &format!("/v1.0/users/{id}?$select=id,onPremisesSyncEnabled"),
+                false,
+            )?;
+            if source["id"] != *id
+                || !source
+                    .as_object()
+                    .is_some_and(|o| o.contains_key("onPremisesSyncEnabled"))
+            {
+                return Err(Error("incomplete_user_source"));
+            }
+            let available = user(g, upn, true)?;
+            return Ok(
+                json!({"target":target,"eligible":source["onPremisesSyncEnabled"] != true && (available.is_null() || available["id"] == *id),"on_premises_sync_enabled":source["onPremisesSyncEnabled"]}),
+            );
+        }
         Change::SetUsageLocation { user: id, .. } | Change::SetUserEnabled { user: id, .. } => {
             user(g, id, false)?
         }

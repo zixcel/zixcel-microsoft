@@ -202,3 +202,78 @@ fn planning_uses_clock_after_read_and_execution_rechecks_after_delayed_read() {
     assert_eq!(receipt["remote_write_attempted"], false);
     assert!(!d.path().join(format!("{TENANT}.active")).exists());
 }
+
+fn alias_original() -> Plan {
+    let mut s = snapshot();
+    s.trustee = None;
+    s.recipients[0].aliases.push("old@example.org".into());
+    exchange::plan(
+        s,
+        Change::RemoveAlias {
+            mailbox: MAILBOX.into(),
+            address: "old@example.org".into(),
+        },
+        100,
+    )
+    .unwrap()
+}
+#[test]
+fn alias_resolution_accepts_only_exact_before_or_exact_postcondition_without_write() {
+    for removed in [false, true] {
+        let (d, j) = journal();
+        let old = alias_original();
+        let hash = seed(&d, &old);
+        let mut f = ReadOnly(old.before.clone());
+        f.0.observed_at = 1000;
+        if removed {
+            f.0.recipients[0].aliases.retain(|a| a != "old@example.org");
+        }
+        let p = reconciliation::plan(&mut f, &j, &scope(), old, || 1000).unwrap();
+        assert_eq!(p.schema, "zix-microsoft-alias-resolution-plan/v1");
+        assert!(p.service_alias_additions.is_empty());
+        let receipt = reconciliation::execute(&mut f, &j, &scope(), &p, || 1000).unwrap();
+        assert_eq!(receipt["desired_alias_absent"], removed);
+        assert_eq!(receipt["remote_write_attempted"], false);
+        assert_eq!(receipt["original_outcome"], "unknown");
+        assert_eq!(receipt["original_replay_allowed"], false);
+        assert!(receipt.get("desired_explicit_grant_observed").is_none());
+        assert!(d.path().join(format!("{hash}.attempt")).exists());
+        assert!(!d.path().join(format!("{TENANT}.active")).exists());
+    }
+}
+#[test]
+fn alias_resolution_refuses_unrelated_drift_and_review_changes() {
+    for mode in 0..7 {
+        let (d, j) = journal();
+        let old = alias_original();
+        seed(&d, &old);
+        let mut f = ReadOnly(old.before.clone());
+        f.0.observed_at = 1000;
+        match mode {
+            0 => f.0.recipients[0].primary = "other@example.org".into(),
+            1 => f.0.recipients[0].aliases.push("extra@example.org".into()),
+            2 => f.0.recipients[0].full_access = true,
+            3 => f.0.trustee = Some(TRUSTEE.into()),
+            _ => (),
+        }
+        if mode < 4 {
+            assert!(reconciliation::plan(&mut f, &j, &scope(), old, || 1000).is_err());
+        } else {
+            let mut p = reconciliation::plan(&mut f, &j, &scope(), old, || 1000).unwrap();
+            match mode {
+                4 => f.0.recipients[0].aliases.retain(|a| a != "old@example.org"),
+                5 => p.schema = "zix-microsoft-exchange-resolution-plan/v1".into(),
+                _ => (),
+            }
+            assert!(
+                reconciliation::execute(&mut f, &j, &scope(), &p, || if mode == 6 {
+                    1300
+                } else {
+                    1000
+                })
+                .is_err()
+            );
+        }
+        assert!(d.path().join(format!("{TENANT}.active")).exists());
+    }
+}

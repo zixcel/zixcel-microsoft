@@ -7,6 +7,14 @@ use serde_json::{Value, json};
 use std::{collections::BTreeMap, path::PathBuf};
 const DECISION: &str =
     "accept_observed_grant_and_listed_service_alias_additions_retain_original_outcome_unknown";
+const ALIAS_DECISION: &str = "record_exact_alias_state_retain_original_outcome_unknown";
+fn schema(change: &Change) -> (&'static str, &'static str) {
+    if matches!(change, Change::RemoveAlias { .. }) {
+        ("zix-microsoft-alias-resolution-plan/v1", ALIAS_DECISION)
+    } else {
+        ("zix-microsoft-exchange-resolution-plan/v1", DECISION)
+    }
+}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ResolutionPlan {
@@ -29,6 +37,20 @@ fn eligible(
 ) -> Result<BTreeMap<String, Vec<String>>> {
     planning::validate(p, p.created_at)?;
     validation::snapshot(observed, now)?;
+    if matches!(p.change, Change::RemoveAlias { .. }) {
+        if p.scope != *scope
+            || observed.scope != *scope
+            || observed.trustee.is_some()
+            || p.before.trustee.is_some()
+            || now.saturating_sub(p.created_at) < 600
+            || p.created_at > now
+            || !(planning::same_state(&p.before, observed)?
+                || postcondition::verify(&p.before, observed, &p.change)?)
+        {
+            return Err(Error("alias_reconciliation_precondition_failed"));
+        }
+        return Ok(BTreeMap::new());
+    }
     if !matches!(
         p.change,
         Change::GrantFullAccess { .. } | Change::GrantSendAs { .. }
@@ -95,14 +117,14 @@ pub fn plan(
     let original_sha256 = digest(&original)?;
     let attempt_sha256 = journal.uncertain_evidence(&original_sha256, scope)?;
     Ok(ResolutionPlan {
-        schema: "zix-microsoft-exchange-resolution-plan/v1".into(),
+        schema: schema(&original.change).0.into(),
+        decision: schema(&original.change).1.into(),
         original,
         journal_directory: journal.directory().to_path_buf(),
         original_sha256,
         attempt_sha256,
         observation,
         service_alias_additions,
-        decision: DECISION.into(),
         created_at: now,
         expires_at: now.checked_add(300).ok_or(Error("invalid_clock"))?,
     })
@@ -115,10 +137,10 @@ pub fn execute(
     now: impl Fn() -> u64,
 ) -> Result<Value> {
     let valid = |at| {
-        if p.schema != "zix-microsoft-exchange-resolution-plan/v1"
+        if p.schema != schema(&p.original.change).0
             || p.journal_directory != journal.directory()
             || p.original_sha256 != digest(&p.original)?
-            || p.decision != DECISION
+            || p.decision != schema(&p.original.change).1
             || p.created_at > at
             || p.expires_at <= at
             || p.expires_at.checked_sub(p.created_at) != Some(300)
@@ -136,11 +158,24 @@ pub fn execute(
         return Err(Error("remote_state_drift"));
     }
     valid(now())?;
-    let receipt = json!({"schema":"zix-microsoft-exchange-resolution/v1",
+    let mut receipt = json!({"schema":"zix-microsoft-exchange-resolution/v1",
         "original_plan_sha256":p.original_sha256,"original_outcome":"unknown",
         "original_replay_allowed":false,"remote_write_attempted":false,
         "desired_explicit_grant_observed":true,"effective_access_inferred":false,
         "observation":fresh,"service_alias_additions":p.service_alias_additions,"decision":p.decision});
+    if matches!(p.original.change, Change::RemoveAlias { .. }) {
+        receipt["schema"] = json!("zix-microsoft-alias-resolution/v1");
+        receipt
+            .as_object_mut()
+            .expect("object")
+            .remove("desired_explicit_grant_observed");
+        receipt["desired_alias_absent"] = json!(postcondition::verify(
+            &p.original.before,
+            &fresh,
+            &p.original.change
+        )?);
+        receipt["new_remote_operation_requires_separate_plan_and_operator_approval"] = json!(true);
+    }
     journal.resolve_uncertain(&p.original_sha256, &p.attempt_sha256, scope, &receipt)?;
     Ok(receipt)
 }

@@ -17,16 +17,25 @@ struct Input {
 }
 pub fn selected(r: &Request) -> Result<bool, Error> {
     let (arg, pointer, expected) = match r.operation.as_str() {
-        "exchange.plan" => ("change-file", "/operation", "resolve_observed_grant"),
+        "exchange.plan" => (
+            "change-file",
+            "/operation",
+            ["resolve_observed_grant", "resolve_alias_removal"],
+        ),
         "exchange.apply" => (
             "plan-file",
             "/plan/schema",
-            "zix-microsoft-exchange-resolution-plan/v1",
+            [
+                "zix-microsoft-exchange-resolution-plan/v1",
+                "zix-microsoft-alias-resolution-plan/v1",
+            ],
         ),
         _ => return Ok(false),
     };
     let v: Value = crate::input::read(r.arguments.get(arg).ok_or(Error("missing_argument"))?)?;
-    Ok(v.pointer(pointer).and_then(Value::as_str) == Some(expected))
+    Ok(v.pointer(pointer)
+        .and_then(Value::as_str)
+        .is_some_and(|s| expected.contains(&s)))
 }
 pub fn invoke(
     r: &Request,
@@ -67,7 +76,7 @@ pub fn invoke(
             .map_err(|e| Error(e.0));
     }
     let input: Input = crate::input::read(arg("change-file")?)?;
-    if input.operation != "resolve_observed_grant" {
+    if !["resolve_observed_grant", "resolve_alias_removal"].contains(&input.operation.as_str()) {
         return Err(Error("unsupported_reconciliation"));
     }
     let original: zix_operation_contracts::LocalPlan =
@@ -77,6 +86,14 @@ pub fn invoke(
     }
     let original: Plan =
         serde_json::from_value(original.plan).map_err(|_| Error("invalid_plan"))?;
+    if (input.operation == "resolve_alias_removal")
+        != matches!(
+            original.change,
+            zixcel_microsoft_admin::exchange::Change::RemoveAlias { .. }
+        )
+    {
+        return Err(Error("unsupported_reconciliation"));
+    }
     let journal = Journal::open(Path::new(&input.journal_directory)).map_err(|e| Error(e.0))?;
     let p = reconciliation::plan(&mut backend, &journal, scope, original, now)
         .map_err(|e| Error(e.0))?;
