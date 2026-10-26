@@ -32,7 +32,15 @@ fn invoke(op: &str, args: Value) -> Value {
         .unwrap();
     c.stdin.take().unwrap().write_all(serde_json::to_string(&json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":op,"arguments":args,"binding":binding(),"limits":{"timeout_ms":40000,"maximum_response_bytes":65536}})).unwrap().as_bytes()).unwrap();
     let r = c.wait_with_output().unwrap();
-    assert!(r.status.success());
+    assert!(
+        r.status.success(),
+        "native protocol exited {:?}: {} (executable bytes: {})",
+        r.status.code(),
+        String::from_utf8_lossy(&r.stderr),
+        std::fs::metadata(env!("CARGO_BIN_EXE_zix-microsoft"))
+            .unwrap()
+            .len()
+    );
     serde_json::from_slice(&r.stdout).unwrap()
 }
 #[test]
