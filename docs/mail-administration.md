@@ -6,6 +6,9 @@ the receipt and permanent attempt journal. Remote messages, headers and arbitrar
 local error strings are never included. Unknown outcomes still retain the tenant
 lock and forbid replay; diagnostics do not authorize reconciliation or retries.
 Existing attempts without diagnostics cannot be reconstructed from this update.
+`domains list` also returns the nullable domain operation `state`, projecting
+only `operation`, `status` and `lastActionDateTime`. A null state does not prove
+that an earlier write failed or authorize a retry.
 Device authorization accepts
 the current `https://login.microsoft.com/device` page as well as the two
 legacy Microsoft device-login URLs, each by exact match. Graph read transport budgets

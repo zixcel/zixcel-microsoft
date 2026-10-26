@@ -49,7 +49,18 @@ pub fn select(v: &Value, fields: &[&str], depth: usize) -> Result<Value> {
     let mut out = Map::new();
     for k in fields {
         if let Some(value) = v.get(*k) {
-            out.insert((*k).into(), field(value, depth + 1)?);
+            let projected = if *k == "state" && !value.is_null() {
+                // Domain operation state is an explicit, bounded projection;
+                // do not broaden the generic nested-object field allowlist.
+                select(
+                    value,
+                    &["lastActionDateTime", "operation", "status"],
+                    depth + 1,
+                )?
+            } else {
+                field(value, depth + 1)?
+            };
+            out.insert((*k).into(), projected);
         }
     }
     Ok(Value::Object(out))

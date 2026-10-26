@@ -48,6 +48,31 @@ fn directory_addresses_do_not_prove_exchange_mailboxes() {
     assert_eq!(r["mailbox_existence"], "not_inferred_from_directory");
     assert_eq!(r["writes_performed"], false);
 }
+
+#[test]
+fn domain_operation_state_is_selected_bounded_and_does_not_infer_write_success() {
+    let mut f = fake(vec![Ok(json!({"value":[
+        {"id":"example.org","isVerified":false,"state":null},
+        {"id":"other.example.org","isVerified":false,"state":{
+            "operation":"Verification","status":"Failed",
+            "lastActionDateTime":"2026-01-01T00:00:00Z","private":"hidden"
+        }}
+    ]}))]);
+    let result = observe(&mut f, &scope(), Read::Domains).unwrap();
+    assert!(f.paths[2].contains("supportedServices,state"));
+    let rows = &result["observation"]["data"];
+    assert!(rows[0].as_object().unwrap().contains_key("state"));
+    assert!(rows[0]["state"].is_null());
+    assert_eq!(rows[1]["state"]["status"], "Failed");
+    assert_eq!(rows[1]["state"]["operation"], "Verification");
+    assert_eq!(rows[1]["isVerified"], false);
+    assert!(!result.to_string().contains("hidden"));
+    assert_eq!(result["writes_performed"], false);
+    let mut malformed = fake(vec![Ok(
+        json!({"value":[{"id":"example.org","state":"invalid"}]}),
+    )]);
+    assert!(observe(&mut malformed, &scope(), Read::Domains).is_err());
+}
 #[test]
 fn pagination_follows_only_same_resource_and_has_explicit_completion() {
     let mut f = fake(vec![

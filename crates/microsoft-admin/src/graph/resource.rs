@@ -30,6 +30,7 @@ impl Read {
                     "isInitial",
                     "authenticationType",
                     "supportedServices",
+                    "state",
                 ],
                 true,
             ),
