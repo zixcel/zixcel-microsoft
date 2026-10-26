@@ -1,5 +1,9 @@
 # Native Microsoft administration
 
+Patch 0.3.2 caps Graph read transport budgets at 40 seconds while preserving
+shorter caller deadlines, so the native 120-second operation budget does not
+prevent authenticated Graph discovery from starting.
+
 The independent native `zix-microsoft` binary implements the Zix provider protocol.
 Use [Microsoft administration](../../docs/microsoft-administration.md) for required
 permissions, trusted Exchange profile, exact commands and one-use plan execution.
