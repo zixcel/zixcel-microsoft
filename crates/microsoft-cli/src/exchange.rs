@@ -52,6 +52,11 @@ pub fn invoke(
     let mut backend =
         PowerShell::new(profile, exo, Some(&graph), timeout).map_err(|e| Error(e.0))?;
     let value = match r.operation.as_str() {
+        "exchange.mailbox-audit" => {
+            return backend
+                .mailbox_audit(scope, arg("mailbox")?)
+                .map_err(|e| Error(e.0));
+        }
         "exchange.snapshot" => serde_json::to_value(
             backend
                 .snapshot(scope, change.as_ref())

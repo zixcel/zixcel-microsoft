@@ -42,6 +42,15 @@ pub(crate) fn verify(before: &Snapshot, after: &Snapshot, change: &Change) -> Re
         };
         match change {
             Change::AddAlias { address, .. } => r.aliases.push(address.clone()),
+            Change::SetPrimarySmtp { address, .. } => {
+                if !r.aliases.contains(&r.primary) {
+                    r.aliases.push(r.primary.clone());
+                }
+                if !r.aliases.contains(address) {
+                    r.aliases.push(address.clone());
+                }
+                r.primary = address.clone();
+            }
             Change::RemoveAlias { address, .. } => r.aliases.retain(|a| a != address),
             Change::GrantFullAccess { .. } => r.full_access = true,
             Change::RevokeFullAccess { .. } => r.full_access = false,

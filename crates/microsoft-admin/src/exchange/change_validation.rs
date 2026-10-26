@@ -35,6 +35,23 @@ pub fn change(s: &Snapshot, c: &Change) -> Result<()> {
             address_domain(s, address)?;
             unused(s, address)?;
         }
+        Change::SetPrimarySmtp { mailbox, address } => {
+            address_domain(s, address)?;
+            let r = s
+                .recipients
+                .iter()
+                .find(|r| &r.id == mailbox)
+                .ok_or(Error("mailbox_not_found"))?;
+            if r.primary == *address {
+                return Err(Error("already_in_requested_state"));
+            }
+            if s.recipients.iter().any(|other| {
+                other.id != *mailbox
+                    && (other.primary == *address || other.aliases.contains(address))
+            }) {
+                return Err(Error("address_conflict"));
+            }
+        }
         Change::RemoveAlias { mailbox, address } => {
             email(address)?;
             let r = s

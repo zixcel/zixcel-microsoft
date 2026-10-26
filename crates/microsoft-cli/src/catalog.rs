@@ -32,6 +32,12 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
             "read",
         ),
         (
+            "exchange.mailbox-audit",
+            vec!["exchange", "mailbox-audit"],
+            vec!["mailbox"],
+            "read",
+        ),
+        (
             "exchange.snapshot",
             vec!["exchange", "snapshot"],
             vec![],

@@ -102,3 +102,83 @@ impl Admission {
             .map_err(|_| Error("journal_sync_failed"))
     }
 }
+
+impl Journal {
+    pub(crate) fn uncertain_evidence(&self, hash: &str, scope: &Scope) -> Result<String> {
+        scope.validate()?;
+        if hash.len() != 64
+            || !hash
+                .bytes()
+                .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+        {
+            return Err(Error("invalid_approval_hash"));
+        }
+        let lock = private_bytes(&self.root.join(format!("{}.active", scope.tenant)))?;
+        if lock != hash.as_bytes() {
+            return Err(Error("active_attempt_mismatch"));
+        }
+        let marker = private_bytes(&self.root.join(format!("{hash}.attempt")))?;
+        if !marker.starts_with(b"admitted; outcome unknown until independent readback\n")
+            || marker
+                .windows(b"verified by independent post-read".len())
+                .any(|v| v == b"verified by independent post-read")
+        {
+            return Err(Error("attempt_not_uncertain"));
+        }
+        use sha2::{Digest, Sha256};
+        Ok(Sha256::digest(&marker)
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect())
+    }
+    pub(crate) fn resolve_verification(
+        &self,
+        hash: &str,
+        expected: &str,
+        scope: &Scope,
+        receipt: &serde_json::Value,
+    ) -> Result<()> {
+        if self.uncertain_evidence(hash, scope)? != expected {
+            return Err(Error("journal_state_drift"));
+        }
+        // Reserve once before touching the lock. Failures leave conservative evidence.
+        let path = self.root.join(format!("{hash}.resolution"));
+        let mut file =
+            create(&path).map_err(|_| Error("resolution_already_exists_or_unavailable"))?;
+        let bytes = serde_json::to_vec(receipt).map_err(|_| Error("encoding_failed"))?;
+        file.write_all(&bytes)
+            .and_then(|_| file.sync_all())
+            .map_err(|_| Error("journal_write_failed"))?;
+        File::open(&self.root)
+            .and_then(|d| d.sync_all())
+            .map_err(|_| Error("journal_sync_failed"))?;
+        if self.uncertain_evidence(hash, scope)? != expected {
+            return Err(Error("journal_state_drift"));
+        }
+        let archived = self.root.join(format!("{hash}.resolved-lock"));
+        if archived.exists() {
+            return Err(Error("resolution_archive_exists"));
+        }
+        fs::rename(self.root.join(format!("{}.active", scope.tenant)), archived)
+            .map_err(|_| Error("lock_archive_failed"))?;
+        File::open(&self.root)
+            .and_then(|d| d.sync_all())
+            .map_err(|_| Error("journal_sync_failed"))
+    }
+}
+fn private_bytes(path: &Path) -> Result<Vec<u8>> {
+    let m = fs::symlink_metadata(path).map_err(|_| Error("journal_unavailable"))?;
+    if !m.is_file() || m.file_type().is_symlink() || m.len() > 16384 {
+        return Err(Error("unsafe_journal_file"));
+    }
+    #[cfg(unix)]
+    if m.mode() & 0o077 != 0
+        || m.uid()
+            != fs::metadata("/proc/self")
+                .map_err(|_| Error("owner_unavailable"))?
+                .uid()
+    {
+        return Err(Error("unsafe_journal_permissions"));
+    }
+    fs::read(path).map_err(|_| Error("journal_unavailable"))
+}

@@ -63,3 +63,59 @@ $refused=$false
 try { Write-ZixDkim ([pscustomobject]@{operation='arbitrary'}) } catch { $refused=$true }
 if (!$refused -or $script:writes.Count -ne 9) {throw 'unknown DKIM write accepted'}
 'DKIM literal mapping, selector observation and permission failures passed without remote requests.'
+function Get-EXOMailbox { param($ExternalDirectoryObjectId,$Properties,$ErrorAction)
+    [pscustomobject]@{ExternalDirectoryObjectId=$ExternalDirectoryObjectId;ExchangeGuid='55555555-5555-5555-5555-555555555555';EmailAddresses=@('SMTP:old@example.org','smtp:help@example.org','X500:/o=Example/ou=Exchange/cn=Recipients/cn=original','SIP:old@example.org')}
+}
+Write-ZixRecipient ([pscustomobject]@{operation='set_primary_smtp';mailbox='33333333-3333-3333-3333-333333333333';address='new@example.org'}) | Out-Null
+$addresses=$script:writes[-1].delta
+if ($addresses.Count -ne 5 -or $addresses -cnotcontains 'SMTP:new@example.org' -or $addresses -cnotcontains 'smtp:old@example.org' -or $addresses -cnotcontains 'X500:/o=Example/ou=Exchange/cn=Recipients/cn=original' -or $addresses -cnotcontains 'SIP:old@example.org') {throw 'primary migration lost proxy addresses'}
+Write-ZixRecipient ([pscustomobject]@{operation='set_primary_smtp';mailbox='33333333-3333-3333-3333-333333333333';address='help@example.org'}) | Out-Null
+if ($script:writes[-1].delta.Count -ne 4 -or $script:writes[-1].delta -cnotcontains 'SMTP:help@example.org') {throw 'existing alias was not promoted exactly once'}
+'Primary SMTP promotion preserves all proxy types without recreating the mailbox.'
+. "$PSScriptRoot/../src/exchange/bridge-audit.ps1"
+function Get-EXORecipient { param($Identity,$ExternalDirectoryObjectId,$ResultSize,$Properties,$ErrorAction)
+    if ($Identity -eq 'unresolvable') {throw 'synthetic resolution failed'}
+    if ($Identity) {return [pscustomobject]@{ExternalDirectoryObjectId='44444444-4444-4444-4444-444444444444';PrimarySmtpAddress='delegate@example.org'}}
+    if ($ExternalDirectoryObjectId) {return [pscustomobject]@{ExternalDirectoryObjectId=$ExternalDirectoryObjectId;PrimarySmtpAddress='delegate@example.org'}}
+    [pscustomobject]@{ExternalDirectoryObjectId='33333333-3333-3333-3333-333333333333';PrimarySmtpAddress='old@example.org';EmailAddresses=@('SMTP:old@example.org');RecipientTypeDetails='SharedMailbox';DisplayName='Example'}
+}
+function Get-AcceptedDomain { param($ResultSize,$ErrorAction) [pscustomobject]@{DomainType='Authoritative';DomainName='example.org'} }
+function Get-EXOMailboxPermission { param($ExternalDirectoryObjectId,$ResultSize,$ErrorAction)
+    [pscustomobject]@{User='NT AUTHORITY\SELF';AccessRights=@('FullAccess');Deny=$false;IsInherited=$false}
+}
+function Get-EXORecipientPermission { param($ExternalDirectoryObjectId,$ResultSize,$ErrorAction)
+    [pscustomobject]@{Trustee='NT AUTHORITY\SELF';AccessRights=@('SendAs');AccessControlType='Allow';IsInherited=$false}
+}
+$r=[pscustomobject]@{scope=@{};change=[pscustomobject]@{mailbox='33333333-3333-3333-3333-333333333333';trustee='44444444-4444-4444-4444-444444444444'}}
+$s=Read-ZixRecipients $r
+if ($s.recipients[0].full_access -or $s.recipients[0].send_as) {throw 'SELF treated as selected trustee'}
+function Get-EXOMailboxPermission { param($ExternalDirectoryObjectId,$ResultSize,$ErrorAction)
+    [pscustomobject]@{User='delegate-alias';AccessRights=@('FullAccess');Deny=$false;IsInherited=$false}
+}
+$s=Read-ZixRecipients $r
+if (!$s.recipients[0].full_access -or $s.recipients[0].send_as) {throw 'returned trustee identity was not resolved'}
+function Get-EXOMailboxPermission { param($ExternalDirectoryObjectId,$ResultSize,$ErrorAction)
+    [pscustomobject]@{User='unresolvable';AccessRights=@('FullAccess');Deny=$false;IsInherited=$false}
+}
+$refused=$false
+try {Read-ZixRecipients $r} catch {$refused=$true}
+if (!$refused) {throw 'unknown permission identity treated as absence'}
+'Selected permission enumeration distinguishes absence, resolved aliases, SELF and unresolved identities.'
+function Get-EXOMailbox { param($ExternalDirectoryObjectId,$Properties,$ErrorAction)
+    [pscustomobject]@{ExternalDirectoryObjectId=$ExternalDirectoryObjectId;ExchangeGuid='55555555-5555-5555-5555-555555555555';EmailAddresses=@('SMTP:old@example.org');ForwardingAddress=$null;ForwardingSmtpAddress='smtp:external@example.net';DeliverToMailboxAndForward=$false;GrantSendOnBehalfTo=@()}
+}
+function Get-EXOMailboxPermission { param($ExternalDirectoryObjectId,$ResultSize,$ErrorAction)
+    [pscustomobject]@{User='delegate@example.org';AccessRights=@('FullAccess');Deny=$false;IsInherited=$false}
+}
+function Get-InboxRule { param($Mailbox,[switch]$IncludeHidden,$ErrorAction)
+    if (!$IncludeHidden -or $Mailbox -ne '55555555-5555-5555-5555-555555555555') {throw 'audit target mismatch'}
+    [pscustomobject]@{Identity='rule-1';Name='Example route';Enabled=$true;Priority=1;From=@('sender@example.org');SubjectContainsWords=@();BodyContainsWords=@();SubjectOrBodyContainsWords=@('example');RedirectTo=@('destination@example.org');ForwardTo=@();DeleteMessage=$true;StopProcessingRules=$false}
+}
+Set-StrictMode -Version Latest
+$a=Read-ZixMailboxAudit '33333333-3333-3333-3333-333333333333'
+if (!$a.read_only -or $a.full_access_entries.Count -ne 1 -or $a.inbox_rules.Count -ne 1 -or $a.forwarding_smtp -ne 'smtp:external@example.net' -or $a.effective_access_inferred -or $a.transport_rules_observed) {throw 'mailbox audit projection incorrect'}
+function Get-InboxRule { param($Mailbox,[switch]$IncludeHidden,$ErrorAction) throw 'synthetic permission failure' }
+$refused=$false
+try {Read-ZixMailboxAudit '33333333-3333-3333-3333-333333333333'} catch {$refused=$true}
+if (!$refused) {throw 'audit permission failure reported as complete'}
+'Mailbox audit retains delegate and delivery observations and propagates read failures.'

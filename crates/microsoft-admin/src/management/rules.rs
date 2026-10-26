@@ -58,6 +58,7 @@ pub(super) fn postcondition(c: &Change, b: &Value, a: &Value) -> Result<bool> {
                 if let Some(o) = v.as_object_mut() {
                     o.remove("isVerified");
                     o.remove("supportedServices");
+                    o.remove("state");
                 }
             }
             return Ok(before == after);

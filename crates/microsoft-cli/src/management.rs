@@ -12,6 +12,9 @@ pub fn invoke(
     timeout: Duration,
     now: fn() -> u64,
 ) -> Result<Value, Error> {
+    if r.operation.starts_with("management.domains.reconcile-") {
+        return crate::reconciliation::invoke(r, scope, timeout, now);
+    }
     let arg = |n| {
         r.arguments
             .get(n)

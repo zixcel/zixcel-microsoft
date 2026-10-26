@@ -1,10 +1,10 @@
 function Write-ZixRecipient($c) {
-    if ($c.operation -notin @('create_shared','add_alias','remove_alias','grant_full_access','revoke_full_access','grant_send_as','revoke_send_as')) { throw 'unknown_operation' }
+    if ($c.operation -notin @('create_shared','set_primary_smtp','add_alias','remove_alias','grant_full_access','revoke_full_access','grant_send_as','revoke_send_as')) { throw 'unknown_operation' }
     # Only reviewed cmdlets with splatted literal data. No Invoke-Expression, scripts or caller command names.
     $name = if ($c.operation -eq 'create_shared') { 'shared-' + [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($c.address))).Substring(0,20).ToLowerInvariant() } else { $null }
     $identity = $null; $trustee = $null
     if ($c.operation -ne 'create_shared') {
-        $target = @(Get-EXOMailbox -ExternalDirectoryObjectId $c.mailbox -Properties ExchangeGuid,ExternalDirectoryObjectId -ErrorAction Stop)
+        $target = @(Get-EXOMailbox -ExternalDirectoryObjectId $c.mailbox -Properties ExchangeGuid,ExternalDirectoryObjectId,EmailAddresses -ErrorAction Stop)
         if ($target.Count -ne 1 -or "$($target[0].ExternalDirectoryObjectId)".ToLowerInvariant() -ne $c.mailbox) { throw 'target_mismatch' }
         $identity = "$($target[0].ExchangeGuid)"
         if (!$identity) { throw 'exchange_identity_missing' }
@@ -17,6 +17,20 @@ function Write-ZixRecipient($c) {
     }
     switch ($c.operation) {
         'create_shared' { New-Mailbox -Shared -Name $name -Alias $name -DisplayName $c.display_name -PrimarySmtpAddress $c.address -ErrorAction Stop | Out-Null }
+        'set_primary_smtp' {
+            # Exchange Online requires EmailAddresses. Preserve every existing proxy type.
+            $existing = @($target[0].EmailAddresses)
+            if (!$existing.Count -or $existing.Count -gt 500 -or @($existing | Where-Object { "$_" -cmatch '^SMTP:' }).Count -ne 1) { throw 'ambiguous_proxy_addresses' }
+            $addresses = @($existing | ForEach-Object {
+                $a = "$_"
+                if ($a -match '^smtp:') {
+                    if ($a.Substring(5).ToLowerInvariant() -eq $c.address) { 'SMTP:' + $c.address }
+                    else { 'smtp:' + $a.Substring(5) }
+                } else { $a }
+            })
+            if (@($addresses | Where-Object { "$_" -ceq ('SMTP:' + $c.address) }).Count -eq 0) { $addresses += 'SMTP:' + $c.address }
+            Set-Mailbox -Identity $identity -EmailAddresses $addresses -ErrorAction Stop
+        }
         'add_alias' { Set-Mailbox -Identity $identity -EmailAddresses @{Add=$c.address} -ErrorAction Stop }
         'remove_alias' { Set-Mailbox -Identity $identity -EmailAddresses @{Remove=$c.address} -ErrorAction Stop }
         'grant_full_access' { Add-MailboxPermission -Identity $identity -User $trustee -AccessRights FullAccess -InheritanceType All -AutoMapping:$false -ErrorAction Stop | Out-Null }
