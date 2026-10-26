@@ -29,3 +29,8 @@ unsafe_code = "forbid"
 
 [lints.clippy]
 all = "warn"
+
+# Native protocol tests hash their executable through the 128 MiB production bound.
+# Retain line information without full variable debug data in test executables.
+[profile.test]
+debug = 1

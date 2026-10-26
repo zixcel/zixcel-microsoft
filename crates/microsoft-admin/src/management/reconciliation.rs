@@ -94,6 +94,6 @@ pub fn execute(
     }
     valid(now())?;
     let receipt = json!({"schema":"zix-microsoft-verification-resolution/v1","original_plan_sha256":p.original_sha256,"original_outcome":"unknown","original_replay_allowed":false,"remote_write_attempted":false,"observation":p.observation,"decision":p.decision,"new_remote_operation_requires_separate_plan_and_operator_approval":true});
-    journal.resolve_verification(&p.original_sha256, &p.attempt_sha256, scope, &receipt)?;
+    journal.resolve_uncertain(&p.original_sha256, &p.attempt_sha256, scope, &receipt)?;
     Ok(receipt)
 }

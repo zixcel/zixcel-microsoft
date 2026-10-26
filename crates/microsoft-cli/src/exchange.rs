@@ -24,6 +24,9 @@ pub fn invoke(
             .map_err(|_| Error("credential_missing"))
     };
     let binding = crate::catalog::binding()?;
+    if crate::exchange_reconciliation::selected(r)? {
+        return crate::exchange_reconciliation::invoke(r, scope, timeout, now);
+    }
     let change: Option<Change> = r
         .arguments
         .get("change-file")

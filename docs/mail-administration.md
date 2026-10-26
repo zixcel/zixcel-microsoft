@@ -208,3 +208,33 @@ DKIM configuration absence is determined only after a successful bounded
 `Get-DkimSigningConfig` enumeration. Identity-filtered not-found exception
 categories vary between Exchange versions and are not used to infer absence.
 Permission, transport and enumeration-limit failures remain errors.
+
+
+## Explicit resolution of an observed permission grant
+
+An uncertain `grant_full_access` or `grant_send_as` must not be replayed.
+`exchange plan --change-file FILE` accepts a local-only descriptor:
+
+```json
+{"operation":"resolve_observed_grant","original_plan_file":"/absolute/original-envelope.json","journal_directory":"/absolute/journal"}
+```
+
+Planning requires the original inner plan digest to match the private active
+lock and permanent uncertain attempt. The attempt must be at least ten minutes
+old. A complete, fresh, same-scope selected-trustee observation must show the
+requested explicit grant. All original postconditions still apply, except for
+individually listed additive service aliases on existing shared mailboxes:
+these must use an authoritative `*.onmicrosoft.com` domain and an existing local
+part on that same mailbox. Removed aliases, primary-address changes, recipient
+changes, other permission changes and unrelated state drift are refused.
+This does not infer when or by whom a service alias was added.
+
+Review the original plan, observation and `service_alias_additions` in the
+new envelope. Applying it through `exchange apply` requires the existing human
+terminal authorization, a fresh exact-state read, unexpired plan and unchanged
+journal evidence. It performs no remote mutation, stores an immutable local
+resolution and archives the active lock. The original outcome remains unknown,
+the original attempt is unchanged and its replay remains prohibited. The
+receipt establishes only the currently observed explicit grant, not effective
+access or mail delivery. This mechanism cannot resolve creation, address
+changes, revocations or mail sending, and does not relax normal write checks.

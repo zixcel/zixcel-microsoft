@@ -11,6 +11,7 @@ mod postcondition;
 mod powershell;
 mod process;
 mod profile;
+pub mod reconciliation;
 mod runtime;
 pub use runtime::inspect as inspect_runtime;
 mod validation;
