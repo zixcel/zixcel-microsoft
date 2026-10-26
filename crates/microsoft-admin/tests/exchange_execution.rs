@@ -32,7 +32,7 @@ fn approval_expiry_and_scope_drift_stop_before_effect() {
         if mode == 3 {
             f.before.recipients[0].primary = "changed@example.org".into();
         }
-        assert!(execute(&mut f, &j, &p, &hash, || if mode == 1 { 221 } else { 100 }).is_err());
+        assert!(execute(&mut f, &j, &p, &hash, || if mode == 1 { 701 } else { 100 }).is_err());
         assert_eq!(f.writes, 0);
     }
 }
@@ -139,9 +139,25 @@ fn slow_preflight_cannot_execute_after_approval_expired() {
         execute(&mut f, &j, &p, &digest(&p).unwrap(), || {
             let n = calls.get();
             calls.set(n + 1);
-            if n < 2 { 100 } else { 221 }
+            if n < 2 { 100 } else { 701 }
         })
         .is_err()
     );
     assert_eq!(f.writes, 0);
+}
+
+#[test]
+fn operator_review_window_does_not_substitute_for_a_fresh_preflight() {
+    for fresh in [false, true] {
+        let (_d, j) = journal();
+        let p = plan(snapshot(), alias(), 100).unwrap();
+        let mut f = Fake::alias();
+        if fresh {
+            f.before.observed_at = 500;
+            f.after.observed_at = 500;
+        }
+        let result = execute(&mut f, &j, &p, &digest(&p).unwrap(), || 500);
+        assert_eq!(result.is_ok(), fresh);
+        assert_eq!(f.writes, usize::from(fresh));
+    }
 }

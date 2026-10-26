@@ -175,7 +175,7 @@ missing state are refused. Absence of an audit log or a null state does **not**
 establish that the original request failed.
 
 `domains apply --plan-file FILE --approval-sha256 HASH
---journal-directory DIR` requires the core's human terminal authorization. It
+--journal-directory DIR` requires the core's y/yes confirmation or explicit --yes. It
 checks fresh state, plan expiry and journal digests again, writes an immutable
 resolution receipt, and archives the active lock. It performs no remote writes.
 The receipt explicitly retains the original outcome as unknown. The original
@@ -230,11 +230,19 @@ changes, other permission changes and unrelated state drift are refused.
 This does not infer when or by whom a service alias was added.
 
 Review the original plan, observation and `service_alias_additions` in the
-new envelope. Applying it through `exchange apply` requires the existing human
-terminal authorization, a fresh exact-state read, unexpired plan and unchanged
+new envelope. Applying it through `exchange apply` requires the existing y/yes confirmation or explicit --yes, a fresh exact-state read, unexpired plan and unchanged
 journal evidence. It performs no remote mutation, stores an immutable local
 resolution and archives the active lock. The original outcome remains unknown,
 the original attempt is unchanged and its replay remains prohibited. The
 receipt establishes only the currently observed explicit grant, not effective
 access or mail delivery. This mechanism cannot resolve creation, address
 changes, revocations or mail sending, and does not relax normal write checks.
+
+
+Exchange plans allow ten minutes for review. The saved baseline must have been
+fresh at creation; execution still reads and validates a fresh remote snapshot,
+requires an exact state match, and rechecks expiry before admitting any write.
+Historical two-minute plans remain interpretable for journal reconciliation.
+With zix 0.5.0, use `y`/`yes` interactively or `-y`/`--yes` for one invocation;
+the dispatcher computes the plan digest when omitted and preserves explicit
+hash pins, executable/catalog binding, credential checks and replay prohibition.
