@@ -31,6 +31,11 @@ pub(super) fn request(c: &Change, password: Option<&str>) -> Result<(&'static st
             format!("/v1.0/users/{user}"),
             json!({"accountEnabled":enabled}),
         ),
+        Change::SetUserPrincipalName { user, upn } => (
+            "PATCH",
+            format!("/v1.0/users/{user}"),
+            json!({"userPrincipalName":upn}),
+        ),
         Change::AssignLicense { user, sku } => (
             "POST",
             format!("/v1.0/users/{user}/assignLicense"),
@@ -51,6 +56,20 @@ pub(super) fn request(c: &Change, password: Option<&str>) -> Result<(&'static st
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn upn_request_patches_only_upn_on_exact_user() {
+        let (method, path, body) = request(
+            &Change::SetUserPrincipalName {
+                user: "11111111-1111-4111-8111-111111111111".into(),
+                upn: "shared@example.net".into(),
+            },
+            None,
+        )
+        .unwrap();
+        assert_eq!(method, "PATCH");
+        assert_eq!(path, "/v1.0/users/11111111-1111-4111-8111-111111111111");
+        assert_eq!(body, json!({"userPrincipalName":"shared@example.net"}));
+    }
     #[test]
     fn verification_cannot_force_takeover_and_licenses_cannot_remove_existing_assignments() {
         let (_, path, body) = request(

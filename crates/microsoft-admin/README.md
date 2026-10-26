@@ -81,3 +81,18 @@ Graph mutations, DKIM, probes, runtime acceptance and remaining owner prerequisi
 Exchange writes execute once. After acknowledgment, verification makes at most three fresh read-only observations with five-second delays in the PowerShell backend. Every observation must satisfy the original full postcondition. Exhausted or failed reads keep the outcome unknown and preserve the tenant lock and replay prohibition.
 
 Native 0.3.11 also accepts `dkim plan` input `{"operation":"resolve_dkim","original_plan_file":"/absolute/original-envelope.json","journal_directory":"/absolute/journal"}` for an uncertain EnableDkim attempt older than ten minutes. Apply the returned resolution envelope through `dkim apply` with the same runtime profile and journal. It performs fresh independent reads only, permits only the original disabled state or the exact enabled state with unchanged selectors and scope, preserves the original unknown result and permanent replay prohibition, and archives the tenant lock. A still-disabled domain requires a separate fresh enable plan; no original mutation is retried. Domain-verification resolution retains its existing schema and checks.
+
+For a blocked, cloud-managed account, `users plan` accepts
+`{"operation":"set_user_principal_name","user":"<object UUID>","upn":"shared@example.net"}`.
+It verifies the destination domain and UPN availability, rejects synchronized or enabled
+accounts, patches only `userPrincipalName`, and requires all other observed user fields
+to remain unchanged. This supports retiring a shared mailbox's former SMTP address
+when Microsoft would otherwise restore the account UPN as a proxy address.
+
+An uncertain `remove_alias` attempt can be reviewed with an `exchange plan` descriptor
+`{"operation":"resolve_alias_removal","original_plan_file":"<absolute original envelope>","journal_directory":"<absolute journal>"}`.
+After at least ten minutes, only the exact original state or the exact intended removal
+is accepted; unrelated drift is rejected. Applying the separate resolution plan performs
+no remote write, records whether the alias is currently absent, preserves the original
+unknown outcome and replay prohibition, and archives the tenant lock. Any subsequent
+change requires its own fresh plan and operator approval.

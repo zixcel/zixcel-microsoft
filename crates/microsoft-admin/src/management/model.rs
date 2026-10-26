@@ -25,6 +25,10 @@ pub enum Change {
         user: String,
         enabled: bool,
     },
+    SetUserPrincipalName {
+        user: String,
+        upn: String,
+    },
     AssignLicense {
         user: String,
         sku: String,
@@ -46,7 +50,8 @@ impl Change {
             Self::AddDomain { .. } | Self::VerifyDomain { .. } => "domains",
             Self::CreateUser { .. }
             | Self::SetUsageLocation { .. }
-            | Self::SetUserEnabled { .. } => "users",
+            | Self::SetUserEnabled { .. }
+            | Self::SetUserPrincipalName { .. } => "users",
             Self::AssignLicense { .. } => "licenses",
             Self::PrepareDkim { .. } | Self::EnableDkim { .. } => "dkim",
             Self::SendProbe { .. } => "mail",
@@ -88,6 +93,10 @@ impl Change {
                 location(usage_location)
             }
             Self::SetUserEnabled { user, .. } => crate::uuid(user),
+            Self::SetUserPrincipalName { user, upn } => {
+                crate::uuid(user)?;
+                crate::email(upn)
+            }
             Self::AssignLicense { user, sku } => {
                 crate::uuid(user)?;
                 crate::uuid(sku)

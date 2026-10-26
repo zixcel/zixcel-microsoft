@@ -18,6 +18,16 @@ pub(super) fn precondition(scope: &Scope, c: &Change, s: &Value) -> Result<()> {
                 && s["target"]["accountEnabled"].is_boolean()
                 && s["target"]["accountEnabled"] != *enabled
         }
+        Change::SetUserPrincipalName { user, upn } => {
+            s["target"]["id"] == *user
+                && s["eligible"] == true
+                && (s["on_premises_sync_enabled"].is_null()
+                    || s["on_premises_sync_enabled"] == false)
+                && s["target"]["accountEnabled"] == false
+                && s["target"]["userPrincipalName"]
+                    .as_str()
+                    .is_some_and(|old| crate::email(old).is_ok() && old != upn)
+        }
         Change::AssignLicense { user, sku } => {
             s["target"]["id"] == *user
                 && s["eligible"] == true
@@ -84,6 +94,9 @@ pub(super) fn postcondition(c: &Change, b: &Value, a: &Value) -> Result<bool> {
         }
         Change::SetUserEnabled { enabled, .. } => {
             expected["target"]["accountEnabled"] = json!(enabled)
+        }
+        Change::SetUserPrincipalName { upn, .. } => {
+            expected["target"]["userPrincipalName"] = json!(upn)
         }
         Change::AssignLicense { sku, .. } => {
             let mut before = b["target"].clone();
