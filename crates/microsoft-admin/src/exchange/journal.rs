@@ -104,6 +104,9 @@ impl Admission {
 }
 
 impl Journal {
+    pub(crate) fn directory(&self) -> &Path {
+        &self.root
+    }
     pub(crate) fn uncertain_evidence(&self, hash: &str, scope: &Scope) -> Result<String> {
         scope.validate()?;
         if hash.len() != 64

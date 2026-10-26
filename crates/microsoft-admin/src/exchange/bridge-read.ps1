@@ -35,8 +35,8 @@ function Read-ZixRecipients($r) {
             $sendPermissions = @(Get-EXORecipientPermission -ExternalDirectoryObjectId $id -ResultSize 1001 -ErrorAction Stop)
             if ($permissions.Count -gt 1000 -or $sendPermissions.Count -gt 1000) { throw 'permission_observation_limit' }
             $cache = @{}
-            $selectedFull = @($permissions | Where-Object { Test-ZixTrustee "$( $_.User )" $trustee $delegateAddress $cache })
-            $selectedSend = @($sendPermissions | Where-Object { Test-ZixTrustee "$( $_.Trustee )" $trustee $delegateAddress $cache })
+            $selectedFull = @($permissions | Where-Object { !$_.IsInherited -and (Test-ZixTrustee "$( $_.User )" $trustee $delegateAddress $cache) })
+            $selectedSend = @($sendPermissions | Where-Object { !$_.IsInherited -and (Test-ZixTrustee "$( $_.Trustee )" $trustee $delegateAddress $cache) })
             if (@($selectedFull | Where-Object { $_.Deny -or $_.IsInherited }).Count -gt 0) { throw 'ambiguous_permission' }
             if (@($selectedSend | Where-Object { $_.AccessControlType -ne 'Allow' -or $_.IsInherited }).Count -gt 0) { throw 'ambiguous_send_permission' }
             $full = @($selectedFull | Where-Object { $_.AccessRights -contains 'FullAccess' }).Count -gt 0

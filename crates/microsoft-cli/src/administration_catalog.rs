@@ -47,29 +47,6 @@ pub fn extend(m: &mut Manifest) -> Result<(), Error> {
             )?;
         }
     }
-    for phase in ["reconcile-plan", "reconcile-apply"] {
-        let mut args = scope();
-        args.push(arg("journal-directory", true, 2048));
-        if phase == "reconcile-plan" {
-            args.push(arg("original-plan-file", true, 2048));
-        } else {
-            args.push(arg("plan-file", true, 2048));
-            args.push(arg("approval-sha256", true, 64));
-        }
-        add(
-            m,
-            &format!("management.domains.{phase}"),
-            vec!["domains", phase],
-            args,
-            if phase == "reconcile-apply" {
-                "operator-write"
-            } else {
-                "read"
-            },
-            vec!["ZIX_MICROSOFT_ACCESS_TOKEN"],
-            vec![],
-        )?;
-    }
     let mut args = scope();
     args.push(arg("domain", true, 253));
     args.push(arg("runtime-profile", false, 2048));

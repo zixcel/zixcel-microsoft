@@ -9,6 +9,7 @@ use serde_json::{Value, json};
 pub struct ResolutionPlan {
     pub schema: String,
     pub original: Plan,
+    pub journal_directory: std::path::PathBuf,
     pub original_sha256: String,
     pub attempt_sha256: String,
     pub observation: Value,
@@ -55,6 +56,7 @@ pub fn plan(
     Ok(ResolutionPlan {
         schema: "zix-microsoft-verification-resolution-plan/v1".into(),
         original,
+        journal_directory: journal.directory().to_path_buf(),
         original_sha256,
         attempt_sha256,
         observation,
@@ -73,7 +75,8 @@ pub fn execute(
     now: impl Fn() -> u64,
 ) -> Result<Value> {
     let valid = |at| {
-        if p.schema != "zix-microsoft-verification-resolution-plan/v1"
+        if p.journal_directory != journal.directory()
+            || p.schema != "zix-microsoft-verification-resolution-plan/v1"
             || p.original_sha256 != digest(&p.original)?
             || p.created_at > at
             || p.expires_at <= at

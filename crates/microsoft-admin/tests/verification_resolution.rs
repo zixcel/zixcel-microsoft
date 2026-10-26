@@ -70,6 +70,7 @@ fn explicit_resolution_preserves_uncertainty_original_attempt_and_archived_lock(
     assert!(!d.path().join(format!("{TENANT}.active")).exists());
     assert!(reconciliation::execute(&mut f, &j, &scope(), &p, || 1000).is_err());
     // A closed original plan cannot be admitted again even after lock resolution.
+    f.observation = p.original.before.clone();
     assert!(
         zixcel_microsoft_admin::management::execute(&mut f, &j, &p.original, &hash, || 200)
             .is_err()

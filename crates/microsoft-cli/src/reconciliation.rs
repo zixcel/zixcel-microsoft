@@ -25,8 +25,9 @@ pub fn invoke(
         std::env::var("ZIX_MICROSOFT_ACCESS_TOKEN").map_err(|_| Error("credential_missing"))?,
     );
     let mut backend = Graph::new(token.to_string(), None, timeout).map_err(|e| Error(e.0))?;
-    let journal = Journal::open(Path::new(arg("journal-directory")?)).map_err(|e| Error(e.0))?;
-    if r.operation.ends_with("reconcile-apply") {
+    if r.operation == "management.domains.apply" {
+        let journal =
+            Journal::open(Path::new(arg("journal-directory")?)).map_err(|e| Error(e.0))?;
         let envelope: zix_operation_contracts::LocalPlan = crate::input::read(arg("plan-file")?)?;
         if !envelope.matches(
             &r.operation,
@@ -42,8 +43,13 @@ pub fn invoke(
     }
     // Original envelope may bind an older official version. Its inner exact digest
     // must match the active lock and permanent attempt; it cannot authorize a write.
+    let input: ResolutionInput = crate::input::read(arg("change-file")?)?;
+    if input.operation != "resolve_verification" {
+        return Err(Error("unsupported_reconciliation"));
+    }
+    let journal = Journal::open(Path::new(&input.journal_directory)).map_err(|e| Error(e.0))?;
     let original: zix_operation_contracts::LocalPlan =
-        crate::input::read(arg("original-plan-file")?)?;
+        crate::input::read(&input.original_plan_file)?;
     if original.operation != "management.domains.apply" {
         return Err(Error("unsupported_reconciliation"));
     }
@@ -52,9 +58,31 @@ pub fn invoke(
     let p = reconciliation::plan(&mut backend, &journal, scope, original, now())
         .map_err(|e| Error(e.0))?;
     let envelope = zix_operation_contracts::LocalPlan::new(
-        "management.domains.reconcile-apply".into(),
+        "management.domains.apply".into(),
         crate::catalog::binding()?,
         serde_json::to_value(p).map_err(|_| Error("encoding_failed"))?,
     );
     Ok(json!({"sha256":envelope.digest(),"plan":envelope,"remote_writes":false}))
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ResolutionInput {
+    operation: String,
+    original_plan_file: String,
+    journal_directory: String,
+}
+pub fn selected(r: &Request) -> Result<bool, Error> {
+    let (argument, pointer, expected) = match r.operation.as_str() {
+        "management.domains.plan" => ("change-file", "/operation", "resolve_verification"),
+        "management.domains.apply" => (
+            "plan-file",
+            "/plan/schema",
+            "zix-microsoft-verification-resolution-plan/v1",
+        ),
+        _ => return Ok(false),
+    };
+    let path = r.arguments.get(argument).ok_or(Error("missing_argument"))?;
+    let v: Value = crate::input::read(path)?;
+    Ok(v.pointer(pointer).and_then(Value::as_str) == Some(expected))
 }

@@ -51,12 +51,15 @@ pub fn invoke(
     let graph = token()?;
     let mut backend =
         PowerShell::new(profile, exo, Some(&graph), timeout).map_err(|e| Error(e.0))?;
-    let value = match r.operation.as_str() {
-        "exchange.mailbox-audit" => {
-            return backend
-                .mailbox_audit(scope, arg("mailbox")?)
-                .map_err(|e| Error(e.0));
+    if r.operation == "exchange.snapshot" && r.arguments.contains_key("mailbox") {
+        if change.is_some() {
+            return Err(Error("ambiguous_read_selector"));
         }
+        return backend
+            .mailbox_audit(scope, arg("mailbox")?)
+            .map_err(|e| Error(e.0));
+    }
+    let value = match r.operation.as_str() {
         "exchange.snapshot" => serde_json::to_value(
             backend
                 .snapshot(scope, change.as_ref())

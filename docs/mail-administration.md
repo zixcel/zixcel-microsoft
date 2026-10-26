@@ -164,7 +164,9 @@ mailbox provisioning, DNS propagation and actual mail delivery.
 
 ## Explicit resolution of an uncertain domain verification
 
-`domains reconcile-plan --original-plan-file FILE --journal-directory DIR` is a
+`domains plan --change-file FILE` with the local-only descriptor
+`{"operation":"resolve_verification","original_plan_file":"/absolute/original.json",
+"journal_directory":"/absolute/journal"}` is a
 read-only planning command. It accepts only a previous `verify_domain` plan whose
 exact inner digest matches the active tenant lock and permanent attempt. The
 original attempt must be at least ten minutes old. Fresh domain observation must
@@ -172,7 +174,7 @@ include an explicit null state or a failed operation; scheduled/in-progress and
 missing state are refused. Absence of an audit log or a null state does **not**
 establish that the original request failed.
 
-`domains reconcile-apply --plan-file FILE --approval-sha256 HASH
+`domains apply --plan-file FILE --approval-sha256 HASH
 --journal-directory DIR` requires the core's human terminal authorization. It
 checks fresh state, plan expiry and journal digests again, writes an immutable
 resolution receipt, and archives the active lock. It performs no remote writes.
@@ -194,7 +196,7 @@ primary. It never recreates the mailbox. Independent post-read requires the
 same recipient identities, prior aliases and other observed state. Removing an
 old secondary alias remains a separate operation after delivery is verified.
 
-`exchange mailbox-audit --mailbox UUID` reads all bounded mailbox permission and
+`exchange snapshot --mailbox UUID` reads all bounded mailbox permission and
 SendAs entries, SendOnBehalf, forwarding and hidden/visible inbox rules, including
 sender and keyword conditions and redirect/forward/delete actions. Read failures
 are errors, never empty successful inventories. It does not claim effective
