@@ -3,6 +3,8 @@ use crate::{Error, Result, Scope};
 use serde::Serialize;
 pub trait Backend {
     fn snapshot(&mut self, scope: &Scope, change: Option<&Change>) -> Result<Snapshot>;
+    /// Delay between bounded, read-only post-write observations.
+    fn wait_for_readback(&mut self) {}
     /// One exact mutation, no automatic retry. A failure may follow remote acceptance.
     fn apply(&mut self, plan: &Plan) -> Result<()>;
 }
@@ -50,22 +52,28 @@ pub fn execute(
         return Ok(receipt);
     }
     receipt.remote_acknowledged = true;
-    let after = match backend.snapshot(&p.scope, Some(&p.change)) {
-        Ok(s) => s,
-        Err(_) => return Ok(receipt),
-    };
-    if validation::snapshot(&after, now()).is_err() || after.scope != p.scope {
-        return Ok(receipt);
-    }
-    let target = after.recipients.iter().find(|r| match &p.change {
-        Change::CreateShared { address, .. } => &r.primary == address,
-        _ => Some(r.id.as_str()) == p.change.mailbox(),
-    });
-    let verified = super::postcondition::verify(&p.before, &after, &p.change)?;
-    if verified {
-        receipt.state = "verified";
-        receipt.sign_in_verified = target.is_some_and(|r| r.sign_in_blocked == Some(true));
-        admission.completed()?;
+    for attempt in 0..3 {
+        if attempt > 0 {
+            backend.wait_for_readback();
+        }
+        let after = match backend.snapshot(&p.scope, Some(&p.change)) {
+            Ok(s) => s,
+            Err(_) => continue,
+        };
+        if validation::snapshot(&after, now()).is_err() || after.scope != p.scope {
+            continue;
+        }
+        let target = after.recipients.iter().find(|r| match &p.change {
+            Change::CreateShared { address, .. } => &r.primary == address,
+            _ => Some(r.id.as_str()) == p.change.mailbox(),
+        });
+        let verified = super::postcondition::verify(&p.before, &after, &p.change)?;
+        if verified {
+            receipt.state = "verified";
+            receipt.sign_in_verified = target.is_some_and(|r| r.sign_in_blocked == Some(true));
+            admission.completed()?;
+            return Ok(receipt);
+        }
     }
     Ok(receipt)
 }

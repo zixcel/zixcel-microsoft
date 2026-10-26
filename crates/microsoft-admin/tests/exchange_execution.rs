@@ -161,3 +161,51 @@ fn operator_review_window_does_not_substitute_for_a_fresh_preflight() {
         assert_eq!(f.writes, usize::from(fresh));
     }
 }
+
+#[test]
+fn delayed_postconditions_retry_only_reads_with_a_fixed_limit() {
+    use zixcel_microsoft_admin::{
+        Result, Scope,
+        exchange::{Backend, Plan, Snapshot},
+    };
+    struct Delayed {
+        inner: Fake,
+        stale_reads: usize,
+        waits: usize,
+    }
+    impl Backend for Delayed {
+        fn snapshot(&mut self, scope: &Scope, change: Option<&Change>) -> Result<Snapshot> {
+            if self.inner.writes > 0 && self.stale_reads > 0 {
+                self.stale_reads -= 1;
+                self.inner.calls += 1;
+                return Ok(self.inner.before.clone());
+            }
+            self.inner.snapshot(scope, change)
+        }
+        fn apply(&mut self, p: &Plan) -> Result<()> {
+            self.inner.apply(p)
+        }
+        fn wait_for_readback(&mut self) {
+            self.waits += 1;
+        }
+    }
+    for delay in [1, 2, 3, 10] {
+        let (d, j) = journal();
+        let p = plan(snapshot(), alias(), 100).unwrap();
+        let mut backend = Delayed {
+            inner: Fake::alias(),
+            stale_reads: delay,
+            waits: 0,
+        };
+        let receipt = execute(&mut backend, &j, &p, &digest(&p).unwrap(), || 100).unwrap();
+        assert_eq!(receipt.state == "verified", delay < 3);
+        assert_eq!(backend.inner.writes, 1);
+        assert_eq!(backend.inner.calls, 1 + (delay + 1).min(3));
+        assert_eq!(backend.waits, delay.min(2));
+        assert_eq!(
+            d.path().join(format!("{TENANT}.active")).exists(),
+            delay >= 3
+        );
+        assert!(!receipt.replay_allowed);
+    }
+}
