@@ -98,9 +98,12 @@ For each change, write a private JSON change file using exactly one operation:
 | mail | `send_probe`: `recipient`, `correlation` (fresh UUID) |
 
 ```sh
+umask 077
+# Invoke through the reviewed credential bindings described above.
 zix microsoft domains plan --tenant TENANT_UUID --subject SUBJECT_UUID \
-  --change-file /absolute/private/change.json
-# Save and review the returned outer plan, then approve its SHA256 in the terminal.
+  --change-file /absolute/private/change.json > /absolute/private/plan-result.json
+jq '.result.plan' /absolute/private/plan-result.json > /absolute/private/plan.json
+# Review .result.sha256 and the extracted plan, then approve that SHA256 in the terminal.
 zix microsoft domains apply --tenant TENANT_UUID --subject SUBJECT_UUID \
   --plan-file /absolute/private/plan.json --approval-sha256 REVIEWED_SHA256 \
   --journal-directory /absolute/private/journal
@@ -129,7 +132,8 @@ A `202` response or an observed Sent Items copy does not prove delivery. The
 receipt explicitly reports `sent_copy_observed_delivery_unverified`. Use
 `mail probe-inspect --tenant ... --subject ... --correlation UUID` in the intended
 recipient's authenticated mailbox to observe the exact probe in Inbox, and send
-a reply/external probe for the opposite direction. It inspects no message body;
+an external probe with the exact subject `zix-mail-probe-CORRELATION_UUID` for the
+opposite direction. Reply prefixes such as `Re:` do not match this exact probe. It inspects no message body;
 Inbox absence is not proof of non-delivery (rules/junk/quarantine remain possible).
 
 Tests use synthetic backends and mocked cmdlets. Successful offline runtime

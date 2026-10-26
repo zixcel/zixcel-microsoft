@@ -12,13 +12,15 @@ pub struct Graph {
 }
 impl Graph {
     pub fn new(token: String, password: Option<String>, timeout: Duration) -> Result<Self> {
+        let token = Zeroizing::new(token);
+        let password = password.map(Zeroizing::new);
         if token.is_empty() || token.len() > 16384 || token.bytes().any(|b| b.is_ascii_control()) {
             return Err(Error("credential_invalid"));
         }
         Ok(Self {
             http: Http::new("https://graph.microsoft.com", timeout)?,
-            token: Zeroizing::new(token),
-            password: password.map(Zeroizing::new),
+            token,
+            password,
         })
     }
     fn get(&mut self, path: &str, absent: bool) -> Result<Value> {
