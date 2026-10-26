@@ -87,9 +87,10 @@ pub fn plan(
     journal: &Journal,
     scope: &Scope,
     original: Plan,
-    now: u64,
+    now: impl Fn() -> u64,
 ) -> Result<ResolutionPlan> {
     let observation = backend.snapshot(scope, Some(&original.change))?;
+    let now = now();
     let service_alias_additions = eligible(scope, &original, &observation, now)?;
     let original_sha256 = digest(&original)?;
     let attempt_sha256 = journal.uncertain_evidence(&original_sha256, scope)?;
