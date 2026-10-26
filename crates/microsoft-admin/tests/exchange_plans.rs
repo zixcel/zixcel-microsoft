@@ -43,7 +43,7 @@ fn untrusted_syntax_and_unicode_hosts_are_refused() {
 #[test]
 fn fresh_alias_plan_is_exact_and_contains_no_credentials() {
     let p = plan(snapshot(), alias(), 100).unwrap();
-    assert_eq!(p.expires_at, 220);
+    assert_eq!(p.expires_at, 700);
     let text = serde_json::to_string(&p).unwrap();
     assert!(!text.contains("token"));
     assert_eq!(p.scope, scope());

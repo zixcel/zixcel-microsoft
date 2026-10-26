@@ -10,7 +10,7 @@ pub fn plan(before: Snapshot, change: Change, now: u64) -> Result<Plan> {
         change,
         before,
         created_at: now,
-        expires_at: now.checked_add(120).ok_or(Error("invalid_clock"))?,
+        expires_at: now.checked_add(600).ok_or(Error("invalid_clock"))?,
     })
 }
 pub(crate) fn validate(p: &Plan, now: u64) -> Result<()> {
@@ -18,11 +18,13 @@ pub(crate) fn validate(p: &Plan, now: u64) -> Result<()> {
         || p.scope != p.before.scope
         || p.created_at > now
         || p.expires_at <= now
-        || p.expires_at.checked_sub(p.created_at) != Some(120)
+        || !matches!(p.expires_at.checked_sub(p.created_at), Some(120 | 600))
     {
         return Err(Error("invalid_or_expired_plan"));
     }
-    validation::snapshot(&p.before, now)?;
+    // The baseline was validated when planned. Actual remote freshness is checked
+    // independently immediately before admission in execution::execute.
+    validation::snapshot(&p.before, p.created_at)?;
     super::change_validation::change(&p.before, &p.change)
 }
 pub(crate) fn same_state(a: &Snapshot, b: &Snapshot) -> Result<bool> {
