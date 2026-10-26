@@ -89,9 +89,70 @@ fn uncertain_write_keeps_tenant_lock_and_never_retries() {
     let r = management::execute(&mut b, &j, &p, &hash, || 101).unwrap();
     assert_eq!(r["state"], "outcome_unknown");
     assert_eq!(r["replay_allowed"], false);
+    assert_eq!(r["failure"]["phase"], "unknown");
+    assert_eq!(r["failure"]["reason"], "unknown");
+    assert!(
+        !serde_json::to_string(&r)
+            .unwrap()
+            .contains("synthetic_unknown")
+    );
     assert!(d.path().join(format!("{}.active", scope().tenant)).exists());
     assert!(management::execute(&mut b, &j, &p, &hash, || 101).is_err());
     assert_eq!(b.writes, 1);
+}
+
+#[test]
+fn rejected_http_write_records_safe_evidence_without_unlocking_or_retrying() {
+    struct Rejected(Fake);
+    impl Backend for Rejected {
+        fn observe(&mut self, scope: &Scope, change: &Change) -> Result<Value> {
+            self.0.observe(scope, change)
+        }
+        fn mutate(&mut self, _: &Scope, _: &Change) -> Result<()> {
+            self.0.writes += 1;
+            Err(Error("synthetic-secret"))
+        }
+        fn mutation_failure(&self) -> Option<management::MutationFailure> {
+            Some(management::MutationFailure::from_http(
+                403,
+                br#"{"error":{"code":"Authorization_RequestDenied","message":"synthetic-secret"}}"#,
+            ))
+        }
+    }
+    let mut backend = Rejected(fake());
+    let p = management::plan(
+        &mut backend,
+        scope(),
+        Change::AddDomain {
+            domain: "example.net".into(),
+        },
+        100,
+    )
+    .unwrap();
+    let hash = digest(&p).unwrap();
+    let (directory, journal) = journal();
+    let receipt = management::execute(&mut backend, &journal, &p, &hash, || 101).unwrap();
+    assert_eq!(receipt["state"], "outcome_unknown");
+    assert_eq!(receipt["remote_acknowledged"], false);
+    assert_eq!(receipt["replay_allowed"], false);
+    assert_eq!(receipt["failure"]["http_status"], 403);
+    assert_eq!(
+        receipt["failure"]["provider_code"],
+        "Authorization_RequestDenied"
+    );
+    let evidence =
+        std::fs::read_to_string(directory.path().join(format!("{hash}.attempt"))).unwrap();
+    assert!(evidence.contains("admitted; outcome unknown"));
+    assert!(evidence.contains("Authorization_RequestDenied"));
+    assert!(!evidence.contains("synthetic-secret"));
+    assert!(
+        directory
+            .path()
+            .join(format!("{}.active", scope().tenant))
+            .exists()
+    );
+    assert!(management::execute(&mut backend, &journal, &p, &hash, || 101).is_err());
+    assert_eq!(backend.0.writes, 1);
 }
 #[test]
 fn account_change_requires_exact_preservation_and_probe_does_not_claim_delivery() {

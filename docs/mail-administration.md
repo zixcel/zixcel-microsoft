@@ -1,6 +1,15 @@
 # Local mail administration
 
-Native Microsoft 0.3.3 requires zix CLI 0.4.0. Device authorization accepts
+Native Microsoft 0.3.4 requires zix CLI 0.4.0. Failed management writes retain
+code-only phase, reason, HTTP status and allowlisted provider error codes in
+the receipt and permanent attempt journal. Remote messages, headers and arbitrary
+local error strings are never included. Unknown outcomes still retain the tenant
+lock and forbid replay; diagnostics do not authorize reconciliation or retries.
+Existing attempts without diagnostics cannot be reconstructed from this update.
+`domains list` also returns the nullable domain operation `state`, projecting
+only `operation`, `status` and `lastActionDateTime`. A null state does not prove
+that an earlier write failed or authorize a retry.
+Device authorization accepts
 the current `https://login.microsoft.com/device` page as well as the two
 legacy Microsoft device-login URLs, each by exact match. Graph read transport budgets
 are capped at 40 seconds within the provider's 120-second operation budget;

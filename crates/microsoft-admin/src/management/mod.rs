@@ -1,7 +1,9 @@
+mod failure;
 mod graph;
 mod model;
 mod rules;
 use crate::{Error, Result, Scope, exchange::Journal};
+pub use failure::{FailurePhase, FailureReason, MutationFailure, ProviderCode};
 pub use graph::Graph;
 pub use model::{Change, Plan};
 use serde_json::{Value, json};
@@ -12,6 +14,9 @@ pub trait Backend {
     }
     /// One mutation only. Never retry a write, including after a transport failure.
     fn mutate(&mut self, scope: &Scope, change: &Change) -> Result<()>;
+    fn mutation_failure(&self) -> Option<MutationFailure> {
+        None
+    }
 }
 pub fn plan(
     backend: &mut (impl Backend + ?Sized),
@@ -64,12 +69,19 @@ pub fn execute(
     backend.prepare(&p.change)?;
     let admission = journal.admit(&hash, &p.scope)?;
     let mut receipt = json!({"schema":"zix-microsoft-management-receipt/v1","plan_sha256":hash,"write_attempted":true,"remote_acknowledged":false,"state":"outcome_unknown","replay_allowed":false});
-    if backend.mutate(&p.scope, &p.change).is_err() {
+    if let Err(error) = backend.mutate(&p.scope, &p.change) {
+        let failure = backend
+            .mutation_failure()
+            .unwrap_or_else(|| MutationFailure::from_error(FailurePhase::Unknown, error));
+        admission.record_failure(&failure)?;
+        receipt["failure"] = serde_json::to_value(failure).map_err(|_| Error("encoding_failed"))?;
         return Ok(receipt);
     }
     receipt["remote_acknowledged"] = json!(true);
-    if let Ok(after) = backend.observe(&p.scope, &p.change)
-        && rules::postcondition(&p.change, &p.before, &after).unwrap_or(false)
+    let after = backend.observe(&p.scope, &p.change);
+    if after
+        .as_ref()
+        .is_ok_and(|after| rules::postcondition(&p.change, &p.before, after).unwrap_or(false))
     {
         receipt["state"] = json!(if matches!(p.change, Change::SendProbe { .. }) {
             "sent_copy_observed_delivery_unverified"
@@ -77,6 +89,13 @@ pub fn execute(
             "verified"
         });
         admission.completed()?;
+    } else {
+        let failure = MutationFailure::from_error(
+            FailurePhase::PostRead,
+            after.err().unwrap_or(Error("postcondition_not_observed")),
+        );
+        admission.record_failure(&failure)?;
+        receipt["failure"] = serde_json::to_value(failure).map_err(|_| Error("encoding_failed"))?;
     }
     Ok(receipt)
 }

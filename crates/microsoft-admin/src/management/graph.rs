@@ -1,4 +1,4 @@
-use super::{Backend, Change};
+use super::{Backend, Change, FailurePhase, MutationFailure};
 use crate::{Error, Result, Scope, http::Http};
 use serde_json::{Value, json};
 use std::time::Duration;
@@ -9,6 +9,7 @@ pub struct Graph {
     http: Http,
     token: Zeroizing<String>,
     password: Option<Zeroizing<String>>,
+    last_failure: Option<MutationFailure>,
 }
 impl Graph {
     pub fn new(token: String, password: Option<String>, timeout: Duration) -> Result<Self> {
@@ -21,6 +22,7 @@ impl Graph {
             http: Http::new("https://graph.microsoft.com", timeout)?,
             token,
             password,
+            last_failure: None,
         })
     }
     fn get(&mut self, path: &str, absent: bool) -> Result<Value> {
@@ -75,8 +77,13 @@ impl Backend for Graph {
         Ok(())
     }
     fn mutate(&mut self, scope: &Scope, change: &Change) -> Result<()> {
-        self.identity(scope)?;
-        self.prepare(change)?;
+        self.last_failure = None;
+        self.identity(scope).inspect_err(|error| {
+            self.last_failure = Some(MutationFailure::from_error(FailurePhase::Identity, *error));
+        })?;
+        self.prepare(change).inspect_err(|error| {
+            self.last_failure = Some(MutationFailure::from_error(FailurePhase::Prepare, *error));
+        })?;
         let (method, path, body) =
             mutate::request(change, self.password.as_deref().map(String::as_str))?;
         let r = self.http.graph(method, &path, &self.token, Some(&body));
@@ -87,7 +94,15 @@ impl Backend for Graph {
             use zeroize::Zeroize;
             s.zeroize();
         }
-        r?.require_success()
+        let response = r.inspect_err(|error| {
+            self.last_failure = Some(MutationFailure::from_error(FailurePhase::Request, *error));
+        })?;
+        response.require_success().inspect_err(|_| {
+            self.last_failure = Some(MutationFailure::from_http(response.status, &response.bytes));
+        })
+    }
+    fn mutation_failure(&self) -> Option<MutationFailure> {
+        self.last_failure.clone()
     }
 }
 pub(super) fn selected(v: &Value, fields: &[&str]) -> Result<Value> {
