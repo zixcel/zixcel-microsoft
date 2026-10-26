@@ -33,27 +33,6 @@ impl LiveRead {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn provider_budget_is_adapted_before_transport_construction() {
-        // Construction is offline. Exercise the actual bounded HTTP constructor
-        // that previously rejected the native provider's 120-second budget.
-        for timeout in [
-            Duration::from_millis(119900),
-            Duration::from_secs(40),
-            Duration::from_millis(50),
-        ] {
-            assert!(LiveRead::new("synthetic-token", timeout).is_ok());
-        }
-        // Do not increase an invalid or exhausted caller budget.
-        assert!(LiveRead::new("synthetic-token", Duration::from_millis(49)).is_err());
-        assert!(LiveRead::new("synthetic-token", Duration::ZERO).is_err());
-        assert!(LiveRead::new("", Duration::from_secs(120)).is_err());
-    }
-}
 fn convert(e: Error) -> ReadError {
     match e {
         Error::Status(s) => ReadError::Http(s),
@@ -79,5 +58,27 @@ impl Transport for LiveRead {
             .map_err(convert)?;
         self.remaining_bytes -= b.len();
         serde_json::from_slice(&b).map_err(|_| ReadError::Invalid)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn provider_budget_is_adapted_before_transport_construction() {
+        // Construction is offline. Exercise the actual bounded HTTP constructor
+        // that previously rejected the native provider's 120-second budget.
+        for timeout in [
+            Duration::from_millis(119900),
+            Duration::from_secs(40),
+            Duration::from_millis(50),
+        ] {
+            assert!(LiveRead::new("synthetic-token", timeout).is_ok());
+        }
+        // Do not increase an invalid or exhausted caller budget.
+        assert!(LiveRead::new("synthetic-token", Duration::from_millis(49)).is_err());
+        assert!(LiveRead::new("synthetic-token", Duration::ZERO).is_err());
+        assert!(LiveRead::new("", Duration::from_secs(120)).is_err());
     }
 }
