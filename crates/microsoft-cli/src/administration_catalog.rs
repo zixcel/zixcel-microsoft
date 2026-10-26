@@ -147,8 +147,8 @@ fn add(
     runtime: Vec<&str>,
 ) -> Result<(), Error> {
     m.commands.push(serde_json::from_value(json!({"id":id,"words":words,"effect":effect,"arguments":args,
-        "description":"Explicit Microsoft authentication, runtime setup or tenant-scoped administration; writes require reviewed one-use plans.",
-        "required_permissions":if id.starts_with("auth.")||id.starts_with("runtime."){vec![]}else{vec!["Delegated Graph scopes and Entra roles per selected operation; Exchange RBAC for DKIM. No permission is inferred or granted."]},
+        "description":format!("Microsoft {}.", words.join(" ")),
+        "required_permissions":if id.starts_with("auth.")||id.starts_with("runtime."){vec![]}else{vec!["See docs/mail-administration.md for scopes, roles and RBAC."]},
         "environment":{"credential_environment":credentials,"runtime_environment":runtime}})).map_err(|_|Error("invalid_admin_manifest"))?);
     Ok(())
 }

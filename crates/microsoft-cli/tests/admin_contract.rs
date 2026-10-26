@@ -92,6 +92,7 @@ fn doctor_requires_no_account_or_tokens_and_performs_no_installation() {
 fn mail_administration_writes_have_exact_approval_inputs_and_auth_has_no_inherited_tokens() {
     let m = zixcel_microsoft_cli::manifest().unwrap();
     assert!(m.commands.len() <= 32);
+    assert!(serde_json::to_vec(&m).unwrap().len() <= 16384);
     for group in ["domains", "users", "licenses", "dkim", "mail"] {
         let c = m
             .commands

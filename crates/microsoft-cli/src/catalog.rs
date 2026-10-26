@@ -85,7 +85,7 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
             vec!["ZIX_MICROSOFT_ACCESS_TOKEN"]
         };
         m.commands.push(serde_json::from_value(json!({"id":id,"words":words,"arguments":args,"effect":effect,
-            "description":"Tenant-bound Microsoft administration; explicit partial states and separate approved writes.",
+            "description":"Tenant-bound Microsoft administration.",
             "required_permissions":permissions,"environment":{"credential_environment":env,"runtime_environment":[]}}))
             .map_err(|_|Error("invalid_admin_manifest"))?);
     }

@@ -17,7 +17,8 @@ function run(args: readonly string[]) {
   return r
 }
 const digest = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex')
-assert.equal(run(['extensions', 'add', '--manifest', manifest, '--manifest-sha256', digest(manifest), '--executable', binary, '--executable-sha256', digest(binary)]).status, 0)
+const registration = run(['extensions', 'add', '--manifest', manifest, '--manifest-sha256', digest(manifest), '--executable', binary, '--executable-sha256', digest(binary)])
+assert.equal(registration.status, 0, registration.stdout + registration.stderr)
 const scope = ['--tenant', '11111111-1111-1111-1111-111111111111', '--subject', '22222222-2222-2222-2222-222222222222']
 const cases: readonly [readonly string[], string | null][] = [
   [['microsoft', 'admin', 'doctor'], null],
