@@ -77,3 +77,5 @@ acceptance and no skipped real-account test is a success.
 
 See [mail administration](../../docs/mail-administration.md) for explicit auth,
 Graph mutations, DKIM, probes, runtime acceptance and remaining owner prerequisites.
+
+Exchange writes execute once. After acknowledgment, verification makes at most three fresh read-only observations with five-second delays in the PowerShell backend. Every observation must satisfy the original full postcondition. Exhausted or failed reads keep the outcome unknown and preserve the tenant lock and replay prohibition.

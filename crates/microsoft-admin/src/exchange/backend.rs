@@ -1,6 +1,9 @@
 use super::{Backend, Change, Plan, PowerShell, Snapshot};
 use crate::{Error, Result, Scope};
 impl Backend for PowerShell {
+    fn wait_for_readback(&mut self) {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+    }
     fn snapshot(&mut self, scope: &Scope, change: Option<&Change>) -> Result<Snapshot> {
         if let Some(c) = change {
             c.validate_syntax()?;
