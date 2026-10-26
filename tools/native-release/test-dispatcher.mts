@@ -39,6 +39,16 @@ for (const [args, expected] of cases) {
 const r = run(['microsoft', 'exchange', 'apply', ...scope, '--plan-file', join(root, 'absent-plan.json'), '--approval-sha256', 'a'.repeat(64), '--journal-directory', join(root, 'absent-journal')])
 assert.notEqual(r.status, 0)
 assert.match(r.stdout + r.stderr, /interactive_authorization_required/)
-const result = { passed: cases.length + 1, credentialInput: false, liveRequests: false, remoteWrites: false, isolatedRegistry: true }
+const authProfile = join(root, 'auth.json')
+const configured = run(['microsoft', 'auth', 'configure', '--tenant', '11111111-1111-1111-1111-111111111111', '--client-id', '22222222-2222-2222-2222-222222222222', '--collection', 'default', '--output', authProfile])
+assert.equal(configured.status, 0, configured.stderr)
+assert.equal(JSON.parse(configured.stdout).result.tenant_configuration_changed, false)
+assert.equal(JSON.parse(readFileSync(authProfile, 'utf8')).client_id, '22222222-2222-2222-2222-222222222222')
+for (const group of ['domains', 'users', 'licenses', 'dkim', 'mail']) {
+  const denied = run(['microsoft', group, 'apply', ...scope, '--plan-file', join(root, 'absent-plan.json'), '--approval-sha256', 'a'.repeat(64), '--journal-directory', join(root, 'absent-journal')])
+  assert.notEqual(denied.status, 0)
+  assert.match(denied.stdout + denied.stderr, /interactive_authorization_required/)
+}
+const result = { passed: cases.length + 7, credentialInput: false, liveRequests: false, remoteWrites: false, isolatedRegistry: true }
 writeFileSync(join(root, 'verification.json'), JSON.stringify(result), { mode: 0o600 })
 process.stdout.write(`${JSON.stringify(result)}\n`)
