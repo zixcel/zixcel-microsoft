@@ -203,3 +203,8 @@ are errors, never empty successful inventories. It does not claim effective
 access, folder-level permission coverage, transport-rule coverage or external
 delivery. Selected-trustee snapshots enumerate and resolve returned permission
 identities; an absent entry is distinct from a failed or ambiguous read.
+
+DKIM configuration absence is determined only after a successful bounded
+`Get-DkimSigningConfig` enumeration. Identity-filtered not-found exception
+categories vary between Exchange versions and are not used to infer absence.
+Permission, transport and enumeration-limit failures remain errors.

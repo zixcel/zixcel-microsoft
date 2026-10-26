@@ -46,7 +46,7 @@ if (!$refused) {throw 'missing_user_identity_accepted'}
 'Exchange command mapping, system inventory and syntax tests passed; no module import, authentication or remote requests.'
 . "$PSScriptRoot/../src/exchange/bridge-management.ps1"
 function Get-AcceptedDomain { param($Identity,$ErrorAction) [pscustomobject]@{DomainType='Authoritative';DomainName=$Identity} }
-function Get-DkimSigningConfig { param($Identity,$ErrorAction) [pscustomobject]@{Domain=$Identity;Enabled=$false;Selector1CNAME='Selector1-example-net._domainkey.Initial.onmicrosoft.com.';Selector2CNAME='selector2-example-net._domainkey.initial.onmicrosoft.com.'} }
+function Get-DkimSigningConfig { param($Identity,$ErrorAction) [pscustomobject]@{Domain=$(if ($Identity) {$Identity} else {'example.net'});Enabled=$false;Selector1CNAME='Selector1-example-net._domainkey.Initial.onmicrosoft.com.';Selector2CNAME='selector2-example-net._domainkey.initial.onmicrosoft.com.'} }
 function New-DkimSigningConfig { param($DomainName,$Enabled,$KeySize,$ErrorAction) if ($Enabled -ne $false -or $KeySize -ne 2048) {throw 'unsafe DKIM preparation'}; $script:writes += @{kind='dkim-new';domain=$DomainName} }
 function Set-DkimSigningConfig { param($Identity,$Enabled,$ErrorAction) if ($Enabled -ne $true) {throw 'unexpected DKIM disable'}; $script:writes += @{kind='dkim-enable';domain=$Identity} }
 $c=[pscustomobject]@{operation='prepare_dkim';domain='example.net'}
@@ -119,3 +119,23 @@ $refused=$false
 try {Read-ZixMailboxAudit '33333333-3333-3333-3333-333333333333'} catch {$refused=$true}
 if (!$refused) {throw 'audit permission failure reported as complete'}
 'Mailbox audit retains delegate and delivery observations and propagates read failures.'
+
+function Get-AcceptedDomain { param($Identity,$ErrorAction) [pscustomobject]@{DomainType='Authoritative';DomainName=$Identity} }
+function Get-DkimSigningConfig { param($Identity,$ErrorAction)
+    if ($Identity) {throw 'synthetic nonstandard absent-identity error category'}
+    [pscustomobject]@{Domain='other.example.org';Enabled=$false;Selector1CNAME='one.example.org';Selector2CNAME='two.example.org'}
+}
+$c=[pscustomobject]@{operation='prepare_dkim';domain='example.net'}
+$s=Read-ZixDkim $c
+if ($null -ne $s.target -or !$s.eligible) {throw 'successful absence was not distinguished'}
+function Get-DkimSigningConfig { param($Identity,$ErrorAction) throw 'synthetic permission denial' }
+$refused=$false
+try {Read-ZixDkim $c} catch {$refused=$true}
+if (!$refused) {throw 'DKIM failed enumeration treated as absence'}
+function Get-DkimSigningConfig { param($Identity,$ErrorAction)
+    foreach ($unused in 1..101) { [pscustomobject]@{Domain='other.example.org'} }
+}
+$refused=$false
+try {Read-ZixDkim $c} catch {$refused=$true}
+if (!$refused) {throw 'DKIM enumeration limit not enforced'}
+'DKIM absence requires successful bounded enumeration; permission and limit failures remain errors.'
