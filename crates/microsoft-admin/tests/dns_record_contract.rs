@@ -93,3 +93,33 @@ fn dns_pagination_keeps_record_identity_and_failure_after_partial_data() {
     assert_eq!(response["observation"]["http_status"], 403);
     assert_eq!(http.paths.len(), 5);
 }
+#[test]
+fn ownership_verification_records_are_available_before_domain_is_verified() {
+    let mut http = Api {
+        replies: VecDeque::from([
+            Ok(json!({"id":SUBJECT})),
+            Ok(json!({"id":TENANT})),
+            Ok(
+                json!({"value":[{"id":"ownership","recordType":"Txt","label":"@","text":"MS=synthetic-verification","ttl":3600}]}),
+            ),
+        ]),
+        paths: vec![],
+    };
+    let r = observe(
+        &mut http,
+        &scope(),
+        Read::DomainVerification {
+            domain: "example.org".into(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        http.paths[2],
+        "/v1.0/domains/example.org/verificationDnsRecords"
+    );
+    assert_eq!(r["observation"]["complete"], true);
+    assert_eq!(
+        r["observation"]["data"][0]["text"],
+        "MS=synthetic-verification"
+    );
+}

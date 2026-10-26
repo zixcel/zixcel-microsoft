@@ -17,6 +17,12 @@ pub fn execute(r: &Request) -> Result<Value, Failure> {
 }
 fn invoke(r: &Request) -> Result<Value, Error> {
     zix_native_provider::validate_request(&crate::manifest()?, r)?;
+    if r.operation.starts_with("auth.") {
+        return crate::auth::invoke(r);
+    }
+    if r.operation.starts_with("runtime.") {
+        return crate::runtime::invoke(r);
+    }
     if r.operation == "admin.doctor" {
         return crate::doctor::report();
     }
@@ -59,6 +65,9 @@ fn invoke(r: &Request) -> Result<Value, Error> {
         subject: arg("subject")?.into(),
     };
     scope.validate().map_err(|e| Error(e.0))?;
+    if r.operation.starts_with("management.") {
+        return crate::management::invoke(r, &scope, timeout, now);
+    }
     if r.operation.starts_with("admin.") {
         let op = match r.operation.as_str() {
             "admin.organization" => Read::Organization,
@@ -68,13 +77,16 @@ fn invoke(r: &Request) -> Result<Value, Error> {
             "admin.user" => Read::User {
                 user: arg("user")?.into(),
             },
+            "admin.domain-verification" => Read::DomainVerification {
+                domain: arg("domain")?.into(),
+            },
             "admin.domain-dns" => Read::DomainDns {
                 domain: arg("domain")?.into(),
             },
             _ => return Err(Error("unknown_operation")),
         };
         // Validate domain inputs before reading credentials.
-        if let Read::DomainDns { domain } = &op {
+        if let Read::DomainDns { domain } | Read::DomainVerification { domain } = &op {
             zixcel_microsoft_admin::domain(domain).map_err(|e| Error(e.0))?;
         }
         if let Read::User { user } = &op {

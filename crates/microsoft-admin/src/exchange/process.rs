@@ -1,5 +1,5 @@
 use crate::{Error, Result};
-use crowsi_process_adapter::{Launch, OwnedProcess};
+use crowsi_process_adapter::{Launch, systemd::Service};
 use std::time::Duration;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use zeroize::Zeroizing;
@@ -13,9 +13,10 @@ pub(crate) fn run(
         .build()
         .map_err(|_| Error("process_runtime_unavailable"))?
         .block_on(async {
-            let mut process = OwnedProcess::spawn(launch)
-                .await
-                .map_err(|_| Error("process_containment_unavailable"))?;
+            let mut process =
+                Service::spawn_public_environment(launch, timeout.min(Duration::from_secs(30)))
+                    .await
+                    .map_err(|_| Error("process_containment_unavailable"))?;
             let result = tokio::time::timeout(timeout.min(Duration::from_secs(30)), async {
                 let mut input = process
                     .take_stdin()

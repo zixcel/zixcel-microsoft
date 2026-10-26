@@ -3,7 +3,7 @@ use zix_native_provider::{Error, Manifest};
 pub fn manifest() -> zix_native_provider::Result<Manifest> {
     let mut m = crate::provider()?.manifest().clone();
     m.schema = "zix-extension/v2".into();
-    m.timeout_ms = 40000;
+    m.timeout_ms = 120000;
     m.credential_environment.extend([
         "ZIX_MICROSOFT_EXCHANGE_TOKEN".into(),
         "ZIX_MICROSOFT_EXCHANGE_PROFILE".into(),
@@ -17,6 +17,12 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
         ),
         ("admin.licenses", vec!["licenses", "list"], vec![], "read"),
         ("admin.domains", vec!["domains", "list"], vec![], "read"),
+        (
+            "admin.domain-verification",
+            vec!["domains", "verification-records"],
+            vec!["domain"],
+            "read",
+        ),
         ("admin.users", vec!["users", "list"], vec![], "read"),
         ("admin.user", vec!["users", "inspect"], vec!["user"], "read"),
         (
@@ -57,6 +63,9 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
             args.push(json!({"name":"change-file","required":false,"maximum":2048}));
         }
         let exchange = id.starts_with("exchange.");
+        if exchange {
+            args.push(json!({"name":"runtime-profile","required":false,"maximum":2048}));
+        }
         let permissions = if exchange {
             vec![
                 "Official Exchange Online RBAC for each selected cmdlet; Graph read for sign-in verification",
@@ -86,6 +95,7 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
     // The original exact-user read retains its smaller credential exposure and validation.
     m.commands[0].environment=Some(serde_json::from_value(json!({"credential_environment":["ZIX_MICROSOFT_ACCESS_TOKEN"],"runtime_environment":[]}))
         .map_err(|_|Error("invalid_admin_manifest"))?);
+    crate::administration_catalog::extend(&mut m)?;
     m.validate()?;
     Ok(m)
 }

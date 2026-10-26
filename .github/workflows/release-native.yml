@@ -50,19 +50,12 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends musl-tools
-          cargo build --locked --release -p zixcel-microsoft-cli --bin zix-microsoft --target x86_64-unknown-linux-musl
-          cargo run --locked -p zixcel-microsoft-cli --bin package-native -- "$PWD/target/x86_64-unknown-linux-musl/release/zix-microsoft" "$RUNNER_TEMP/native" x86_64-unknown-linux-musl
+          sudo apt-get install -y --no-install-recommends musl-tools libsecret-1-dev
+          bash tools/native-release/prepare.sh "$RUNNER_TEMP/native"
           cd "$RUNNER_TEMP/native"
-          sha256sum --check SHA256SUMS
-          test "$(find . -maxdepth 1 -name '*.tar.gz' | wc -l)" = 1
-          read -r digest filename < SHA256SUMS
-          [[ "$digest" =~ ^[a-f0-9]{64}$ && "$filename" =~ ^[a-z0-9.-]+-x86_64-unknown-linux-musl\.tar\.gz$ ]]
-          mkdir unpacked
-          tar -xzf "$filename" -C unpacked
-          (cd unpacked/*; sha256sum --check CONTENTS.sha256; ./zix-microsoft --manifest > observed.json; cmp observed.json microsoft.extension.json)
-          echo "sha256=$digest" >> "$GITHUB_OUTPUT"
-          echo "filename=$filename" >> "$GITHUB_OUTPUT"
+          test "$(wc -l < SHA256SUMS)" = 2
+          echo "sha256=$(sha256sum SHA256SUMS | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "filename=SHA256SUMS" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         id: upload
         with:
@@ -99,15 +92,16 @@ jobs:
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/native"
-          [[ "$DIGEST" =~ ^[a-f0-9]{64}$ && "$ARCHIVE" =~ ^[a-z0-9.-]+-x86_64-unknown-linux-musl\.tar\.gz$ ]]
+          [[ "$DIGEST" =~ ^[a-f0-9]{64}$ && "$ARCHIVE" = SHA256SUMS ]]
           printf '%s  %s\n' "$DIGEST" "$ARCHIVE" | sha256sum --check
           if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$GITHUB_REF_NAME" > "$RUNNER_TEMP/release" 2> "$RUNNER_TEMP/error"; then
             echo 'Existing release: verification only; no overwrite.'
           else
             grep -q '(HTTP 404)' "$RUNNER_TEMP/error"; test "$GITHUB_RUN_ATTEMPT" = 1
-            gh release create "$GITHUB_REF_NAME" "$ARCHIVE" SHA256SUMS --repo "$GITHUB_REPOSITORY" --verify-tag --target "$GITHUB_SHA" --title "$GITHUB_REF_NAME" --notes "Source $GITHUB_SHA; archive SHA256 $DIGEST."
+            gh release create "$GITHUB_REF_NAME" ./*.tar.gz SHA256SUMS --repo "$GITHUB_REPOSITORY" --verify-tag --target "$GITHUB_SHA" --title "$GITHUB_REF_NAME" --notes "Source $GITHUB_SHA; archive SHA256 $DIGEST."
           fi
           mkdir readback
-          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern "$ARCHIVE" --dir readback
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern "*.tar.gz" --pattern SHA256SUMS --dir readback
           test "$(sha256sum "readback/$ARCHIVE" | cut -d' ' -f1)" = "$DIGEST"
+          (cd readback; sha256sum --check SHA256SUMS)
           printf 'Verified `%s` source `%s` SHA256 `%s`.\n' "$GITHUB_REF_NAME" "$GITHUB_SHA" "$DIGEST" >> "$GITHUB_STEP_SUMMARY"

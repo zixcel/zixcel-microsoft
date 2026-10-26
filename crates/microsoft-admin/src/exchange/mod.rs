@@ -10,6 +10,8 @@ mod postcondition;
 mod powershell;
 mod process;
 mod profile;
+mod runtime;
+pub use runtime::inspect as inspect_runtime;
 mod validation;
 pub use execution::{Backend, Receipt, execute};
 pub use journal::Journal;

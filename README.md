@@ -97,3 +97,6 @@ the Rust [admin library](crates/microsoft-admin) and native CLI. These are separ
 from this root planning-only crate. They provide bounded Graph reads and typed,
 operator-approved Exchange recipient changes; no authentication, real changes or
 new runtime installation is enabled by the source update.
+
+[Local mail enablement](docs/mail-administration.md) documents native 0.3.0 auth,
+Crowsi custody, reviewed tenant changes, DKIM, probes and official runtime setup.

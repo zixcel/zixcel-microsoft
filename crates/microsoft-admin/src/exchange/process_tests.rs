@@ -3,15 +3,18 @@ use crowsi_process_adapter::{Launch, ProcessBudget};
 use std::time::{Duration, Instant};
 use zeroize::Zeroizing;
 fn launch(exe: &str, args: &[&str]) -> Launch {
-    // Fixture only: finite pipe/file tests do not assert whole-tree memory enforcement.
+    // Explicit user-manager acceptance; all requested axes are installed before exec.
     Launch::new(exe)
         .args(args.iter().copied())
         .budget(ProcessBudget {
             max_file_bytes: Some(0),
-            ..Default::default()
+            max_memory_bytes: Some(512 * 1024 * 1024),
+            max_processes: Some(32),
+            cpu_quota: Some(1.0),
         })
 }
 #[test]
+#[ignore = "requires an actual local systemd user manager; run explicitly on target host"]
 fn exact_bounded_pipe_roundtrip_without_files_or_authentication() {
     let bytes = Zeroizing::new(b"synthetic pipe request\n".to_vec());
     assert_eq!(
@@ -20,6 +23,7 @@ fn exact_bounded_pipe_roundtrip_without_files_or_authentication() {
     );
 }
 #[test]
+#[ignore = "requires an actual local systemd user manager; run explicitly on target host"]
 fn finite_oversized_output_is_rejected_and_owned_child_reaped() {
     let start = Instant::now();
     let r = process::run(
@@ -31,6 +35,7 @@ fn finite_oversized_output_is_rejected_and_owned_child_reaped() {
     assert!(start.elapsed() < Duration::from_secs(7));
 }
 #[test]
+#[ignore = "requires an actual local systemd user manager; run explicitly on target host"]
 fn timeout_stops_only_the_owned_fixture_tree() {
     let start = Instant::now();
     let r = process::run(

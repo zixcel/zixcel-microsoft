@@ -8,12 +8,23 @@ pub(super) fn encode(
     profile: &ExchangeProfile,
     token: &str,
 ) -> Result<Zeroizing<Vec<u8>>> {
+    encode_all(scope, mode, change, None, profile, token)
+}
+pub(super) fn encode_all(
+    scope: &Scope,
+    mode: &str,
+    change: Option<&Change>,
+    management: Option<&crate::management::Change>,
+    profile: &ExchangeProfile,
+    token: &str,
+) -> Result<Zeroizing<Vec<u8>>> {
     #[derive(serde::Serialize)]
     struct Input<'a> {
         scope: &'a Scope,
         mode: &'a str,
         change: Option<&'a Change>,
         user: &'a str,
+        management_change: Option<&'a crate::management::Change>,
         module: &'a std::path::Path,
         token: &'a str,
     }
@@ -21,6 +32,7 @@ pub(super) fn encode(
         serde_json::to_vec(&Input {
             scope,
             mode,
+            management_change: management,
             change,
             user: &profile.user_principal_name,
             module: &profile.module_manifest,

@@ -11,3 +11,8 @@ pub fn provider() -> zix_native_provider::Result<zix_native_provider::Provider> 
         env!("CARGO_PKG_VERSION"),
     )
 }
+
+mod administration_catalog;
+mod auth;
+mod management;
+mod runtime;

@@ -87,3 +87,47 @@ fn doctor_requires_no_account_or_tokens_and_performs_no_installation() {
     assert_eq!(r["result"]["remote_requests"], false);
     assert_eq!(r["result"]["exchange_profile"], "not_configured");
 }
+
+#[test]
+fn mail_administration_writes_have_exact_approval_inputs_and_auth_has_no_inherited_tokens() {
+    let m = zixcel_microsoft_cli::manifest().unwrap();
+    assert!(m.commands.len() <= 32);
+    for group in ["domains", "users", "licenses", "dkim", "mail"] {
+        let c = m
+            .commands
+            .iter()
+            .find(|c| c.id == format!("management.{group}.apply"))
+            .unwrap();
+        assert_eq!(c.effect, "operator-write");
+        for name in ["plan-file", "approval-sha256", "journal-directory"] {
+            assert!(c.arguments.iter().any(|a| a.name == name && a.required));
+        }
+    }
+    for c in m.commands.iter().filter(|c| c.id.starts_with("auth.")) {
+        assert!(
+            c.environment
+                .as_ref()
+                .unwrap()
+                .credential_environment
+                .is_empty()
+        );
+    }
+    let c = m
+        .commands
+        .iter()
+        .find(|c| c.id == "management.dkim.apply")
+        .unwrap();
+    assert_eq!(
+        c.environment.as_ref().unwrap().credential_environment.len(),
+        3
+    );
+    let c = m
+        .commands
+        .iter()
+        .find(|c| c.id == "management.domains.apply")
+        .unwrap();
+    assert_eq!(
+        c.environment.as_ref().unwrap().credential_environment,
+        vec!["ZIX_MICROSOFT_ACCESS_TOKEN"]
+    );
+}

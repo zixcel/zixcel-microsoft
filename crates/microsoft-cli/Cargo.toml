@@ -1,6 +1,6 @@
 [package]
 name = "zixcel-microsoft-cli"
-version = "0.2.2"
+version = "0.3.0"
 edition = "2024"
 rust-version = "1.97"
 license = "Apache-2.0"
@@ -11,13 +11,18 @@ publish = false
 name = "zix-microsoft"
 path = "src/main.rs"
 [dependencies]
-zix-native-provider = { git = "https://github.com/zixcel/cli", rev = "8fbd566aa53a52d4a588fef537683be2a604b02a" }
+zix-native-provider = { git = "https://github.com/zixcel/cli", rev = "772a0498500df508c1f9801f36b60040265f42fc" }
 zixcel-microsoft-admin = { path = "../microsoft-admin" }
-zix-cli = { git = "https://github.com/zixcel/cli", rev = "8fbd566aa53a52d4a588fef537683be2a604b02a" }
-zix-operation-contracts = { git = "https://github.com/zixcel/cli", rev = "8fbd566aa53a52d4a588fef537683be2a604b02a" }
+zix-cli = { git = "https://github.com/zixcel/cli", rev = "772a0498500df508c1f9801f36b60040265f42fc" }
+zix-operation-contracts = { git = "https://github.com/zixcel/cli", rev = "772a0498500df508c1f9801f36b60040265f42fc" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 zeroize = "1"
+[features]
+default = []
+credential-store = ["dep:crowsi-credential-broker"]
+[target.'cfg(target_os = "linux")'.dependencies]
+crowsi-credential-broker = { version = "=0.1.2", default-features = false, features = ["linux-secret-service"], optional = true }
 [dev-dependencies]
 serde_json = "1.0"
 [lints.rust]

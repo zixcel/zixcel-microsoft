@@ -56,10 +56,17 @@ impl Read {
                     many,
                 )
             }
-            Self::DomainDns { domain } => {
+            Self::DomainVerification { domain } | Self::DomainDns { domain } => {
                 crate::domain(domain)?;
                 (
-                    format!("domains/{domain}/serviceConfigurationRecords"),
+                    format!(
+                        "domains/{domain}/{}",
+                        if matches!(self, Self::DomainVerification { .. }) {
+                            "verificationDnsRecords"
+                        } else {
+                            "serviceConfigurationRecords"
+                        }
+                    ),
                     vec![
                         "id",
                         "recordType",
@@ -79,7 +86,10 @@ impl Read {
         // DNS record collections contain derived MX/TXT/CNAME properties. Fetch the
         // bounded collection, then project locally instead of selecting derived fields
         // on the base domainDnsRecord entity at the server.
-        let initial = if matches!(self, Self::DomainDns { .. }) {
+        let initial = if matches!(
+            self,
+            Self::DomainDns { .. } | Self::DomainVerification { .. }
+        ) {
             format!("/v1.0/{path}")
         } else {
             format!("/v1.0/{path}?$select={}", fields.join(","))
