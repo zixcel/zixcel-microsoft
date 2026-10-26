@@ -1,6 +1,7 @@
 pub mod catalog;
 mod doctor;
 mod exchange;
+mod exchange_reconciliation;
 mod input;
 pub mod invoke;
 pub use catalog::manifest;

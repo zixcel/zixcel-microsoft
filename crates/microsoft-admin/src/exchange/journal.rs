@@ -134,7 +134,7 @@ impl Journal {
             .map(|b| format!("{b:02x}"))
             .collect())
     }
-    pub(crate) fn resolve_verification(
+    pub(crate) fn resolve_uncertain(
         &self,
         hash: &str,
         expected: &str,
