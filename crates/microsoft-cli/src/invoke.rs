@@ -41,6 +41,7 @@ fn invoke(r: &Request) -> Result<Value, Error> {
     if r.operation == "users.read" {
         let p = crate::provider()?;
         let mut old = r.clone();
+        old.schema = p.manifest().protocol.clone();
         old.limits.timeout_ms = old.limits.timeout_ms.min(20000);
         old.binding = None;
         let prepared = p.prepare(&old)?;

@@ -1,0 +1,3267 @@
+[
+  {
+    "operation": "admin.organization",
+    "selectors": {},
+    "intent": "read_tenant_identity",
+    "keywords": [
+      "GRAPH",
+      "DIRECTORY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.domains",
+    "selectors": {},
+    "intent": "read_verified_domains",
+    "keywords": [
+      "GRAPH",
+      "DOMAIN",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Domain.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.domain-verification",
+    "selectors": {},
+    "intent": "read_domain_verification_records",
+    "keywords": [
+      "GRAPH",
+      "DOMAIN",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Domain.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "domain",
+        "operation": "dns.delegation",
+        "purpose": "establish_authoritative_dns",
+        "arguments": {},
+        "on": [
+          "observed"
+        ]
+      },
+      {
+        "namespace": "domain",
+        "operation": "dns.records.plan",
+        "purpose": "prepare_dns_after_authority_and_profile",
+        "arguments": {},
+        "on": [
+          "observed"
+        ],
+        "requires_context": {
+          "authoritative_dns": "verified",
+          "dns_profile": "reviewed"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.domain-dns",
+    "selectors": {},
+    "intent": "read_service_dns_requirements",
+    "keywords": [
+      "GRAPH",
+      "DOMAIN",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Domain.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "domain",
+        "operation": "dns.delegation",
+        "purpose": "establish_authoritative_dns",
+        "arguments": {},
+        "on": [
+          "observed"
+        ]
+      },
+      {
+        "namespace": "domain",
+        "operation": "dns.records.plan",
+        "purpose": "prepare_dns_after_authority_and_profile",
+        "arguments": {},
+        "on": [
+          "observed"
+        ],
+        "requires_context": {
+          "authoritative_dns": "verified",
+          "dns_profile": "reviewed"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.licenses",
+    "selectors": {},
+    "intent": "read_subscribed_licenses",
+    "keywords": [
+      "GRAPH",
+      "DIRECTORY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "LicenseAssignment.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.users",
+    "selectors": {},
+    "intent": "read_directory_users",
+    "keywords": [
+      "GRAPH",
+      "DIRECTORY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.user",
+    "selectors": {},
+    "intent": "read_selected_directory_user",
+    "keywords": [
+      "GRAPH",
+      "DIRECTORY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.organization",
+    "selectors": {
+      "resource": "security_defaults"
+    },
+    "intent": "read_security_defaults",
+    "keywords": [
+      "GRAPH",
+      "POLICY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Policy.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent for selected delegated scopes",
+        "subject": "application"
+      },
+      {
+        "kind": "role",
+        "value": "supported Entra role for the selected policy operation",
+        "subject": "operator"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/api/identitysecuritydefaultsenforcementpolicy-get?view=graph-rest-1.0"
+    ]
+  },
+  {
+    "operation": "admin.organization",
+    "selectors": {
+      "resource": "conditional_access"
+    },
+    "intent": "read_conditional_access",
+    "keywords": [
+      "GRAPH",
+      "MEMBERSHIP",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Policy.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent for selected delegated scopes",
+        "subject": "application"
+      },
+      {
+        "kind": "role",
+        "value": "supported Entra role for the selected policy operation",
+        "subject": "operator"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.organization",
+    "selectors": {
+      "resource": "groups"
+    },
+    "intent": "read_directory_groups",
+    "keywords": [
+      "GRAPH",
+      "MEMBERSHIP",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "GroupMember.Read.All",
+        "subject": "graph_credential",
+        "alternatives": [
+          "Group.Read.All"
+        ]
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent for selected delegated scopes",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "admin.organization",
+    "selectors": {
+      "resource": "group_members"
+    },
+    "intent": "read_transitive_group_members",
+    "keywords": [
+      "GRAPH",
+      "MEMBERSHIP",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "GroupMember.ReadBasic.All",
+        "subject": "graph_credential",
+        "alternatives": [
+          "GroupMember.Read.All",
+          "Group.Read.All"
+        ]
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent for selected delegated scopes",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "operation",
+        "value": "Hidden membership requires Member.Read.Hidden; limited object data does not establish absence."
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/api/group-list-transitivemembers?view=graph-rest-1.0"
+    ],
+    "required_arguments": [
+      "identity"
+    ]
+  },
+  {
+    "operation": "admin.organization",
+    "selectors": {
+      "resource": "user_memberships"
+    },
+    "intent": "read_transitive_user_memberships",
+    "keywords": [
+      "GRAPH",
+      "MEMBERSHIP",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential",
+        "alternatives": [
+          "User.Read.All",
+          "GroupMember.Read.All",
+          "Group.Read.All"
+        ]
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent for selected delegated scopes",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "operation",
+        "value": "For another user select an applicable alternative scope; User.Read alone applies to the signed-in user."
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/api/user-list-transitivememberof?view=graph-rest-1.0"
+    ],
+    "required_arguments": [
+      "identity"
+    ]
+  },
+  {
+    "operation": "exchange.snapshot",
+    "selectors": {},
+    "intent": "read_exchange_configuration",
+    "keywords": [
+      "EXCHANGE",
+      "CONFIGURATION"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell"
+    ]
+  },
+  {
+    "operation": "exchange.plan",
+    "selectors": {},
+    "intent": "plan_exchange_change",
+    "keywords": [
+      "EXCHANGE",
+      "CONFIGURATION"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell"
+    ]
+  },
+  {
+    "operation": "exchange.apply",
+    "selectors": {},
+    "intent": "apply_reviewed_exchange_plan",
+    "keywords": [
+      "EXCHANGE",
+      "CONFIGURATION"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "exchange.snapshot",
+        "purpose": "readback_before_new_plan",
+        "arguments": {},
+        "on": [
+          "outcome_unknown"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell"
+    ]
+  },
+  {
+    "operation": "management.dkim.inspect",
+    "selectors": {},
+    "intent": "read_dkim_state",
+    "keywords": [
+      "EXCHANGE",
+      "DKIM"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "domain",
+        "operation": "dns.records.plan",
+        "purpose": "prepare_dkim_dns_after_authority_check",
+        "arguments": {},
+        "on": [
+          "observed"
+        ],
+        "requires_context": {
+          "authoritative_dns": "verified",
+          "dns_profile": "reviewed"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell"
+    ]
+  },
+  {
+    "operation": "management.dkim.plan",
+    "selectors": {},
+    "intent": "plan_dkim_change",
+    "keywords": [
+      "EXCHANGE",
+      "DKIM"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "domain",
+        "operation": "dns.records.plan",
+        "purpose": "prepare_dkim_dns_after_authority_check",
+        "arguments": {},
+        "on": [
+          "observed"
+        ],
+        "requires_context": {
+          "authoritative_dns": "verified",
+          "dns_profile": "reviewed"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell"
+    ]
+  },
+  {
+    "operation": "management.dkim.apply",
+    "selectors": {},
+    "intent": "apply_reviewed_dkim_plan",
+    "keywords": [
+      "EXCHANGE",
+      "DKIM"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "exchange.snapshot",
+        "purpose": "readback_before_new_plan",
+        "arguments": {},
+        "on": [
+          "outcome_unknown"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell"
+    ]
+  },
+  {
+    "operation": "exchange.snapshot",
+    "selectors": {
+      "resource": "policies"
+    },
+    "intent": "read_exchange_policies",
+    "keywords": [
+      "EXCHANGE",
+      "POLICIES",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/"
+    ]
+  },
+  {
+    "operation": "exchange.snapshot",
+    "selectors": {
+      "resource": "rbac"
+    },
+    "intent": "read_exchange_rbac",
+    "keywords": [
+      "EXCHANGE",
+      "RBAC",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/"
+    ]
+  },
+  {
+    "operation": "exchange.snapshot",
+    "selectors": {
+      "resource": "inbox_rules"
+    },
+    "intent": "read_exchange_inbox_rules",
+    "keywords": [
+      "EXCHANGE",
+      "INBOX_RULES",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/"
+    ],
+    "required_arguments": [
+      "mailbox"
+    ]
+  },
+  {
+    "operation": "exchange.snapshot",
+    "selectors": {
+      "resource": "folder_permissions"
+    },
+    "intent": "read_exchange_folder_permissions",
+    "keywords": [
+      "EXCHANGE",
+      "FOLDER_PERMISSIONS",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/"
+    ],
+    "required_arguments": [
+      "mailbox",
+      "folder"
+    ]
+  },
+  {
+    "operation": "exchange.snapshot",
+    "selectors": {
+      "resource": "mailbox"
+    },
+    "intent": "read_exchange_mailbox",
+    "keywords": [
+      "EXCHANGE",
+      "MAILBOX",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/"
+    ],
+    "required_arguments": [
+      "mailbox"
+    ]
+  },
+  {
+    "operation": "exchange.snapshot",
+    "selectors": {
+      "resource": "client_access"
+    },
+    "intent": "read_exchange_client_access",
+    "keywords": [
+      "EXCHANGE",
+      "CLIENT_ACCESS",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/"
+    ],
+    "required_arguments": [
+      "mailbox"
+    ]
+  },
+  {
+    "operation": "exchange.snapshot",
+    "selectors": {
+      "resource": "auto_mapping"
+    },
+    "intent": "read_exchange_auto_mapping",
+    "keywords": [
+      "EXCHANGE",
+      "AUTO_MAPPING",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Exchange.Manage",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "role",
+        "value": "Exchange RBAC for selected cmdlets",
+        "subject": "operator"
+      },
+      {
+        "kind": "runtime",
+        "value": "reviewed PowerShell and ExchangeOnlineManagement profile",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_exchange_auth_state",
+        "arguments": {
+          "resource": "exchange"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "context",
+          "other"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/"
+    ],
+    "required_arguments": [
+      "mailbox",
+      "trustee"
+    ]
+  },
+  {
+    "operation": "management.domains.plan",
+    "selectors": {},
+    "intent": "plan_domains_change",
+    "keywords": [
+      "GRAPH",
+      "DOMAINS",
+      "PLAN"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Domain.ReadWrite.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent and applicable Entra administrative role",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "domain",
+        "operation": "dns.delegation",
+        "purpose": "establish_authoritative_dns",
+        "arguments": {},
+        "on": [
+          "observed"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "management.domains.apply",
+    "selectors": {},
+    "intent": "apply_domains_change",
+    "keywords": [
+      "GRAPH",
+      "DOMAINS",
+      "APPLY"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Domain.ReadWrite.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent and applicable Entra administrative role",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "admin.domains",
+        "purpose": "readback_before_new_plan",
+        "arguments": {},
+        "on": [
+          "outcome_unknown"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "management.users.plan",
+    "selectors": {},
+    "intent": "plan_users_change",
+    "keywords": [
+      "GRAPH",
+      "USERS",
+      "PLAN"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.ReadWrite.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent and applicable Entra administrative role",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "management.users.apply",
+    "selectors": {},
+    "intent": "apply_users_change",
+    "keywords": [
+      "GRAPH",
+      "USERS",
+      "APPLY"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.ReadWrite.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent and applicable Entra administrative role",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "admin.users",
+        "purpose": "readback_before_new_plan",
+        "arguments": {},
+        "on": [
+          "outcome_unknown"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "management.licenses.plan",
+    "selectors": {},
+    "intent": "plan_licenses_change",
+    "keywords": [
+      "GRAPH",
+      "LICENSES",
+      "PLAN"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "LicenseAssignment.ReadWrite.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent and applicable Entra administrative role",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "management.licenses.apply",
+    "selectors": {},
+    "intent": "apply_licenses_change",
+    "keywords": [
+      "GRAPH",
+      "LICENSES",
+      "APPLY"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "LicenseAssignment.ReadWrite.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent and applicable Entra administrative role",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "admin.licenses",
+        "purpose": "readback_before_new_plan",
+        "arguments": {},
+        "on": [
+          "outcome_unknown"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "management.mail.plan",
+    "selectors": {},
+    "intent": "plan_mail_change",
+    "keywords": [
+      "GRAPH",
+      "MAIL",
+      "PLAN"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Mail.Send",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent and applicable Entra administrative role",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "management.mail.apply",
+    "selectors": {},
+    "intent": "apply_mail_change",
+    "keywords": [
+      "GRAPH",
+      "MAIL",
+      "APPLY"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Mail.Send",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "consent",
+        "value": "admin consent and applicable Entra administrative role",
+        "subject": "application"
+      },
+      {
+        "kind": "context",
+        "subject": "credential_source",
+        "value": "Profile status applies only to its own cache; separately enrolled external tokens require their actual source context."
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_graph_auth_state",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "context",
+          "authentication",
+          "authorization"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      },
+      {
+        "namespace": "microsoft",
+        "operation": "management.mail.inspect",
+        "purpose": "readback_before_new_plan",
+        "arguments": {},
+        "on": [
+          "outcome_unknown"
+        ]
+      },
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.start",
+    "selectors": {
+      "resource": "graph"
+    },
+    "intent": "start_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "GRAPH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.start",
+    "selectors": {
+      "resource": "exchange"
+    },
+    "intent": "start_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "EXCHANGE"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.poll",
+    "selectors": {
+      "resource": "graph"
+    },
+    "intent": "poll_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "GRAPH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.poll",
+    "selectors": {
+      "resource": "exchange"
+    },
+    "intent": "poll_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "EXCHANGE"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.refresh",
+    "selectors": {
+      "resource": "graph"
+    },
+    "intent": "refresh_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "GRAPH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.refresh",
+    "selectors": {
+      "resource": "exchange"
+    },
+    "intent": "refresh_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "EXCHANGE"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.status",
+    "selectors": {
+      "resource": "graph"
+    },
+    "intent": "status_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "GRAPH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.status",
+    "selectors": {
+      "resource": "exchange"
+    },
+    "intent": "status_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "EXCHANGE"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.logout",
+    "selectors": {
+      "resource": "graph"
+    },
+    "intent": "logout_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "GRAPH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  },
+  {
+    "operation": "auth.logout",
+    "selectors": {
+      "resource": "exchange"
+    },
+    "intent": "logout_selected_authentication",
+    "keywords": [
+      "AUTH",
+      "EXCHANGE"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "reviewed authentication profile",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "https://outlook.office365.com",
+        "subject": "exchange_credential"
+      },
+      {
+        "kind": "context",
+        "value": "consent does not update an already issued token",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/permissions-overview"
+    ]
+  }
+]

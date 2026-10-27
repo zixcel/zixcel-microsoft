@@ -56,7 +56,7 @@ fn actual_native_manifest_and_missing_credential_protocol_need_no_node_or_accoun
     );
     let mut child = Command::new(env!("CARGO_BIN_EXE_zix-microsoft"))
         .env_clear()
-        .arg("--zix-provider-v1")
+        .arg("--zix-provider-v2")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -69,6 +69,7 @@ fn actual_native_manifest_and_missing_credential_protocol_need_no_node_or_accoun
         .write_all(
             &serde_json::to_vec(&{
                 let mut value = serde_json::to_value(request()).unwrap();
+                value["schema"] = m["protocol"].clone();
                 let bytes = std::fs::read(env!("CARGO_BIN_EXE_zix-microsoft")).unwrap();
                 value["binding"] =
                     serde_json::to_value(zix_operation_contracts::Binding::for_catalog(
