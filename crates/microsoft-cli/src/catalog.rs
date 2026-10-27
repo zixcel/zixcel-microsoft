@@ -118,7 +118,9 @@ pub fn catalog() -> zix_native_provider::Result<Value> {
 pub fn binding() -> zix_native_provider::Result<zix_operation_contracts::Binding> {
     let bytes = zix_cli::files::bounded(
         std::fs::File::open("/proc/self/exe").map_err(|_| Error("executable_unavailable"))?,
-        32 * 1024 * 1024,
+        // Match the pinned native SDK executable-binding limit. Test binaries
+        // retain line debug information and can exceed the old local 32 MiB cap.
+        128 * 1024 * 1024,
     )?;
     Ok(zix_operation_contracts::Binding::for_catalog(
         env!("CARGO_PKG_NAME"),
