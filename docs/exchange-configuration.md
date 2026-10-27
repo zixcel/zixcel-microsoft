@@ -54,7 +54,9 @@ zix microsoft organization get --tenant TENANT_UUID --subject SUBJECT_UUID --res
 zix microsoft organization get --tenant TENANT_UUID --subject SUBJECT_UUID --resource conditional_access
 ```
 
-Group queries are transitive. Graph additionally requires appropriate delegated
+Membership queries are transitive. `user_memberships` preserves object types
+(groups, directory roles, administrative units); it uses the uncast relationship
+and local projection, without an advanced-query index dependency. Graph additionally requires appropriate delegated
 `GroupMember.ReadBasic.All` or `GroupMember.Read.All` for member IDs/types
 (group discovery may need `Group.Read.All`),
 `User.Read.All` for another user's memberships, and `Policy.Read.All` for security
@@ -198,6 +200,7 @@ requires a separate plan and approval.
 - [Set-CASMailbox](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/set-casmailbox)
 - [Folder permissions](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/get-exomailboxfolderpermission)
 - [Transitive group members](https://learn.microsoft.com/en-us/graph/api/group-list-transitivemembers)
+- [Transitive user memberships](https://learn.microsoft.com/en-us/graph/api/user-list-transitivememberof)
 - [Conditional Access policies](https://learn.microsoft.com/en-us/graph/api/conditionalaccessroot-list-policies)
 - [Security Defaults](https://learn.microsoft.com/en-us/graph/api/identitysecuritydefaultsenforcementpolicy-get)
 - [Add shared mailbox in Outlook mobile](https://support.microsoft.com/en-us/outlook/add-a-shared-mailbox-to-outlook-mobile)

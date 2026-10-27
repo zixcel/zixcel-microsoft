@@ -62,13 +62,16 @@ impl Read {
                     }
                     Self::UserMemberships { user } => {
                         crate::uuid(user)?;
-                        format!("users/{user}/transitiveMemberOf/microsoft.graph.group")
+                        format!("users/{user}/transitiveMemberOf")
                     }
                     _ => unreachable!(),
                 };
                 // Polymorphic member collections are projected locally; selecting
                 // group-only properties on the directoryObject base is invalid.
-                let fields = if matches!(self, Self::GroupMembers { .. }) {
+                let fields = if matches!(
+                    self,
+                    Self::GroupMembers { .. } | Self::UserMemberships { .. }
+                ) {
                     vec!["id", "@odata.type", "displayName"]
                 } else {
                     vec![
@@ -138,7 +141,10 @@ impl Read {
         // on the base domainDnsRecord entity at the server.
         let initial = if matches!(
             self,
-            Self::DomainDns { .. } | Self::DomainVerification { .. } | Self::GroupMembers { .. }
+            Self::DomainDns { .. }
+                | Self::DomainVerification { .. }
+                | Self::GroupMembers { .. }
+                | Self::UserMemberships { .. }
         ) {
             format!("/v1.0/{path}")
         } else {

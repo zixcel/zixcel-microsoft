@@ -29,6 +29,26 @@ fn transitive_group_reads_keep_identity_types_and_do_not_infer_effective_access(
     );
     assert_eq!(r["effective_permissions"], "not_inferred");
     assert!(!r.to_string().contains("hidden"));
+    let mut memberships = fake(vec![Ok(
+        json!({"value":[{"id":TRUSTEE,"@odata.type":"#microsoft.graph.group","displayName":"Example group"},{"id":MAILBOX,"@odata.type":"#microsoft.graph.directoryRole","displayName":"Example role"}]}),
+    )]);
+    let observed = observe(
+        &mut memberships,
+        &scope(),
+        Read::UserMemberships {
+            user: SUBJECT.into(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        memberships.paths[2],
+        format!("/v1.0/users/{SUBJECT}/transitiveMemberOf")
+    );
+    assert_eq!(observed["observation"]["complete"], true);
+    assert_eq!(
+        observed["observation"]["data"][1]["@odata.type"],
+        "#microsoft.graph.directoryRole"
+    );
     let mut f = fake(vec![Err(ReadError::Http(403))]);
     let r = observe(
         &mut f,
