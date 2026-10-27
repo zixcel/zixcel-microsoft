@@ -63,6 +63,26 @@ fn manifest_separates_operator_writes_and_subtracts_credential_inheritance() {
     );
 }
 #[test]
+fn configuration_and_group_selectors_fail_closed_before_credentials() {
+    let mut args = json!({"tenant":"11111111-1111-4111-8111-111111111111","subject":"22222222-2222-4222-8222-222222222222","resource":"folder_permissions","mailbox":"33333333-3333-4333-8333-333333333333","folder":"other@example.net:\\Inbox"});
+    assert_eq!(
+        invoke("exchange.snapshot", args.clone())["error"],
+        "invalid_folder_path"
+    );
+    args["folder"] = json!("\\Inbox");
+    assert_eq!(
+        invoke("exchange.snapshot", args)["error"],
+        "credential_missing"
+    );
+    assert_eq!(
+        invoke(
+            "admin.organization",
+            json!({"tenant":"11111111-1111-4111-8111-111111111111","subject":"22222222-2222-4222-8222-222222222222","resource":"group_members","identity":"../escape"})
+        )["error"],
+        "invalid_uuid"
+    );
+}
+#[test]
 fn default_dispatcher_timeout_is_accepted_before_credential_boundary() {
     let r = invoke(
         "admin.domains",

@@ -1,5 +1,11 @@
 # Native Microsoft administration
 
+Native 0.4.0 adds bounded organization/policy/permission discovery, shared-mailbox
+settings, managed Inbox-rule CRUD and AutoMapping selection through the existing
+`exchange snapshot`, `exchange plan` and `exchange apply` routes. See the
+[configuration guide](../../docs/exchange-configuration.md) for scopes, finite
+settings, reconciliation and client-verification limits.
+
 Patch 0.3.4 records code-only management failure evidence in receipts and attempt
 journals while preserving unknown-outcome locks and replay refusal. The update
 does not recover error details omitted by earlier versions or release old locks.

@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 //! Provider administration, not credential enrollment, a mail server or domain policy.
+pub mod configuration;
 pub mod exchange;
 pub mod graph;
 pub mod http;

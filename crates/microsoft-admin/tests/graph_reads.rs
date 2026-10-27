@@ -7,6 +7,60 @@ struct Fake {
     q: VecDeque<Result<Value, ReadError>>,
     paths: Vec<String>,
 }
+#[test]
+fn transitive_group_reads_keep_identity_types_and_do_not_infer_effective_access() {
+    let mut f = fake(vec![Ok(
+        json!({"value":[{"id":MAILBOX,"@odata.type":"#microsoft.graph.user","displayName":"Member","private":"hidden"}]}),
+    )]);
+    let r = observe(
+        &mut f,
+        &scope(),
+        Read::GroupMembers {
+            group: TRUSTEE.into(),
+        },
+    )
+    .unwrap();
+    assert!(f.paths[2].contains("/transitiveMembers"));
+    assert!(!f.paths[2].contains("$select"));
+    assert_eq!(r["observation"]["complete"], true);
+    assert_eq!(
+        r["observation"]["data"][0]["@odata.type"],
+        "#microsoft.graph.user"
+    );
+    assert_eq!(r["effective_permissions"], "not_inferred");
+    assert!(!r.to_string().contains("hidden"));
+    let mut memberships = fake(vec![Ok(
+        json!({"value":[{"id":TRUSTEE,"@odata.type":"#microsoft.graph.group","displayName":"Example group"},{"id":MAILBOX,"@odata.type":"#microsoft.graph.directoryRole","displayName":"Example role"}]}),
+    )]);
+    let observed = observe(
+        &mut memberships,
+        &scope(),
+        Read::UserMemberships {
+            user: SUBJECT.into(),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        memberships.paths[2],
+        format!("/v1.0/users/{SUBJECT}/transitiveMemberOf")
+    );
+    assert_eq!(observed["observation"]["complete"], true);
+    assert_eq!(
+        observed["observation"]["data"][1]["@odata.type"],
+        "#microsoft.graph.directoryRole"
+    );
+    let mut f = fake(vec![Err(ReadError::Http(403))]);
+    let r = observe(
+        &mut f,
+        &scope(),
+        Read::UserMemberships {
+            user: SUBJECT.into(),
+        },
+    )
+    .unwrap();
+    assert_eq!(r["observation"]["complete"], false);
+    assert_eq!(r["observation"]["state"], "denied");
+}
 impl Transport for Fake {
     fn get(&mut self, p: &str) -> Result<Value, ReadError> {
         self.paths.push(p.into());
@@ -210,4 +264,30 @@ fn duplicate_resource_ids_never_form_a_complete_inventory() {
     let r = observe(&mut f, &scope(), Read::Domains).unwrap();
     assert_eq!(r["observation"]["complete"], false);
     assert_eq!(r["observation"]["reason"], "duplicate_resource_identity");
+}
+
+#[test]
+fn conditional_access_preserves_selected_conditions_and_defaults_are_distinct() {
+    let mut f = fake(vec![Ok(
+        json!({"value":[{"id":"policy","displayName":"Example", "state":"enabledForReportingButNotEnforced","conditions":{"users":{"includeUsers":["All"],"excludeUsers":[SUBJECT]},"applications":{"includeApplications":["All"]}},"grantControls":{"operator":"OR","builtInControls":["mfa"]},"private":"hidden"}]}),
+    )]);
+    let r = observe(&mut f, &scope(), Read::ConditionalAccess).unwrap();
+    assert!(f.paths[2].starts_with("/v1.0/identity/conditionalAccess/policies?"));
+    assert_eq!(
+        r["observation"]["data"][0]["conditions"]["users"]["excludeUsers"][0],
+        SUBJECT
+    );
+    assert_eq!(
+        r["observation"]["data"][0]["grantControls"]["builtInControls"][0],
+        "mfa"
+    );
+    assert!(!r.to_string().contains("hidden"));
+    let mut f = fake(vec![Ok(json!({"id":"default","isEnabled":true}))]);
+    let r = observe(&mut f, &scope(), Read::SecurityDefaults).unwrap();
+    assert!(f.paths[2].starts_with("/v1.0/policies/identitySecurityDefaultsEnforcementPolicy?"));
+    assert_eq!(r["observation"]["data"]["isEnabled"], true);
+    let mut f = fake(vec![Err(ReadError::Http(403))]);
+    let r = observe(&mut f, &scope(), Read::ConditionalAccess).unwrap();
+    assert_eq!(r["observation"]["state"], "denied");
+    assert_eq!(r["observation"]["complete"], false);
 }

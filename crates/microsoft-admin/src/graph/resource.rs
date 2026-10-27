@@ -21,6 +21,25 @@ impl Read {
                 ],
                 true,
             ),
+            Self::SecurityDefaults => (
+                "policies/identitySecurityDefaultsEnforcementPolicy".into(),
+                vec!["id", "displayName", "isEnabled"],
+                false,
+            ),
+            Self::ConditionalAccess => (
+                "identity/conditionalAccess/policies".into(),
+                vec![
+                    "id",
+                    "displayName",
+                    "state",
+                    "conditions",
+                    "grantControls",
+                    "sessionControls",
+                    "createdDateTime",
+                    "modifiedDateTime",
+                ],
+                true,
+            ),
             Self::Domains => (
                 "domains".into(),
                 vec![
@@ -34,6 +53,39 @@ impl Read {
                 ],
                 true,
             ),
+            Self::Groups | Self::GroupMembers { .. } | Self::UserMemberships { .. } => {
+                let path = match self {
+                    Self::Groups => "groups".into(),
+                    Self::GroupMembers { group } => {
+                        crate::uuid(group)?;
+                        format!("groups/{group}/transitiveMembers")
+                    }
+                    Self::UserMemberships { user } => {
+                        crate::uuid(user)?;
+                        format!("users/{user}/transitiveMemberOf")
+                    }
+                    _ => unreachable!(),
+                };
+                // Polymorphic member collections are projected locally; selecting
+                // group-only properties on the directoryObject base is invalid.
+                let fields = if matches!(
+                    self,
+                    Self::GroupMembers { .. } | Self::UserMemberships { .. }
+                ) {
+                    vec!["id", "@odata.type", "displayName"]
+                } else {
+                    vec![
+                        "id",
+                        "displayName",
+                        "mail",
+                        "mailEnabled",
+                        "securityEnabled",
+                        "groupTypes",
+                        "membershipRule",
+                    ]
+                };
+                (path, fields, true)
+            }
             Self::Users | Self::User { .. } => {
                 let (path, many) = match self {
                     Self::User { user } => {
@@ -89,7 +141,10 @@ impl Read {
         // on the base domainDnsRecord entity at the server.
         let initial = if matches!(
             self,
-            Self::DomainDns { .. } | Self::DomainVerification { .. }
+            Self::DomainDns { .. }
+                | Self::DomainVerification { .. }
+                | Self::GroupMembers { .. }
+                | Self::UserMemberships { .. }
         ) {
             format!("/v1.0/{path}")
         } else {
