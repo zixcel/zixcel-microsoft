@@ -21,8 +21,9 @@ function Convert-ZixRule($r) {
     @{identity="$($r.Identity)";name="$($r.Name)";priority=[int]$r.Priority;enabled=[bool]$r.Enabled;from=@($from|Sort-Object);subject_contains=$subject;body_contains=$body;subject_or_body_contains=$either;delivery=$delivery;recipients=@(($redirect+$forward)|Sort-Object);keep_original=![bool](Get-ZixProperty $r 'DeleteMessage');stop_processing=[bool](Get-ZixProperty $r 'StopProcessingRules');manageable=[bool]$manageable;unsupported_properties=@($unsupported|Sort-Object)}
 }
 function Read-ZixRoutingGuard($mailbox,$change) {
-    $result=@{complete=$true;known_cycle=$false;external_destinations=@();scope='mailbox_forwarding_and_inbox_rules_only';nodes=@()}
+    $result=@{complete=$false;evaluated=$false;known_cycle=$null;external_destinations=@();scope='mailbox_forwarding_and_inbox_rules_only';nodes=@()}
     if (!$change -or $change.operation -notin @('create_inbox_rule','update_inbox_rule')) {return $result}
+    $result.complete=$true;$result.evaluated=$true;$result.known_cycle=$false
     $root=@($mailbox.EmailAddresses|ForEach-Object {"$_".Replace('SMTP:','').Replace('smtp:','').ToLowerInvariant()})
     $domains=@(Get-AcceptedDomain -ResultSize 201 -ErrorAction Stop)
     if ($domains.Count -gt 200) {throw 'routing_domain_limit'}

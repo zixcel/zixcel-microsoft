@@ -60,7 +60,10 @@ and local projection, without an advanced-query index dependency. Graph addition
 `GroupMember.ReadBasic.All` or `GroupMember.Read.All` for member IDs/types
 (group discovery may need `Group.Read.All`),
 `User.Read.All` for another user's memberships, and `Policy.Read.All` for security
-policy reads, alongside existing identity preflight permissions. Hidden membership
+policy reads, alongside existing identity preflight permissions. These read scopes
+can also be explicitly listed in a private `zix microsoft auth` profile; changing
+the profile produces a separate cache binding and requires the corresponding
+application permissions and operator consent. Existing profiles are unchanged. Hidden membership
 can additionally require `Member.Read.Hidden`; limited-information objects do not
 prove absence of membership. Conditional Access availability also depends on
 licensing and Entra roles. No permissions, licenses, policies or consent are added
@@ -144,7 +147,8 @@ Exchange may renumber absolute priorities.
 
 Exchange rule mutation can remove Outlook client-only rule blobs; each CRUD/toggle
 operation requires the explicit acknowledgement above, which is also disclosed in
-the plan. Plans check mailbox forwarding and downstream Inbox rules for known
+the plan. An ordinary rule inventory marks its routing guard unevaluated, not cycle-free.
+Plans check mailbox forwarding and downstream Inbox rules for known
 loops and refuse incomplete internal traversal. They cannot prove absence of loops
 through transport rules or external services. Inspect those inventories separately.
 
