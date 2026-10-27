@@ -28,6 +28,11 @@ pub(super) fn validate(p: &mut Profile) -> Result<(), Error> {
         "Domain.Read.All",
         "LicenseAssignment.Read.All",
         "User.Read.All",
+        "GroupMember.ReadBasic.All",
+        "GroupMember.Read.All",
+        "Group.Read.All",
+        "Member.Read.Hidden",
+        "Policy.Read.All",
         "Domain.ReadWrite.All",
         "User.ReadWrite.All",
         "User.EnableDisableAccount.All",
@@ -92,6 +97,30 @@ impl Profile {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn read_discovery_scopes_are_explicit_and_do_not_admit_arbitrary_permissions() {
+        for permission in [
+            "GroupMember.ReadBasic.All",
+            "GroupMember.Read.All",
+            "Group.Read.All",
+            "Member.Read.Hidden",
+            "Policy.Read.All",
+        ] {
+            let mut p = profile();
+            p.graph_permissions.push(permission.into());
+            validate(&mut p).unwrap();
+            assert!(
+                p.scopes("graph")
+                    .unwrap()
+                    .contains(&format!("https://graph.microsoft.com/{permission}"))
+            );
+            assert_ne!(p.hash().unwrap(), profile().hash().unwrap());
+        }
+        let mut p = profile();
+        p.graph_permissions
+            .push("Policy.ReadWrite.ConditionalAccess".into());
+        assert!(validate(&mut p).is_err());
+    }
     fn profile() -> Profile {
         Profile {
             tenant: "11111111-1111-4111-8111-111111111111".into(),
