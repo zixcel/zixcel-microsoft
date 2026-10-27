@@ -63,17 +63,29 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
             args.push(json!({"name":"mailbox","required":false,"maximum":36}));
             args.push(json!({"name":"change-file","required":false,"maximum":2048}));
         }
+        if id == "admin.organization" {
+            args.push(json!({"name":"resource","required":false,"maximum":32}));
+            args.push(json!({"name":"identity","required":false,"maximum":36}));
+        }
+        if id == "exchange.snapshot" {
+            for (name, max) in [
+                ("resource", 32),
+                ("kind", 32),
+                ("folder", 256),
+                ("trustee", 36),
+            ] {
+                args.push(json!({"name":name,"required":false,"maximum":max}));
+            }
+        }
         let exchange = id.starts_with("exchange.");
         if exchange {
             args.push(json!({"name":"runtime-profile","required":false,"maximum":2048}));
         }
         let permissions = if exchange {
-            vec![
-                "Official Exchange Online RBAC for each selected cmdlet; Graph read for sign-in verification",
-            ]
+            vec!["Exchange RBAC; delegated Graph identity verification."]
         } else {
             vec![
-                "Delegated User.Read plus Organization.Read.All; Domain.Read.All, LicenseAssignment.Read.All or User.Read.All per selected read",
+                "Delegated Graph scopes and roles: docs/microsoft-administration.md; groups: GroupMember.Read.All",
             ]
         };
         let env: Vec<&str> = if exchange {

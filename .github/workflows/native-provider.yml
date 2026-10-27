@@ -24,7 +24,9 @@ jobs:
           package-manager-cache: false
       - name: Verify official Exchange command mapping without connecting
         shell: pwsh
-        run: ./crates/microsoft-admin/tests/exchange-bridge.ps1
+        run: |
+          ./crates/microsoft-admin/tests/exchange-bridge.ps1
+          ./crates/microsoft-admin/tests/configuration-bridge.ps1
       - name: Install custody dependencies
         run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libsecret-1-dev
       - run: cargo fmt --all --check

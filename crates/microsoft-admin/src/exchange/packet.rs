@@ -8,14 +8,17 @@ pub(super) fn encode(
     profile: &ExchangeProfile,
     token: &str,
 ) -> Result<Zeroizing<Vec<u8>>> {
-    encode_all(scope, mode, change, None, None, profile, token)
+    encode_all(scope, mode, change, None, None, None, profile, token)
 }
+// One bounded wire packet keeps each existing operation payload distinct.
+#[allow(clippy::too_many_arguments)]
 pub(super) fn encode_all(
     scope: &Scope,
     mode: &str,
     change: Option<&Change>,
     management: Option<&crate::management::Change>,
     audit_mailbox: Option<&str>,
+    configuration: Option<&serde_json::Value>,
     profile: &ExchangeProfile,
     token: &str,
 ) -> Result<Zeroizing<Vec<u8>>> {
@@ -27,6 +30,7 @@ pub(super) fn encode_all(
         user: &'a str,
         audit_mailbox: Option<&'a str>,
         management_change: Option<&'a crate::management::Change>,
+        configuration: Option<&'a serde_json::Value>,
         module: &'a std::path::Path,
         token: &'a str,
     }
@@ -36,6 +40,7 @@ pub(super) fn encode_all(
             mode,
             audit_mailbox,
             management_change: management,
+            configuration,
             change,
             user: &profile.user_principal_name,
             module: &profile.module_manifest,

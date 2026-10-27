@@ -15,6 +15,8 @@ pub fn provider() -> zix_native_provider::Result<zix_native_provider::Provider> 
 
 mod administration_catalog;
 mod auth;
+mod configuration;
+mod configuration_reconciliation;
 mod management;
 mod runtime;
 

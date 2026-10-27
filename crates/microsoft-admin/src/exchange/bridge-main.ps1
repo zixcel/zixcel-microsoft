@@ -12,7 +12,7 @@ try {
     [Array]::Clear($chars,0,$chars.Length)
     $r = ConvertFrom-Json -InputObject $inputText -Depth 10
     $inputText = $null
-    if ($r.mode -notin @('snapshot','apply','management_snapshot','management_apply','mailbox_audit')) { throw 'unknown_mode' }
+    if ($r.mode -notin @('snapshot','apply','management_snapshot','management_apply','mailbox_audit','configuration_read','configuration_apply')) { throw 'unknown_mode' }
     Import-Module -Name $r.module -RequiredVersion '3.10.1' -ErrorAction Stop
     Connect-ExchangeOnline -AccessToken $r.token -UserPrincipalName $r.user -ShowBanner:$false -SkipLoadingCmdletHelp -ErrorAction Stop | Out-Null
     $connections = @(Get-ConnectionInformation | Where-Object { $_.State -eq 'Connected' })
@@ -25,6 +25,8 @@ try {
         'apply' { Write-ZixRecipient $r.change }
         'management_snapshot' { Read-ZixDkim $r.management_change }
         'management_apply' { Write-ZixDkim $r.management_change }
+        'configuration_read' { Read-ZixConfiguration $r.configuration }
+        'configuration_apply' { Write-ZixConfiguration $r.configuration }
     }
     ConvertTo-Json -InputObject $result -Depth 12 -Compress
 } catch {

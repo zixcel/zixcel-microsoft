@@ -60,7 +60,11 @@ pub fn observe(http: &mut impl Transport, scope: &Scope, read: Read) -> Result<V
                 result.reason = "duplicate_resource_identity".into();
                 break 'pages;
             }
-            let selected = select(item, &fields, 0)?;
+            let selected = if matches!(read, Read::ConditionalAccess) {
+                super::projection::policy(item, &fields)?
+            } else {
+                select(item, &fields, 0)?
+            };
             output_bytes += serde_json::to_vec(&selected)
                 .map_err(|_| Error("encoding_failed"))?
                 .len()

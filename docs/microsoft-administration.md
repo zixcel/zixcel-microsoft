@@ -82,8 +82,9 @@ and never creates an independent user/license or changes DNS implicitly.
 zix microsoft exchange apply --tenant TENANT_UUID --subject SUBJECT_UUID --plan-file /absolute/private/plan.json --approval-sha256 EXACT_SHA256 --journal-directory /absolute/private/journal
 ```
 
-The dispatcher requires a human terminal confirmation of this hash. Unlocking
-custody is not approval. The provider rechecks executable/catalog, scope, age,
+Zix CLI 0.5.0 supports the usual `y`/`yes` confirmation or explicit `-y`/`--yes`
+for operator writes. The plan hash still binds the exact reviewed artifact; manual
+hash entry and a terminal are not required with `--yes`. Unlocking custody is not approval. The provider rechecks executable/catalog, scope, age,
 current recipients and domains before one write. Primary-address removal, duplicate
 addresses, incomplete inventory and permission ambiguity are rejected. Alias updates
 use add/remove deltas, never replacement of the entire address set.
@@ -145,3 +146,6 @@ For explicit domain-verification journal resolution, mailbox primary-address
 cutover, and delegate/delivery inspection commands, see
 [mail-administration.md](mail-administration.md). Diagnostic readback alone never
 authorizes replay or automatic lock removal.
+
+For policy inventories, shared-mailbox operations and routing CRUD in native 0.4.0,
+see [Exchange configuration and routing](exchange-configuration.md).
