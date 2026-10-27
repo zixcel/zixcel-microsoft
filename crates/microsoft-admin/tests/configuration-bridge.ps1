@@ -57,6 +57,7 @@ Assert (!$unchecked.evaluated -and !$unchecked.complete -and $null -eq $unchecke
 $before=Read-ZixConfiguration $packet
 Assert $before.complete 'empty inbox rules must be observable'
 Assert (!$before.routing_guard.known_cycle) 'internal empty destination must be acyclic'
+Assert ($before.routing_guard.external_destinations.Count -eq 0 -and $before.routing_guard.nodes[0].destinations.Count -eq 0) 'an empty downstream route must not become a phantom external address'
 $ack=Write-ZixConfiguration ([pscustomobject]@{change=$change});Assert $ack.acknowledged 'rule create acknowledgement'
 $after=Read-ZixConfiguration $packet
 Assert $after.complete 'created inbox rule must be observable'
@@ -87,4 +88,30 @@ Assert (!$script:hasGrant) 'partial state must stay visible'
 $unavailable=Read-ZixConfigurationSection {throw 'synthetic-secret'} @('Name')
 Assert (!$unavailable.complete -and $null -eq $unavailable.data) 'failed reads cannot mean empty configuration'
 Assert ((ConvertTo-Json $unavailable -Compress) -notmatch 'synthetic-secret') 'provider exceptions must not escape'
+
+function Get-AntiPhishPolicy {
+    [CmdletBinding()]param([switch]$Advanced)
+    $row=[ordered]@{Identity='Example';Name='Example';IsDefault=$true;Enabled=$true;EnableSpoofIntelligence=$true}
+    if($Advanced){foreach($key in @('EnableMailboxIntelligence','EnableMailboxIntelligenceProtection','EnableTargetedUserProtection','EnableTargetedDomainsProtection')){$row[$key]=$true}}
+    [pscustomobject]$row
+}
+function Get-AntiPhishRule {[CmdletBinding()]param()}
+$basic=Read-ZixPolicies 'anti_phish'
+Assert ($basic.complete -and $basic.policy_observation.complete) 'basic anti-phish reads must not require premium advanced fields'
+$advanced=Read-ZixPolicies 'anti_phish_advanced'
+Assert ($advanced.complete -and $advanced.data[0].EnableMailboxIntelligence) 'advanced fields require an explicit Advanced query'
+$missing=Read-ZixConfigurationSection {[pscustomobject]@{Name='Example'}} @('Name','IsDefault')
+Assert (!$missing.complete -and $missing.reason -eq 'property_unobserved' -and $missing.missing_property -eq 'IsDefault') 'missing selected fields must have bounded code-only diagnostics'
+$partial=Read-ZixConfigurationSection {1..201|ForEach-Object {[pscustomobject]@{Name="Row$_"}}} @('Name')
+Assert (!$partial.complete -and $partial.status -eq 'partial' -and $partial.data.Count -eq 200) 'partial inventories must retain their bounded observed rows'
+function Get-ManagementRole {[CmdletBinding()]param() [pscustomobject]@{Identity='Mail Recipients';Name='Mail Recipients';RoleType='MailRecipients'}}
+function Get-ManagementRoleAssignment {
+    [CmdletBinding()]param($Role)
+    Assert ($Role -eq 'Mail Recipients') 'assignment reads must use the exact selected role, with no nonexistent ResultSize parameter'
+    [pscustomobject]@{Identity='Assignment';Name='Assignment';Role=$Role;RoleAssigneeName='Example Group';RoleAssigneeType='RoleGroup';AssignmentMethod='Direct';Delegating=$false;RecipientReadScope='Organization';RecipientWriteScope='Organization';CustomRecipientWriteScope=$null}
+}
+$roles=Read-ZixConfiguration ([pscustomobject]@{read=[pscustomobject]@{resource='rbac';kind='roles'}})
+Assert ($roles.complete -and $roles.data.Count -eq 1) 'bounded role definitions must be readable separately'
+$assignments=Read-ZixConfiguration ([pscustomobject]@{read=[pscustomobject]@{resource='rbac';kind='assignments';identity='Mail Recipients'}})
+Assert ($assignments.complete -and $assignments.data[0].Role -eq 'Mail Recipients') 'scoped role assignments must support complete bounded enumeration'
 'configuration bridge: all offline assertions passed; no provider connection or credential used'

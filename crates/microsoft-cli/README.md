@@ -1,5 +1,10 @@
 # Native Microsoft administration
 
+Patch 0.4.1 fixes empty downstream routes being classified as external, separates
+basic/advanced anti-phishing reads, retains partial inventory evidence, and adds
+bounded role-scoped RBAC enumeration. Missing projected properties have code-only
+diagnostics, and creation rejects the Inbox-rule observation limit before writing.
+
 Native 0.4.0 adds bounded organization/policy/permission discovery, shared-mailbox
 settings, managed Inbox-rule CRUD and AutoMapping selection through the existing
 `exchange snapshot`, `exchange plan` and `exchange apply` routes. See the

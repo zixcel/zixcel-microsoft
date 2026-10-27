@@ -344,3 +344,51 @@ fn mapping_resolution_distinguishes_missing_grant_from_unobservable_mapping() {
         assert_eq!(b.writes, 1);
     }
 }
+
+#[test]
+fn scoped_rbac_selectors_and_rule_capacity_fail_before_mutation() {
+    for v in [
+        json!({"resource":"rbac","kind":"roles"}),
+        json!({"resource":"rbac","kind":"groups"}),
+        json!({"resource":"rbac","kind":"assignments","identity":"Mail Recipients"}),
+    ] {
+        serde_json::from_value::<Read>(v)
+            .unwrap()
+            .validate()
+            .unwrap();
+    }
+    for v in [
+        json!({"resource":"rbac","kind":"assignments"}),
+        json!({"resource":"rbac","kind":"roles","identity":"unexpected"}),
+        json!({"resource":"rbac","kind":"assignments","identity":"*"}),
+    ] {
+        assert!(
+            serde_json::from_value::<Read>(v)
+                .unwrap()
+                .validate()
+                .is_err()
+        );
+    }
+    let mut b = backend(
+        view(json!(vec![observed_rule("existing"); 100])),
+        Value::Null,
+    );
+    assert_eq!(
+        configuration::plan(&mut b, scope(), create(), || 100)
+            .unwrap_err()
+            .0,
+        "inbox_rule_limit"
+    );
+    let mut c = create();
+    if let Change::CreateInboxRule { rule, .. } = &mut c {
+        rule.priority = 99;
+    }
+    b.state = view(json!([]));
+    assert_eq!(
+        configuration::plan(&mut b, scope(), c, || 100)
+            .unwrap_err()
+            .0,
+        "rule_priority_exceeds_observed_count"
+    );
+    assert_eq!(b.writes, 0);
+}

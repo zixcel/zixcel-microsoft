@@ -57,6 +57,10 @@ function Read-ZixConfiguration($packet) {
             }
             'remote_domains' {return Read-ZixConfigurationSection {Get-RemoteDomain -ErrorAction Stop} @('Identity','Name','DomainName','AutoForwardEnabled','AllowedOOFType','DeliveryReportEnabled','NDREnabled')}
             'rbac' {
+                $kind=Get-ZixProperty $q 'kind'
+                if($kind -eq 'groups'){return Read-ZixConfigurationSection {Get-RoleGroup -ResultSize 201 -ErrorAction Stop} @('Identity','Name','Roles','Members')}
+                if($kind -eq 'roles'){return Read-ZixConfigurationSection {Get-ManagementRole -ErrorAction Stop} @('Identity','Name','RoleType')}
+                if($kind -eq 'assignments'){return Read-ZixConfigurationSection {Get-ManagementRoleAssignment -Role $q.identity -ErrorAction Stop} @('Identity','Name','Role','RoleAssigneeName','RoleAssigneeType','AssignmentMethod','Delegating','RecipientReadScope','RecipientWriteScope','CustomRecipientWriteScope')}
                 $groups=Read-ZixConfigurationSection {Get-RoleGroup -ResultSize 201 -ErrorAction Stop} @('Identity','Name','Roles','Members')
                 $assignments=Read-ZixConfigurationSection {Get-ManagementRoleAssignment -ErrorAction Stop} @('Identity','Name','Role','RoleAssigneeName','RoleAssigneeType','AssignmentMethod','Delegating','RecipientReadScope','RecipientWriteScope','CustomRecipientWriteScope')
                 return @{complete=($groups.complete -and $assignments.complete);status='sections';data=@{groups=$groups;assignments=$assignments}}

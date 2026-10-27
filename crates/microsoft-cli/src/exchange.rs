@@ -26,7 +26,7 @@ pub fn invoke(
     let binding = crate::catalog::binding()?;
     if r.operation == "exchange.snapshot"
         && !r.arguments.contains_key("resource")
-        && ["kind", "folder", "trustee"]
+        && ["kind", "folder", "trustee", "identity"]
             .iter()
             .any(|k| r.arguments.contains_key(*k))
     {
