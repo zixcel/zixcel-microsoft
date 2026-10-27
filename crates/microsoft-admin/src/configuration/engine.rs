@@ -21,7 +21,7 @@ pub struct Plan {
 fn effects(c: &Change) -> Vec<String> {
     match c {
     Change::SetAutoMapping{..}=>vec!["Add FullAccess when absent; otherwise remove then re-add that exact grant; SendAs is preserved".into(),"AutoMapping is acknowledged by Exchange but requires Outlook client verification".into()],
-    Change::CreateInboxRule{..}|Change::UpdateInboxRule{..}|Change::DeleteInboxRule{..}|Change::SetInboxRuleEnabled{..}=>vec!["Changes only the selected zix-owned Inbox rule; other rules retain content and relative order".into(),"Exchange Inbox-rule mutation can remove Outlook client-only rules; explicit blob-removal acknowledgement is required".into(),"Loop check covers mailbox forwarding and Inbox rules; transport rules and external systems are not inferred".into()],
+    Change::CreateInboxRule{..}|Change::UpdateInboxRule{..}|Change::DeleteInboxRule{..}|Change::SetInboxRuleEnabled{..}=>vec!["Changes only the selected zix-owned Inbox rule; other observed rule fields and relative order must match".into(),"Exchange Inbox-rule mutation can remove Outlook client-only rules; explicit blob-removal acknowledgement is required".into(),"Loop check covers mailbox forwarding and Inbox rules; transport rules and external systems are not inferred".into()],
     Change::Configure{values,..} if values.get("HiddenFromAddressListsEnabled") == Some(&json!(true)) =>vec!["Hiding the mailbox from address lists can prevent desktop Outlook delegates from sending as it".into(),"Only listed settings are changed; other observed settings must remain identical".into()],
     _=>vec!["Only listed settings are changed; other observed settings must remain identical".into()],
 }

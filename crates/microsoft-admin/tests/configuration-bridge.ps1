@@ -36,6 +36,19 @@ function Add-MailboxPermission {[CmdletBinding()]param($Identity,$User,$AccessRi
 function Test-ZixTrustee($Identity,$Trustee,$Address,$Cache){$Identity -eq $Address}
 function Read-ZixMailboxAudit($Mailbox){@{full_access_entries=@($(if($script:hasGrant){@{user='delegate@example.org';rights=@('FullAccess');deny=$false;inherited=$false}}));send_as_entries=@();email_addresses=@('SMTP:support@example.org')}}
 
+function Get-User {
+    [CmdletBinding()]param($Identity)
+    Assert ($Identity -eq 'support@example.org') 'Get-User must use UUID-verified primary SMTP, not the unrelated ExchangeGuid'
+    [pscustomobject]@{ExternalDirectoryObjectId=$script:mailbox;AuthenticationPolicy=$null}
+}
+function Set-User {
+    [CmdletBinding()]param($Identity,$AuthenticationPolicy)
+    Assert ($Identity -eq 'support@example.org' -and $AuthenticationPolicy -eq 'ExamplePolicy') 'Set-User must use the resolved target and exact settings'
+}
+$userPolicy=Read-ZixConfiguration ([pscustomobject]@{read=[pscustomobject]@{resource='user_policy';mailbox=$script:mailbox}})
+Assert ($userPolicy.complete -and $userPolicy.data.null_means_organization_default) 'user policy assignment must be read with the verified target'
+Write-ZixConfiguration ([pscustomobject]@{change=[pscustomobject]@{operation='configure';target=[pscustomobject]@{resource='user_policy';mailbox=$script:mailbox};values=[pscustomobject]@{AuthenticationPolicy='ExamplePolicy'}}})|Out-Null
+
 $rule=[pscustomobject]@{name='zix:school';priority=0;from=@('school@example.org');subject_contains=@('$(throw "injected")');body_contains=@();subject_or_body_contains=@();delivery='redirect';recipients=@('child@example.org');keep_original=$false;stop_processing=$true;allow_external=$false}
 $change=[pscustomobject]@{operation='create_inbox_rule';mailbox=$script:mailbox;rule=$rule;acknowledge_outlook_rules_blob_removal=$true}
 $packet=[pscustomobject]@{read=[pscustomobject]@{resource='inbox_rules';mailbox=$script:mailbox};change=$change}

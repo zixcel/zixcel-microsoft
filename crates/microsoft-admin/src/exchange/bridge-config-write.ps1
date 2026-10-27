@@ -7,7 +7,7 @@ function Write-ZixConfiguration($packet) {
             switch($q.resource) {
                 'mailbox' {$m=Get-ZixMailbox $q.mailbox;Set-Mailbox -Identity "$($m.ExchangeGuid)" @values -ErrorAction Stop}
                 'client_access' {$m=Get-ZixMailbox $q.mailbox;Set-CASMailbox -Identity "$($m.ExchangeGuid)" @values -ErrorAction Stop}
-                'user_policy' {$m=Get-ZixMailbox $q.mailbox;Set-User -Identity "$($m.ExchangeGuid)" @values -ErrorAction Stop}
+                'user_policy' {$m=Get-ZixMailbox $q.mailbox;Set-User -Identity "$($m.PrimarySmtpAddress)" @values -ErrorAction Stop}
                 'organization' {Set-TransportConfig @values -ErrorAction Stop}
                 'remote_domains' {Set-RemoteDomain -Identity $c.identity @values -ErrorAction Stop}
                 'policies' {switch($q.kind) {

@@ -137,7 +137,7 @@ Deleted Items/retention may retain the original.
 `delete_inbox_rule` requires mailbox, identity and the acknowledgement.
 `set_inbox_rule_enabled` adds `enabled:true/false` and optional `allow_external`.
 Read the current rules before choosing the exact identity. The tool never edits
-hidden or unsupported rules. Other rule content and relative order must survive;
+hidden or unsupported rules. Other observed rule content and relative order must survive;
 Exchange may renumber absolute priorities.
 
 Exchange rule mutation can remove Outlook client-only rule blobs; each CRUD/toggle

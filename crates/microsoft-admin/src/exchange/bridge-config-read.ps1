@@ -21,7 +21,7 @@ function Read-ZixConfiguration($packet) {
                 $data['smtp_auth_null_means_inherit']=$true
             }
             'user_policy' {
-                $u=Get-User -Identity $identity -ErrorAction Stop
+                $u=Get-User -Identity "$($m.PrimarySmtpAddress)" -ErrorAction Stop
                 if("$($u.ExternalDirectoryObjectId)".ToLowerInvariant() -ne $q.mailbox){throw 'user_policy_identity_mismatch'}
                 $data=Select-ZixSettings $u @('AuthenticationPolicy')
                 $data['null_means_organization_default']=$true
