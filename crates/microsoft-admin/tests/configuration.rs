@@ -315,3 +315,32 @@ fn resolution_refuses_expiry_scope_and_postreview_drift() {
         assert_eq!(b.writes, 1);
     }
 }
+
+#[test]
+fn mapping_resolution_distinguishes_missing_grant_from_unobservable_mapping() {
+    use zixcel_microsoft_admin::configuration::reconciliation;
+    for initially_present in [false, true] {
+        let grant = json!({"user":"delegate@example.org","rights":["FullAccess"],"deny":false,"inherited":false});
+        let before = json!({"complete":true,"status":"observed","data":{"trustee_smtp":"delegate@example.org","permissions":if initially_present {json!([grant])} else {json!([])},"auto_mapping":"not_observable_by_permission_listing"}});
+        let mut b = backend(before.clone(), before);
+        let change = Change::SetAutoMapping {
+            mailbox: MAILBOX.into(),
+            trustee: TRUSTEE.into(),
+            enabled: true,
+        };
+        let p = configuration::plan(&mut b, scope(), change, || 100).unwrap();
+        let (_d, j) = journal();
+        b.fail = true;
+        configuration::execute(&mut b, &j, &p, &digest(&p).unwrap(), || 101).unwrap();
+        b.state["data"]["permissions"] = json!([]);
+        let r = reconciliation::plan(&mut b, &j, &scope(), p, || 1000).unwrap();
+        assert_eq!(
+            r.observed_state,
+            "full_access_absent_requires_separate_repair_plan"
+        );
+        let receipt = reconciliation::execute(&mut b, &j, &scope(), &r, || 1001).unwrap();
+        assert_eq!(receipt["remote_write_attempted"], false);
+        assert_eq!(receipt["auto_mapping_observed"], false);
+        assert_eq!(b.writes, 1);
+    }
+}

@@ -24,7 +24,14 @@ fn state(p: &Plan, scope: &Scope, v: &Value, at: u64) -> Result<String> {
     }
     if rules::canonical(&p.before) == rules::canonical(v) {
         return Ok(if matches!(p.change, Change::SetAutoMapping { .. }) {
-            "permission_present_mapping_unobserved"
+            if v["data"]["permissions"]
+                .as_array()
+                .is_some_and(Vec::is_empty)
+            {
+                "full_access_absent_requires_separate_repair_plan"
+            } else {
+                "permission_present_mapping_unobserved"
+            }
         } else {
             "original_state_observed"
         }
