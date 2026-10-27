@@ -23,14 +23,14 @@ fn binding() -> Value {
 }
 fn invoke(op: &str, args: Value) -> Value {
     let mut c = Command::new(env!("CARGO_BIN_EXE_zix-microsoft"))
-        .arg("--zix-provider-v1")
+        .arg("--zix-provider-v2")
         .env_clear()
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
         .unwrap();
-    c.stdin.take().unwrap().write_all(serde_json::to_string(&json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":op,"arguments":args,"binding":binding(),"limits":{"timeout_ms":40000,"maximum_response_bytes":65536}})).unwrap().as_bytes()).unwrap();
+    c.stdin.take().unwrap().write_all(serde_json::to_string(&json!({"schema":"zix-provider/v2","id":"a".repeat(32),"operation":op,"arguments":args,"binding":binding(),"limits":{"timeout_ms":40000,"maximum_response_bytes":65536}})).unwrap().as_bytes()).unwrap();
     let r = c.wait_with_output().unwrap();
     assert!(
         r.status.success(),
@@ -60,6 +60,26 @@ fn manifest_separates_operator_writes_and_subtracts_credential_inheritance() {
     assert_eq!(
         read.environment.as_ref().unwrap().credential_environment,
         vec!["ZIX_MICROSOFT_ACCESS_TOKEN"]
+    );
+}
+#[test]
+fn configuration_and_group_selectors_fail_closed_before_credentials() {
+    let mut args = json!({"tenant":"11111111-1111-4111-8111-111111111111","subject":"22222222-2222-4222-8222-222222222222","resource":"folder_permissions","mailbox":"33333333-3333-4333-8333-333333333333","folder":"other@example.net:\\Inbox"});
+    assert_eq!(
+        invoke("exchange.snapshot", args.clone())["error"],
+        "invalid_folder_path"
+    );
+    args["folder"] = json!("\\Inbox");
+    assert_eq!(
+        invoke("exchange.snapshot", args)["error"],
+        "credential_missing"
+    );
+    assert_eq!(
+        invoke(
+            "admin.organization",
+            json!({"tenant":"11111111-1111-4111-8111-111111111111","subject":"22222222-2222-4222-8222-222222222222","resource":"group_members","identity":"../escape"})
+        )["error"],
+        "invalid_uuid"
     );
 }
 #[test]

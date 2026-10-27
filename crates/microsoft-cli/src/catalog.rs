@@ -63,18 +63,29 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
             args.push(json!({"name":"mailbox","required":false,"maximum":36}));
             args.push(json!({"name":"change-file","required":false,"maximum":2048}));
         }
+        if id == "admin.organization" {
+            args.push(json!({"name":"resource","required":false,"maximum":32}));
+            args.push(json!({"name":"identity","required":false,"maximum":36}));
+        }
+        if id == "exchange.snapshot" {
+            for (name, max) in [
+                ("resource", 32),
+                ("kind", 32),
+                ("folder", 256),
+                ("trustee", 36),
+                ("identity", 256),
+            ] {
+                args.push(json!({"name":name,"required":false,"maximum":max}));
+            }
+        }
         let exchange = id.starts_with("exchange.");
         if exchange {
             args.push(json!({"name":"runtime-profile","required":false,"maximum":2048}));
         }
         let permissions = if exchange {
-            vec![
-                "Official Exchange Online RBAC for each selected cmdlet; Graph read for sign-in verification",
-            ]
+            vec!["Exchange RBAC and Graph identity; inspect operation guidance."]
         } else {
-            vec![
-                "Delegated User.Read plus Organization.Read.All; Domain.Read.All, LicenseAssignment.Read.All or User.Read.All per selected read",
-            ]
+            vec!["Selected Graph scopes, consent and roles; inspect operation guidance."]
         };
         let env: Vec<&str> = if exchange {
             vec![
@@ -97,6 +108,8 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
     m.commands[0].environment=Some(serde_json::from_value(json!({"credential_environment":["ZIX_MICROSOFT_ACCESS_TOKEN"],"runtime_environment":[]}))
         .map_err(|_|Error("invalid_admin_manifest"))?);
     crate::administration_catalog::extend(&mut m)?;
+    m.protocol = "zix-provider/v2".into();
+    zix_native_provider::guidance::decorate(&mut m, include_bytes!("../api/guidance.json"))?;
     m.validate()?;
     Ok(m)
 }
@@ -106,7 +119,9 @@ pub fn catalog() -> zix_native_provider::Result<Value> {
 pub fn binding() -> zix_native_provider::Result<zix_operation_contracts::Binding> {
     let bytes = zix_cli::files::bounded(
         std::fs::File::open("/proc/self/exe").map_err(|_| Error("executable_unavailable"))?,
-        32 * 1024 * 1024,
+        // Match the pinned native SDK executable-binding limit. Test binaries
+        // retain line debug information and can exceed the old local 32 MiB cap.
+        128 * 1024 * 1024,
     )?;
     Ok(zix_operation_contracts::Binding::for_catalog(
         env!("CARGO_PKG_NAME"),

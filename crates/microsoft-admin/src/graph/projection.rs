@@ -1,5 +1,49 @@
 use crate::{Error, Result};
 use serde_json::{Map, Value};
+fn policy_field(v: &Value, depth: usize) -> Result<Value> {
+    if depth > 8 {
+        return Err(Error("policy_response_depth"));
+    }
+    Ok(match v {
+        Value::String(s) if s.len() > 8192 => return Err(Error("policy_string_limit")),
+        Value::Array(a) => {
+            if a.len() > 200 {
+                return Err(Error("policy_array_limit"));
+            }
+            Value::Array(
+                a.iter()
+                    .map(|v| policy_field(v, depth + 1))
+                    .collect::<Result<_>>()?,
+            )
+        }
+        Value::Object(m) => {
+            if m.len() > 64 {
+                return Err(Error("policy_property_limit"));
+            }
+            let mut out = Map::new();
+            for (k, v) in m {
+                if k.len() > 128 {
+                    return Err(Error("policy_key_limit"));
+                }
+                out.insert(k.clone(), policy_field(v, depth + 1)?);
+            }
+            Value::Object(out)
+        }
+        _ => v.clone(),
+    })
+}
+pub(super) fn policy(v: &Value, fields: &[&str]) -> Result<Value> {
+    if !v.is_object() {
+        return Err(Error("response_object_required"));
+    }
+    let mut out = Map::new();
+    for k in fields {
+        if let Some(v) = v.get(*k) {
+            out.insert((*k).into(), policy_field(v, 0)?);
+        }
+    }
+    Ok(Value::Object(out))
+}
 fn field(v: &Value, depth: usize) -> Result<Value> {
     if depth > 5 {
         return Err(Error("response_depth"));

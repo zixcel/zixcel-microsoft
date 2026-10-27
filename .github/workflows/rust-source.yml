@@ -19,6 +19,12 @@ jobs:
         run: rustup toolchain install 1.97.1 --profile minimal --component rustfmt --component clippy
       - name: Test every maintained source target and feature
         run: cargo +1.97.1 test --locked --all-targets --all-features
+      - name: Verify portable Graph mail protocol
+        run: |
+          cargo +1.97.1 test --locked -p zixcel-microsoft-mail
+          cargo +1.97.1 clippy --locked -p zixcel-microsoft-mail --all-targets -- -D warnings
+          rustup target add wasm32-unknown-unknown --toolchain 1.97.1
+          cargo +1.97.1 check --locked -p zixcel-microsoft-mail --target wasm32-unknown-unknown
       - name: Check source formatting
         run: cargo +1.97.1 fmt --all -- --check
       - name: Check all source targets

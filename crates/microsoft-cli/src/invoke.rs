@@ -41,6 +41,7 @@ fn invoke(r: &Request) -> Result<Value, Error> {
     if r.operation == "users.read" {
         let p = crate::provider()?;
         let mut old = r.clone();
+        old.schema = p.manifest().protocol.clone();
         old.limits.timeout_ms = old.limits.timeout_ms.min(20000);
         old.binding = None;
         let prepared = p.prepare(&old)?;
@@ -70,7 +71,39 @@ fn invoke(r: &Request) -> Result<Value, Error> {
     }
     if r.operation.starts_with("admin.") {
         let op = match r.operation.as_str() {
-            "admin.organization" => Read::Organization,
+            "admin.organization" => match r.arguments.get("resource").map(String::as_str) {
+                None | Some("organization") => {
+                    if r.arguments.contains_key("identity") {
+                        return Err(Error("unexpected_selector_identity"));
+                    }
+                    Read::Organization
+                }
+                Some("groups") => {
+                    if r.arguments.contains_key("identity") {
+                        return Err(Error("unexpected_selector_identity"));
+                    }
+                    Read::Groups
+                }
+                Some("group_members") => Read::GroupMembers {
+                    group: arg("identity")?.into(),
+                },
+                Some("security_defaults") => {
+                    if r.arguments.contains_key("identity") {
+                        return Err(Error("unexpected_selector_identity"));
+                    }
+                    Read::SecurityDefaults
+                }
+                Some("conditional_access") => {
+                    if r.arguments.contains_key("identity") {
+                        return Err(Error("unexpected_selector_identity"));
+                    }
+                    Read::ConditionalAccess
+                }
+                Some("user_memberships") => Read::UserMemberships {
+                    user: arg("identity")?.into(),
+                },
+                _ => return Err(Error("invalid_directory_resource")),
+            },
             "admin.licenses" => Read::Licenses,
             "admin.domains" => Read::Domains,
             "admin.users" => Read::Users,
@@ -89,8 +122,11 @@ fn invoke(r: &Request) -> Result<Value, Error> {
         if let Read::DomainDns { domain } | Read::DomainVerification { domain } = &op {
             zixcel_microsoft_admin::domain(domain).map_err(|e| Error(e.0))?;
         }
-        if let Read::User { user } = &op {
+        if let Read::User { user } | Read::UserMemberships { user } = &op {
             zixcel_microsoft_admin::uuid(user).map_err(|e| Error(e.0))?;
+        }
+        if let Read::GroupMembers { group } = &op {
+            zixcel_microsoft_admin::uuid(group).map_err(|e| Error(e.0))?;
         }
         let t = token()?;
         let mut http = LiveRead::new(&t, timeout).map_err(|_| Error("transport_setup"))?;

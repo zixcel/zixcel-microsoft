@@ -1,5 +1,19 @@
 # Native Microsoft administration
 
+Patch 0.4.2 corrects RBAC delegation and basic anti-phishing property selection
+against actual Exchange responses. Rule activation remains in binding State.
+
+Patch 0.4.1 fixes empty downstream routes being classified as external, separates
+basic/advanced anti-phishing reads, retains partial inventory evidence, and adds
+bounded role-scoped RBAC enumeration. Missing projected properties have code-only
+diagnostics, and creation rejects the Inbox-rule observation limit before writing.
+
+Native 0.4.0 adds bounded organization/policy/permission discovery, shared-mailbox
+settings, managed Inbox-rule CRUD and AutoMapping selection through the existing
+`exchange snapshot`, `exchange plan` and `exchange apply` routes. See the
+[configuration guide](../../docs/exchange-configuration.md) for scopes, finite
+settings, reconciliation and client-verification limits.
+
 Patch 0.3.4 records code-only management failure evidence in receipts and attempt
 journals while preserving unknown-outcome locks and replay refusal. The update
 does not recover error details omitted by earlier versions or release old locks.

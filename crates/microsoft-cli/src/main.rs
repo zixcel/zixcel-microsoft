@@ -1,8 +1,17 @@
 fn main() -> std::process::ExitCode {
-    match zixcel_microsoft_cli::manifest() {
-        Ok(m) => zix_native_provider::serve(m, zixcel_microsoft_cli::invoke::execute),
-        Err(e) => {
-            eprintln!("{{\"error\":\"{}\"}}", e.0);
+    let result = (|| {
+        let manifest = zixcel_microsoft_cli::manifest()?;
+        let catalog = zixcel_microsoft_cli::guidance()?;
+        Ok::<_, zix_native_provider::Error>((manifest, catalog))
+    })();
+    match result {
+        Ok((manifest, catalog)) => zix_native_provider::serve_guided(
+            manifest,
+            catalog,
+            zixcel_microsoft_cli::invoke::execute,
+        ),
+        Err(error) => {
+            eprintln!("{{\"error\":\"{}\"}}", error.0);
             std::process::ExitCode::from(2)
         }
     }

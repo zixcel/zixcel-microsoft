@@ -24,6 +24,20 @@ pub fn invoke(
             .map_err(|_| Error("credential_missing"))
     };
     let binding = crate::catalog::binding()?;
+    if r.operation == "exchange.snapshot"
+        && !r.arguments.contains_key("resource")
+        && ["kind", "folder", "trustee", "identity"]
+            .iter()
+            .any(|k| r.arguments.contains_key(*k))
+    {
+        return Err(Error("configuration_resource_required"));
+    }
+    if crate::configuration_reconciliation::selected(r)? {
+        return crate::configuration_reconciliation::invoke(r, scope, timeout, now);
+    }
+    if crate::configuration::selected(r)? {
+        return crate::configuration::invoke(r, scope, timeout, now);
+    }
     if crate::exchange_reconciliation::selected(r)? {
         return crate::exchange_reconciliation::invoke(r, scope, timeout, now);
     }

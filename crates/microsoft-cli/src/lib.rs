@@ -15,7 +15,14 @@ pub fn provider() -> zix_native_provider::Result<zix_native_provider::Provider> 
 
 mod administration_catalog;
 mod auth;
+mod configuration;
+mod configuration_reconciliation;
 mod management;
 mod runtime;
 
 mod reconciliation;
+
+pub fn guidance() -> zix_native_provider::Result<zix_native_provider::GuidanceCatalog> {
+    let manifest = manifest()?;
+    zix_native_provider::guidance::catalog(&manifest, include_bytes!("../api/guidance.json"))
+}
