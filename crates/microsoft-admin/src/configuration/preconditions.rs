@@ -37,6 +37,12 @@ pub(crate) fn precondition(c: &Change, b: &Value) -> Result<()> {
             if !acknowledge_outlook_rules_blob_removal {
                 return Err(Error("outlook_rule_blob_acknowledgement_required"));
             }
+            if rule_rows(b)?.len() >= 100 {
+                return Err(Error("inbox_rule_limit"));
+            }
+            if usize::from(rule.priority) > rule_rows(b)?.len() {
+                return Err(Error("rule_priority_exceeds_observed_count"));
+            }
             if rule_rows(b)?.iter().any(|r| r["name"] == rule.name) {
                 return Err(Error("rule_name_conflict"));
             }

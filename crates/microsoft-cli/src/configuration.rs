@@ -52,7 +52,7 @@ pub fn invoke(
                 return Err(Error("ambiguous_read_selector"));
             }
             let mut v = json!({"resource":arg("resource")?});
-            for key in ["mailbox", "kind", "folder", "trustee"] {
+            for key in ["mailbox", "kind", "folder", "trustee", "identity"] {
                 if let Some(s) = r.arguments.get(key) {
                     v[key] = json!(s);
                 }

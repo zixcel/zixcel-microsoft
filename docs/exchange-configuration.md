@@ -1,4 +1,4 @@
-# Exchange configuration and routing (native 0.4.0)
+# Exchange configuration and routing (native 0.4.1)
 
 The independent Microsoft extension adds these capabilities to the existing Zix
 command routes. No additional root command or installer is required. Install the
@@ -22,7 +22,7 @@ zix microsoft exchange snapshot --tenant TENANT_UUID --subject SUBJECT_UUID --ru
 | Resource | Additional selector | Observed scope |
 | --- | --- | --- |
 | `organization` | none | SMTP AUTH default, audit switch, default authentication policy, accepted domains |
-| `policies` | `--kind authentication/mobile/retention/sharing/owa/address_book/inbound_spam/outbound_spam/anti_phish` | Selected policy settings and default flags; anti-spam/phish rule bindings include priority, targets and exceptions |
+| `policies` | `--kind authentication/mobile/retention/sharing/owa/address_book/inbound_spam/outbound_spam/anti_phish/anti_phish_advanced` | Selected policy settings and default flags; anti-spam/phish rule bindings include priority, targets and exceptions |
 | `mailbox` | `--mailbox UUID` | Sent As/On Behalf copies, GAL visibility, retention/sharing/address-book assignments |
 | `client_access` | `--mailbox UUID` | OWA/MAPI/ActiveSync/POP/IMAP/SMTP AUTH and OWA/mobile assignments |
 | `user_policy` | `--mailbox UUID` | Authentication policy assignment; null means organization default |
@@ -34,7 +34,17 @@ zix microsoft exchange snapshot --tenant TENANT_UUID --subject SUBJECT_UUID --ru
 | `transport_rules` | none | Enabled state, mode, priority, descriptions, conditions, exceptions and actions |
 | `connectors` | none | Selected inbound/outbound connectors and TLS/routing settings |
 | `remote_domains` | none | Automatic forwarding and selected remote-domain settings |
-| `rbac` | none | Role groups and management role assignments/scopes |
+| `rbac` | optional `--kind groups/roles/assignments`; assignments require `--identity ROLE_NAME` | Role groups, role definitions and assignments/scopes per exact role |
+
+For complete RBAC enumeration on a tenant exceeding the combined 200-row limit,
+read `--resource rbac --kind roles`, then read each returned role with
+`--resource rbac --kind assignments --identity 'Mail Recipients'` (using its exact
+observed identity). Group definitions are independently readable with `--kind groups`.
+The combined inventory retains the first 200 observed assignments and marks partial
+results incomplete. Individual scoped reads remain bounded; no incomplete result
+proves absence of other access. Basic anti-phishing reads cover EOP settings and
+bindings. `anti_phish_advanced` explicitly requests `-Advanced` settings, whose
+availability depends on permissions/service capabilities and licensing.
 
 These are bounded projections, not full configuration export or an effective-access
 calculation. Sections cap at 200 items (Inbox rules: 100); routing traversal caps at
@@ -130,7 +140,8 @@ Example: deliver a matching message from a common box to an internal child box:
 
 Different condition categories are AND; multiple entries in one category are OR.
 `subject_or_body_contains` matches either field. Keywords are literal cmdlet
-arguments, never PowerShell source. At least one condition is required. Recipient
+arguments, never PowerShell source. At least one condition is required. Creation refuses the 100-rule observation
+limit and a priority above the observed rule count before any mutation. Recipient
 addresses must be explicit; external destinations additionally require
 `allow_external:true` and remain subject to tenant forwarding restrictions.
 `redirect` preserves original sender semantics; `forward` produces forwarding

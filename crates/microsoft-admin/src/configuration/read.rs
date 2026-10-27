@@ -4,19 +4,44 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "resource", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Read {
     Organization {},
-    Policies { kind: String },
+    Policies {
+        kind: String,
+    },
     TransportRules {},
     Connectors {},
     RemoteDomains {},
-    Rbac {},
-    Mailbox { mailbox: String },
-    ClientAccess { mailbox: String },
-    UserPolicy { mailbox: String },
-    Folders { mailbox: String },
-    FolderPermissions { mailbox: String, folder: String },
-    InboxRules { mailbox: String },
-    MobileDevices { mailbox: String },
-    AutoMapping { mailbox: String, trustee: String },
+    Rbac {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        kind: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        identity: Option<String>,
+    },
+    Mailbox {
+        mailbox: String,
+    },
+    ClientAccess {
+        mailbox: String,
+    },
+    UserPolicy {
+        mailbox: String,
+    },
+    Folders {
+        mailbox: String,
+    },
+    FolderPermissions {
+        mailbox: String,
+        folder: String,
+    },
+    InboxRules {
+        mailbox: String,
+    },
+    MobileDevices {
+        mailbox: String,
+    },
+    AutoMapping {
+        mailbox: String,
+        trustee: String,
+    },
 }
 impl Read {
     pub fn validate(&self) -> Result<()> {
@@ -32,11 +57,25 @@ impl Read {
                     "inbound_spam",
                     "outbound_spam",
                     "anti_phish",
+                    "anti_phish_advanced",
                 ]
                 .contains(&kind.as_str()) =>
             {
                 return Err(Error("unknown_policy_kind"));
             }
+            Self::Rbac { kind, identity } => match kind.as_deref() {
+                None | Some("groups") | Some("roles") if identity.is_none() => (),
+                Some("assignments") => {
+                    let id = identity
+                        .as_deref()
+                        .ok_or(Error("rbac_role_identity_required"))?;
+                    text(id, 256)?;
+                    if id.contains(['*', '?', '[', ']']) {
+                        return Err(Error("wildcard_identity_refused"));
+                    }
+                }
+                _ => return Err(Error("invalid_rbac_selector")),
+            },
             Self::AutoMapping { mailbox, trustee } => {
                 crate::uuid(mailbox)?;
                 crate::uuid(trustee)?;

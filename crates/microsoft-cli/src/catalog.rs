@@ -73,6 +73,7 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
                 ("kind", 32),
                 ("folder", 256),
                 ("trustee", 36),
+                ("identity", 256),
             ] {
                 args.push(json!({"name":name,"required":false,"maximum":max}));
             }

@@ -2,7 +2,7 @@
   "schema": "zix-native-policy/v1",
   "namespace": "microsoft",
   "package": "zixcel-microsoft-cli",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "credential_environment": "ZIX_MICROSOFT_ACCESS_TOKEN",
   "origin": "https://graph.microsoft.com",
   "base_path": "/v1.0",
