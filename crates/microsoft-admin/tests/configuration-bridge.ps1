@@ -91,13 +91,13 @@ Assert ((ConvertTo-Json $unavailable -Compress) -notmatch 'synthetic-secret') 'p
 
 function Get-AntiPhishPolicy {
     [CmdletBinding()]param([switch]$Advanced)
-    $row=[ordered]@{Identity='Example';Name='Example';IsDefault=$true;Enabled=$true;EnableSpoofIntelligence=$true}
+    $row=[ordered]@{Identity='Example';Name='Example';IsDefault=$true;EnableSpoofIntelligence=$true}
     if($Advanced){foreach($key in @('EnableMailboxIntelligence','EnableMailboxIntelligenceProtection','EnableTargetedUserProtection','EnableTargetedDomainsProtection')){$row[$key]=$true}}
     [pscustomobject]$row
 }
 function Get-AntiPhishRule {[CmdletBinding()]param()}
 $basic=Read-ZixPolicies 'anti_phish'
-Assert ($basic.complete -and $basic.policy_observation.complete) 'basic anti-phish reads must not require premium advanced fields'
+Assert ($basic.complete -and $basic.policy_observation.complete) 'basic anti-phish reads must require neither unavailable Enabled nor premium fields'
 $advanced=Read-ZixPolicies 'anti_phish_advanced'
 Assert ($advanced.complete -and $advanced.data[0].EnableMailboxIntelligence) 'advanced fields require an explicit Advanced query'
 $missing=Read-ZixConfigurationSection {[pscustomobject]@{Name='Example'}} @('Name','IsDefault')
@@ -108,10 +108,10 @@ function Get-ManagementRole {[CmdletBinding()]param() [pscustomobject]@{Identity
 function Get-ManagementRoleAssignment {
     [CmdletBinding()]param($Role)
     Assert ($Role -eq 'Mail Recipients') 'assignment reads must use the exact selected role, with no nonexistent ResultSize parameter'
-    [pscustomobject]@{Identity='Assignment';Name='Assignment';Role=$Role;RoleAssigneeName='Example Group';RoleAssigneeType='RoleGroup';AssignmentMethod='Direct';Delegating=$false;RecipientReadScope='Organization';RecipientWriteScope='Organization';CustomRecipientWriteScope=$null}
+    [pscustomobject]@{Identity='Assignment';Name='Assignment';Role=$Role;RoleAssigneeName='Example Group';RoleAssigneeType='RoleGroup';AssignmentMethod='Direct';RoleAssignmentDelegationType='Regular';RecipientReadScope='Organization';RecipientWriteScope='Organization';CustomRecipientWriteScope=$null}
 }
 $roles=Read-ZixConfiguration ([pscustomobject]@{read=[pscustomobject]@{resource='rbac';kind='roles'}})
 Assert ($roles.complete -and $roles.data.Count -eq 1) 'bounded role definitions must be readable separately'
 $assignments=Read-ZixConfiguration ([pscustomobject]@{read=[pscustomobject]@{resource='rbac';kind='assignments';identity='Mail Recipients'}})
-Assert ($assignments.complete -and $assignments.data[0].Role -eq 'Mail Recipients') 'scoped role assignments must support complete bounded enumeration'
+Assert ($assignments.complete -and $assignments.data[0].Role -eq 'Mail Recipients' -and $assignments.data[0].RoleAssignmentDelegationType -eq 'Regular') 'scoped role assignments must support complete bounded enumeration'
 'configuration bridge: all offline assertions passed; no provider connection or credential used'

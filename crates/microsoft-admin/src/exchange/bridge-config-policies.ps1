@@ -17,7 +17,7 @@ function Read-ZixPolicies([string]$kind) {
         }
         'anti_phish_advanced' {return Read-ZixConfigurationSection {Get-AntiPhishPolicy -Advanced -ErrorAction Stop} ($identity+@('IsDefault','EnableMailboxIntelligence','EnableMailboxIntelligenceProtection','EnableTargetedUserProtection','EnableTargetedDomainsProtection'))}
         'anti_phish' {
-            $policies=Read-ZixConfigurationSection {Get-AntiPhishPolicy -ErrorAction Stop} ($identity+@('IsDefault','Enabled','EnableSpoofIntelligence'))
+            $policies=Read-ZixConfigurationSection {Get-AntiPhishPolicy -ErrorAction Stop} ($identity+@('IsDefault','EnableSpoofIntelligence'))
             $bindings=Read-ZixConfigurationSection {Get-AntiPhishRule -ErrorAction Stop} ($identity+@('State','Priority','AntiPhishPolicy','SentTo','SentToMemberOf','RecipientDomainIs','ExceptIfSentTo','ExceptIfSentToMemberOf','ExceptIfRecipientDomainIs'))
         }
         default {throw 'unknown_policy_kind'}
