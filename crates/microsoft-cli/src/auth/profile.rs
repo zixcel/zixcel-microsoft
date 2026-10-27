@@ -99,6 +99,9 @@ mod tests {
     use super::*;
     #[test]
     fn read_discovery_scopes_are_explicit_and_do_not_admit_arbitrary_permissions() {
+        let mut baseline = profile();
+        validate(&mut baseline).unwrap();
+        let baseline_hash = baseline.hash().unwrap();
         for permission in [
             "GroupMember.ReadBasic.All",
             "GroupMember.Read.All",
@@ -114,7 +117,7 @@ mod tests {
                     .unwrap()
                     .contains(&format!("https://graph.microsoft.com/{permission}"))
             );
-            assert_ne!(p.hash().unwrap(), profile().hash().unwrap());
+            assert_ne!(p.hash().unwrap(), baseline_hash);
         }
         let mut p = profile();
         p.graph_permissions
