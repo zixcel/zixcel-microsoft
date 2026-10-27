@@ -1,4 +1,4 @@
-# Exchange configuration and routing (native 0.4.1)
+# Exchange configuration and routing (native 0.4.2)
 
 The independent Microsoft extension adds these capabilities to the existing Zix
 command routes. No additional root command or installer is required. Install the
@@ -219,3 +219,8 @@ requires a separate plan and approval.
 - [Conditional Access policies](https://learn.microsoft.com/en-us/graph/api/conditionalaccessroot-list-policies)
 - [Security Defaults](https://learn.microsoft.com/en-us/graph/api/identitysecuritydefaultsenforcementpolicy-get)
 - [Add shared mailbox in Outlook mobile](https://support.microsoft.com/en-us/outlook/add-a-shared-mailbox-to-outlook-mobile)
+
+RBAC assignment observations use the returned `RoleAssignmentDelegationType` property;
+`Delegating` is a cmdlet filter, not a returned property. Basic anti-phishing policy
+observations do not require `Enabled`; rule activation is reported in each binding
+through its `State` property. Missing selected fields remain unobserved.

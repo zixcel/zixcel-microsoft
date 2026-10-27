@@ -1,5 +1,8 @@
 # Native Microsoft administration
 
+Patch 0.4.2 corrects RBAC delegation and basic anti-phishing property selection
+against actual Exchange responses. Rule activation remains in binding State.
+
 Patch 0.4.1 fixes empty downstream routes being classified as external, separates
 basic/advanced anti-phishing reads, retains partial inventory evidence, and adds
 bounded role-scoped RBAC enumeration. Missing projected properties have code-only
