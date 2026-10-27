@@ -23,14 +23,14 @@ fn binding() -> Value {
 }
 fn invoke(op: &str, args: Value) -> Value {
     let mut c = Command::new(env!("CARGO_BIN_EXE_zix-microsoft"))
-        .arg("--zix-provider-v1")
+        .arg("--zix-provider-v2")
         .env_clear()
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
         .unwrap();
-    c.stdin.take().unwrap().write_all(serde_json::to_string(&json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":op,"arguments":args,"binding":binding(),"limits":{"timeout_ms":40000,"maximum_response_bytes":65536}})).unwrap().as_bytes()).unwrap();
+    c.stdin.take().unwrap().write_all(serde_json::to_string(&json!({"schema":"zix-provider/v2","id":"a".repeat(32),"operation":op,"arguments":args,"binding":binding(),"limits":{"timeout_ms":40000,"maximum_response_bytes":65536}})).unwrap().as_bytes()).unwrap();
     let r = c.wait_with_output().unwrap();
     assert!(
         r.status.success(),

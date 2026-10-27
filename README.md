@@ -1,5 +1,8 @@
 # Microsoft integration contracts
 
+Local administration: `zix microsoft --help`. Inspect intent, prerequisites and related
+tools before a remote request: [operation guidance](docs/operation-guidance.md).
+
 Owner-approved Microsoft Graph user/organization/mail operations; separate Rust planning and mail presentation components.
 It also maintains a display-only mailbox descriptor and a separately installable browser mail client.
 The host application owns account selection, consent, token custody and activation.
@@ -100,3 +103,5 @@ new runtime installation is enabled by the source update.
 
 [Local mail enablement](docs/mail-administration.md) documents native 0.3.1 auth,
 Crowsi custody, reviewed tenant changes, DKIM, probes and official runtime setup.
+
+Operation requirements and related-tool handoffs: [LLM guidance](docs/operation-guidance.md).

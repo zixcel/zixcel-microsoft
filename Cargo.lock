@@ -2064,8 +2064,8 @@ dependencies = [
 
 [[package]]
 name = "zix-cli"
-version = "0.4.0"
-source = "git+https://github.com/zixcel/cli?rev=772a0498500df508c1f9801f36b60040265f42fc#772a0498500df508c1f9801f36b60040265f42fc"
+version = "0.6.0"
+source = "git+https://github.com/zixcel/cli?rev=c00dcd435d147c43cc6a6cb93a0e667d33a6d297#c00dcd435d147c43cc6a6cb93a0e667d33a6d297"
 dependencies = [
  "crowsi-process-adapter 0.10.0",
  "rustix",
@@ -2082,8 +2082,8 @@ dependencies = [
 
 [[package]]
 name = "zix-native-provider"
-version = "0.3.0"
-source = "git+https://github.com/zixcel/cli?rev=772a0498500df508c1f9801f36b60040265f42fc#772a0498500df508c1f9801f36b60040265f42fc"
+version = "0.4.0"
+source = "git+https://github.com/zixcel/cli?rev=c00dcd435d147c43cc6a6cb93a0e667d33a6d297#c00dcd435d147c43cc6a6cb93a0e667d33a6d297"
 dependencies = [
  "crowsi-provider-read-http",
  "serde",
@@ -2096,8 +2096,8 @@ dependencies = [
 
 [[package]]
 name = "zix-operation-contracts"
-version = "0.1.0"
-source = "git+https://github.com/zixcel/cli?rev=772a0498500df508c1f9801f36b60040265f42fc#772a0498500df508c1f9801f36b60040265f42fc"
+version = "0.1.1"
+source = "git+https://github.com/zixcel/cli?rev=c00dcd435d147c43cc6a6cb93a0e667d33a6d297#c00dcd435d147c43cc6a6cb93a0e667d33a6d297"
 dependencies = [
  "serde",
  "serde_json",
@@ -2142,7 +2142,7 @@ dependencies = [
 
 [[package]]
 name = "zixcel-microsoft-cli"
-version = "0.4.2"
+version = "0.5.0"
 dependencies = [
  "crowsi-credential-broker",
  "serde",

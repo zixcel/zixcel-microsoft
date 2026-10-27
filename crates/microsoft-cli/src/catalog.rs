@@ -83,11 +83,9 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
             args.push(json!({"name":"runtime-profile","required":false,"maximum":2048}));
         }
         let permissions = if exchange {
-            vec!["Exchange RBAC; delegated Graph identity verification."]
+            vec!["Exchange RBAC and Graph identity; inspect operation guidance."]
         } else {
-            vec![
-                "Delegated Graph scopes and roles: docs/microsoft-administration.md; groups: GroupMember.Read.All",
-            ]
+            vec!["Selected Graph scopes, consent and roles; inspect operation guidance."]
         };
         let env: Vec<&str> = if exchange {
             vec![
@@ -110,6 +108,8 @@ pub fn manifest() -> zix_native_provider::Result<Manifest> {
     m.commands[0].environment=Some(serde_json::from_value(json!({"credential_environment":["ZIX_MICROSOFT_ACCESS_TOKEN"],"runtime_environment":[]}))
         .map_err(|_|Error("invalid_admin_manifest"))?);
     crate::administration_catalog::extend(&mut m)?;
+    m.protocol = "zix-provider/v2".into();
+    zix_native_provider::guidance::decorate(&mut m, include_bytes!("../api/guidance.json"))?;
     m.validate()?;
     Ok(m)
 }

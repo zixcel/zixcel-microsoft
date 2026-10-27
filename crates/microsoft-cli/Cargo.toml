@@ -1,6 +1,6 @@
 [package]
 name = "zixcel-microsoft-cli"
-version = "0.4.2"
+version = "0.5.0"
 edition = "2024"
 rust-version = "1.97"
 license = "Apache-2.0"
@@ -11,10 +11,10 @@ publish = false
 name = "zix-microsoft"
 path = "src/main.rs"
 [dependencies]
-zix-native-provider = { git = "https://github.com/zixcel/cli", rev = "772a0498500df508c1f9801f36b60040265f42fc" }
+zix-native-provider = { git = "https://github.com/zixcel/cli", rev = "c00dcd435d147c43cc6a6cb93a0e667d33a6d297" }
 zixcel-microsoft-admin = { path = "../microsoft-admin" }
-zix-cli = { git = "https://github.com/zixcel/cli", rev = "772a0498500df508c1f9801f36b60040265f42fc" }
-zix-operation-contracts = { git = "https://github.com/zixcel/cli", rev = "772a0498500df508c1f9801f36b60040265f42fc" }
+zix-cli = { git = "https://github.com/zixcel/cli", rev = "c00dcd435d147c43cc6a6cb93a0e667d33a6d297" }
+zix-operation-contracts = { git = "https://github.com/zixcel/cli", rev = "c00dcd435d147c43cc6a6cb93a0e667d33a6d297" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 zeroize = "1"
