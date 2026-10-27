@@ -52,6 +52,8 @@ Write-ZixConfiguration ([pscustomobject]@{change=[pscustomobject]@{operation='co
 $rule=[pscustomobject]@{name='zix:school';priority=0;from=@('school@example.org');subject_contains=@('$(throw "injected")');body_contains=@();subject_or_body_contains=@();delivery='redirect';recipients=@('child@example.org');keep_original=$false;stop_processing=$true;allow_external=$false}
 $change=[pscustomobject]@{operation='create_inbox_rule';mailbox=$script:mailbox;rule=$rule;acknowledge_outlook_rules_blob_removal=$true}
 $packet=[pscustomobject]@{read=[pscustomobject]@{resource='inbox_rules';mailbox=$script:mailbox};change=$change}
+$unchecked=Read-ZixRoutingGuard (Get-ZixMailbox $script:mailbox) $null
+Assert (!$unchecked.evaluated -and !$unchecked.complete -and $null -eq $unchecked.known_cycle) 'ordinary reads cannot claim a routing cycle check was performed'
 $before=Read-ZixConfiguration $packet
 Assert $before.complete 'empty inbox rules must be observable'
 Assert (!$before.routing_guard.known_cycle) 'internal empty destination must be acyclic'

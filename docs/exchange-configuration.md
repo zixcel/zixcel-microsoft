@@ -147,7 +147,8 @@ Exchange may renumber absolute priorities.
 
 Exchange rule mutation can remove Outlook client-only rule blobs; each CRUD/toggle
 operation requires the explicit acknowledgement above, which is also disclosed in
-the plan. Plans check mailbox forwarding and downstream Inbox rules for known
+the plan. An ordinary rule inventory marks its routing guard unevaluated, not cycle-free.
+Plans check mailbox forwarding and downstream Inbox rules for known
 loops and refuse incomplete internal traversal. They cannot prove absence of loops
 through transport rules or external services. Inspect those inventories separately.
 
