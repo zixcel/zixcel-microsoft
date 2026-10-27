@@ -3263,5 +3263,432 @@
     "documentation": [
       "https://learn.microsoft.com/en-us/graph/permissions-overview"
     ]
+  },
+  {
+    "operation": "users.read",
+    "selectors": {},
+    "intent": "read_selected_graph_user",
+    "keywords": [
+      "GRAPH",
+      "USER",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.ReadBasic.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Exact user UUID and basic identity fields; no directory-wide inventory",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0"
+    ]
+  },
+  {
+    "operation": "admin.doctor",
+    "selectors": {},
+    "intent": "inspect_local_admin_prerequisites",
+    "keywords": [
+      "LOCAL",
+      "SETUP",
+      "CHECK"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "Local configuration and executable availability; no token validity or live RBAC proof",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_reviewed_exchange_runtime",
+        "arguments": {},
+        "on": [
+          "observed",
+          "context",
+          "other"
+        ]
+      }
+    ],
+    "documentation": []
+  },
+  {
+    "operation": "management.mail.inspect",
+    "selectors": {},
+    "intent": "read_correlated_mail_probe",
+    "keywords": [
+      "GRAPH",
+      "MAIL",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://graph.microsoft.com",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "User.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Organization.Read.All",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "oauth_scope",
+        "value": "Mail.Read",
+        "subject": "graph_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Exact tenant, subject and previously issued probe correlation; absence is not deliverability proof",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/graph/api/user-list-messages?view=graph-rest-1.0"
+    ]
+  },
+  {
+    "operation": "auth.configure",
+    "selectors": {},
+    "intent": "write_local_oauth_profile",
+    "keywords": [
+      "LOCAL",
+      "OAUTH",
+      "CONFIGURE"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "Tenant and public client application registration; output is local configuration, not login or consent",
+        "subject": "operation"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Explicit Graph permissions and selected subject; no automatic permission expansion",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "auth.status",
+        "purpose": "inspect_matching_graph_profile",
+        "arguments": {
+          "resource": "graph"
+        },
+        "on": [
+          "observed"
+        ],
+        "requires_context": {
+          "credential_source": "matching_oauth_profile"
+        }
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code"
+    ]
+  },
+  {
+    "operation": "runtime.configure",
+    "selectors": {},
+    "intent": "bind_local_exchange_runtime",
+    "keywords": [
+      "LOCAL",
+      "EXCHANGE",
+      "CONFIGURE"
+    ],
+    "requirements": [
+      {
+        "kind": "runtime",
+        "value": "Explicit PowerShell executable and ExchangeOnlineManagement module paths; verify source before selection",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "value": "Local profile output and selected user; does not authenticate or grant Exchange RBAC",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "microsoft",
+        "operation": "runtime.inspect",
+        "purpose": "inspect_configured_runtime",
+        "arguments": {},
+        "on": [
+          "observed",
+          "context"
+        ]
+      }
+    ],
+    "documentation": []
+  },
+  {
+    "operation": "runtime.inspect",
+    "selectors": {},
+    "intent": "inspect_pinned_exchange_runtime",
+    "keywords": [
+      "LOCAL",
+      "EXCHANGE",
+      "CHECK"
+    ],
+    "requirements": [
+      {
+        "kind": "runtime",
+        "value": "Existing reviewed runtime profile with pinned executable and module digests",
+        "subject": "host"
+      },
+      {
+        "kind": "context",
+        "value": "Local integrity inspection only; live Exchange permission remains unverified",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2"
+    ]
+  },
+  {
+    "operation": "auth.start",
+    "selectors": {},
+    "intent": "start_resource_auth",
+    "keywords": [
+      "AUTH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "Explicit profile and resource=graph or resource=exchange; inspect the matching resource guide before execution",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "Graph and Exchange use distinct access-token audiences; a token for one cannot authorize the other",
+        "subject": "selected_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Consent does not change issued tokens; storing credentials does not grant scopes or roles",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code"
+    ]
+  },
+  {
+    "operation": "auth.poll",
+    "selectors": {},
+    "intent": "poll_resource_auth",
+    "keywords": [
+      "AUTH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "Explicit profile and resource=graph or resource=exchange; inspect the matching resource guide before execution",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "Graph and Exchange use distinct access-token audiences; a token for one cannot authorize the other",
+        "subject": "selected_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Consent does not change issued tokens; storing credentials does not grant scopes or roles",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code"
+    ]
+  },
+  {
+    "operation": "auth.refresh",
+    "selectors": {},
+    "intent": "refresh_resource_auth",
+    "keywords": [
+      "AUTH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "Explicit profile and resource=graph or resource=exchange; inspect the matching resource guide before execution",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "Graph and Exchange use distinct access-token audiences; a token for one cannot authorize the other",
+        "subject": "selected_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Consent does not change issued tokens; storing credentials does not grant scopes or roles",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code"
+    ]
+  },
+  {
+    "operation": "auth.status",
+    "selectors": {},
+    "intent": "status_resource_auth",
+    "keywords": [
+      "AUTH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "Explicit profile and resource=graph or resource=exchange; inspect the matching resource guide before execution",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "Graph and Exchange use distinct access-token audiences; a token for one cannot authorize the other",
+        "subject": "selected_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Consent does not change issued tokens; storing credentials does not grant scopes or roles",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code"
+    ]
+  },
+  {
+    "operation": "auth.logout",
+    "selectors": {},
+    "intent": "logout_resource_auth",
+    "keywords": [
+      "AUTH"
+    ],
+    "requirements": [
+      {
+        "kind": "context",
+        "value": "Explicit profile and resource=graph or resource=exchange; inspect the matching resource guide before execution",
+        "subject": "operation"
+      },
+      {
+        "kind": "audience",
+        "value": "Graph and Exchange use distinct access-token audiences; a token for one cannot authorize the other",
+        "subject": "selected_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Consent does not change issued tokens; storing credentials does not grant scopes or roles",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code"
+    ]
   }
 ]
