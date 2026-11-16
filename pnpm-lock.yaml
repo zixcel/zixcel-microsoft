@@ -18,8 +18,8 @@ importers:
   packages/zixcel-microsoft-mail-web:
     dependencies:
       '@azure/msal-browser':
-        specifier: 5.29.0
-        version: 5.29.0
+        specifier: 5.29.1
+        version: 5.29.1
       '@crowsi/provider-http-transport':
         specifier: 0.12.1
         version: 0.12.1
@@ -33,12 +33,12 @@ importers:
 
 packages:
 
-  '@azure/msal-browser@5.29.0':
-    resolution: {integrity: sha512-Ko/Ovw6h+Gu33mp8f0FUyddr/KDWzbGzcgR8HKZaT4wgTYljLPKJP1rcDu0RHj7pkd4CR2hCHK51XFzgvq/Q5Q==}
+  '@azure/msal-browser@5.29.1':
+    resolution: {integrity: sha512-+TMoU/4h3KYUvQKZH+p1/9/iDaepDlVJQ7UMUAB6q8prPsMfsOoqA9m2alpPqLUQ48Bp7sXqN2wdhA9rOg9q1A==}
     engines: {node: '>=0.8.0'}
 
-  '@azure/msal-common@16.16.1':
-    resolution: {integrity: sha512-dSKdL9h/iercb4GumsKFh+wVvLe1ohuDPiviklgnQVHnY2FYNUlbQJ3E1Qd37vkof9CfraK9BQpCW1hoOg0znQ==}
+  '@azure/msal-common@16.16.2':
+    resolution: {integrity: sha512-IVoPgAup0hnpzwC8esxPxrrnDDVe0n3mmK+UU3JRmKWySKxBQrl+a30tTP3okmJ9Wc7dh+IgoNaUXkCxb2DBSg==}
     engines: {node: '>=0.8.0'}
 
   '@crowsi/provider-http-transport@0.12.1':
@@ -178,11 +178,11 @@ packages:
 
 snapshots:
 
-  '@azure/msal-browser@5.29.0':
+  '@azure/msal-browser@5.29.1':
     dependencies:
-      '@azure/msal-common': 16.16.1
+      '@azure/msal-common': 16.16.2
 
-  '@azure/msal-common@16.16.1': {}
+  '@azure/msal-common@16.16.2': {}
 
   '@crowsi/provider-http-transport@0.12.1': {}
 
